@@ -1,0 +1,8 @@
+﻿@using Kendo.Mvc.UI
+@using System.Collections
+@model TeamMemberLookupItem
+
+@(Html.Kendo().DropDownListFor(m => m)
+    .DataValueField("UserId")
+    .DataTextField("UserEmail")
+    .BindTo((IEnumerable) ViewData["Team Members"]))

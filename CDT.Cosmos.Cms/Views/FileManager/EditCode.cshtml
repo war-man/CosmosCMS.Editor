@@ -1,0 +1,17 @@
+﻿@model FileManagerEditCodeViewModel
+@{
+    Layout = "_CodeEditorLayout";
+    Layout = "_CodeEditorLayout";
+    ViewData["Title"] = Model.EditorTitle;
+}
+<form id="codeForm" asp-action="EditCode" asp-controller="FileManager">
+    <input type="hidden" asp-for="Id"/>
+    <input type="hidden" asp-for="Path"/>
+    <input type="hidden" asp-for="EditingField"/>
+    <input type="hidden" asp-for="Content"/>
+</form>
+<script>
+    function closeEditor() {
+        window.location.href = "@Url.Action("Index", "FileManager")";
+    }
+</script>

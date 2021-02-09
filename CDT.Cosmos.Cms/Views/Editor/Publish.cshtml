@@ -1,0 +1,250 @@
+﻿@using CDT.Cosmos.Cms.Common.Services
+@using Kendo.Mvc.UI
+@using Microsoft.Extensions.Options
+@model ArticleViewModel
+@inject IOptions<RedisContextConfig> Options
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Publish Website";
+}
+<style>
+    #gauge-container {
+        height: 386px;
+        margin: 0 auto 30px auto;
+        text-align: center;
+        @*background: transparent url("@Url.Content("~/shared/dataviz/gauge/gauge-container-partial.png")") no-repeat 50% 50%;*@
+        width: 386px;
+    }
+
+    #gauge {
+        border-color: transparent;
+        height: 300px;
+        margin: 0 auto;
+        width: 350px;
+    }
+
+    #gauge-container .k-slider {
+        margin-top: -11px;
+        width: 140px;
+    }
+</style>
+<div id="main-content" class="main-content">
+    <main class="main-primary">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Website Publisher</h1>
+                <p>
+                    Normally web page changes will become public automatically in a couple minutes as
+                    various caching mechanisms check for new content. This is true even for scheduled
+                    publishing of individual web pages.
+                </p>
+                <p>
+                    Allowing this process to happen naturally ensures new content is displayed in a timely manner and overall website
+                    performance is maintained. However there are times when you may want to trigger a site-wide &quot;publish.&quot;
+                </p>
+            </div>
+        </div>
+        @*<div class="row">
+            <div class="card-group">
+                <div class="card text-white bg-secondary">
+                    <div class="card-header">
+                        <h6 class="card-title">What does &quot;Publish&quot; do?</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            Website speed is improved though caching content at various places, from in memory at the web server, through techologies such as CDN's and
+                            web browsers. 
+                        </p>
+                        <p>
+                            Unseen from everyone is caching done by internet providers who may at times cache things on networking equipment.
+                        </p>
+                        <p>Normally C/CMS emits information to let all these levels of caching know when a web page has changed. Sometimes this information doesn't take.</p>
+                        <p>&quot;Publishing&quot; sends commands that explicity tells everything clear the old data and reload with the new.</p>
+                    </div>
+                </div>
+                <div class="card text-white bg-secondary">
+                    <div class="card-header">
+                        <h6 class="card-title">When would I &quot;Publish&quot; a website?</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            Using this feature should be a rare event. But sometimes it is necessary. Here are some examples:
+                        </p>
+                        <ul>
+                            <li>Navigation bar is changed (all pages need updating)</li>
+                            <li>CDN isn't picking up a change within 5 minutes</li>
+                            <li>Layout has changed (all pages need updating)</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card text-white bg-secondary">
+                    <div class="card-header">
+                        <h6 class="card-title">What happens when I &quot;Publish?&quot;</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            Fully refreshing the website on the internet involves three steps that have to happen in order:
+                        </p>
+                        <ul>
+                            <li>The date/time of when a page was last updated needs refreshing.</li>
+                            <li>Redis needs to be cleared and reloaded with new objects.</li>
+                            <li>A instruction is set to the CDN to clear its world-wide cache.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>*@
+        <div class="row">
+            <div class="col-md-12">
+                <br />
+                <button id="btnPublish" class="btn btn-sm btn-success" onclick="publish()">Publish Website</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div style="padding-bottom: 30px; padding-top: 30px;">
+                    <p>
+                        <span class="badge badge-warning">WARNING: </span>
+                        When publishing, websites with large amounts of content may experience temporary performance degradation
+                        as caching mechanisms reload content.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <p>The following three </p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row" id="msgBox">
+                    <div class="card-group" style="padding-top: 30px;">
+                        <div id="card1" class="card text-white bg-secondary mb-4">
+                            <div class="card-header" id="card1header">
+                                <h6 class="card-title">Date/Time Stamps</h6>
+                            </div>
+                            <div class="card-body" id="card1body">
+                                <div>
+                                    Updaing the &quot;last changed&quot; date and time of when each web page is the primary way caching mechanisms know that a page is updated.
+                                </div>
+                                <div id="spinner1" style="display:none">
+                                    @(Html.Kendo().Loader().Name("loader-time").Size(LoaderSize.Medium).ThemeColor(LoaderThemeColor.Primary).Type(LoaderType.InfiniteSpinner).Messages(m => m.Loading("Running...")))
+                                </div>
+                            </div>
+                        </div>
+                        <div id="card2" class="card text-white bg-secondary  mb-4">
+                            <div class="card-header" id="card2header">
+                                <h6 class="card-title">Redis Cache</h6>
+                            </div>
+                            <div class="card-body" id="card2body">
+                                <div>
+                                    Redis is the in-memory caching service used by C/CMS to speed up web page publishing.
+                                </div>
+                                <div id="spinner2" style="display:none">
+                                    @(Html.Kendo().Loader().Name("loader-redis").Size(LoaderSize.Medium).ThemeColor(LoaderThemeColor.Primary).Type(LoaderType.InfiniteSpinner).Messages(m => m.Loading("Running...")))
+                                </div>
+                            </div>
+                        </div>
+                        <div id="card3" class="card text-white bg-secondary  mb-4">
+                            <div class="card-header" id="card3header">
+                                <h6 class="card-title">CDN</h6>
+                            </div>
+                            <div class="card-body" id="card3body">
+                                <div>
+                                    C/CMS uses Content Delivery Networks (CDN) to speed up delivery of web content to users.
+                                </div>
+                                <div id="spinner3" style="display:none">
+                                    @(Html.Kendo().Loader().Name("loader-cdn").Size(LoaderSize.Medium).ThemeColor(LoaderThemeColor.Primary).Type(LoaderType.InfiniteSpinner).Messages(m => m.Loading("Running...")))
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+
+    var counter;
+    var count = 61;
+    var second = 1;
+
+    $("#btnStartCountDown").click(function(e) {
+        e.preventDefault();
+        $("#clearDiv").hide();
+        $("#gaugeDiv").show();
+        $("#resultDiv").hide();
+        counter = setInterval(timer, 200); //1000 will  run it every 1 second
+    });
+
+    function change(e) {
+        $("#gauge").data("kendoRadialGauge").value($("#gauge-value").val());
+    }
+
+    function publish(e) {
+
+        $("#card1header").attr("class", "card-header text-white bg-primary");
+        //e.preventDefault();
+        $("#btnPublish").hide();
+        //$("#msgBox").html("<p>Working, please wait .... </p><ul><li>Beginning publishing process...</li></ul>");
+
+        // Start with updating the time stamps of all published articles
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("UpdateTimeStamps")",
+            success: function (json0) {
+                $("#spinner1").show();
+                $("#spinner2").show();
+                $("#spinner3").show();
+                $("#card1header").attr("class", "card-header text-white bg-secondary");
+                $("#card2header").attr("class", "card-header text-white bg-primary");
+                $("#card1body").html(
+                    "<p>Time stamps for " + json0 + " pages updated.</p><br />" +
+                    "<div class='btn btn-large btn-success'><i class='fa fa-check-square-o' aria-hidden='true'></i></div>"
+                );
+                // Next Redis Cache
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("FlushRedis")",
+                    success: function(json1) {
+                        if (json1.CacheConnected === true) {
+                            //$("#msgBox").html("<p>Working, please wait .... </p><ul><li>Redis refreshed</li><li>" + json1.Keys.length + " item(s) flushed.</li><li>Refreshing CDN...</li></ul>");
+                            $("#card2body").html(
+                                "<p>Removed " + json1.Keys.length + " items from Redis cache.</p><br />" +
+                                "<div class='btn btn-large btn-success'><i class='fa fa-check-square-o' aria-hidden='true'></i></div>"
+                            );
+                        }
+
+                        $("#card2header").attr("class", "card-header text-white bg-secondary");
+                        $("#card3header").attr("class", "card-header text-white bg-primary");
+                        // Now handle CDN
+                        $.ajax({
+                            type: "POST",
+                            url: "@Url.Action("FlushCdn")",
+                            success: function(json2) {
+                                //$("#msgBox").html("<p>Finished publishing.</p><ul><li>REDIS Refreshed</li><li>" + json1.Keys.length + " item(s) flushed.</li><li>CDN Result: " + json2.Detail + "</li></ul>");
+
+                                $("#card3header").attr("class", "card-header text-white bg-secondary");
+                                //$("#msgBox").html("<p>Working, please wait .... </p><ul><li>Redis refreshed</li><li>" + json1.Keys.length + " item(s) flushed.</li><li>Refreshing CDN...</li></ul>");
+                                $("#card3body").html(
+                                    "<p>" + json2.Detail + " to complete in " + json2.EstimatedSeconds + " seconds.</p>" +
+                                    "<div class='btn btn-large btn-success'><i class='fa fa-check-square-o' aria-hidden='true'></i></div>"
+                                );
+                                $("#btnPublish").show();
+                            },
+                            dataType: "json"
+                        });
+                    },
+                    dataType: "json"
+                });
+            }
+        });
+    }
+
+</script>
+
+@{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }

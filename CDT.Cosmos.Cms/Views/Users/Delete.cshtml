@@ -1,0 +1,34 @@
+﻿@using Kendo.Mvc.UI
+@model ConfirmDeleteUserViewModel
+@{
+    Html.ViewContext.ViewBag.BrowserTitle = "Delete User";
+}
+<h3>Are you sure you want to delete this user account?</h3>
+<div>
+    <p>Please review the account below before confirming delete.</p>
+
+    <form name="frmDeleteUser" kendo-validator="true" asp-action="Delete">
+        <input type="hidden" asp-for="UserId"/>
+        <div class="form-group">
+            <label asp-for="EmailAddress"></label>
+            <input asp-for="EmailAddress" type="text" disabled/>
+            <span asp-validation-for="EmailAddress"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="PhoneNumber"></label>
+            <input asp-for="PhoneNumber" type="text" disabled/>
+            <span asp-validation-for="PhoneNumber"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="ConfirmDelete"></label>
+            @(Html.Kendo().SwitchFor(m => m.ConfirmDelete))
+            <span asp-validation-for="ConfirmDelete"></span>
+        </div>
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <div class="form-group">
+            <input type="submit" value="Delete" class="btn btn-danger"/>
+        </div>|
+        <a asp-action="Index">Back to List</a>
+    </form>
+</div>
+@{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }

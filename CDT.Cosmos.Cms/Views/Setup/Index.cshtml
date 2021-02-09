@@ -1,0 +1,77 @@
+﻿@using Kendo.Mvc.UI
+@model CDT.Cosmos.Cms.Models.SetupViewModel
+
+@{
+    Html.ViewContext.ViewBag.BrowserTitle = "Cosmos Setup";
+}
+
+<h1>Cosmos Setup</h1>
+
+
+<hr/>
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Index">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            @if (Model == null)
+            {
+                <p>To run setup for this website, please click the button below.</p>
+                <input asp-for="IconsSetup" type="hidden"/>
+                <input asp-for="RolesSetup" type="hidden"/>
+                <input asp-for="SetupAdmin" type="hidden"/>
+                <input asp-for="RedisSetup" type="hidden"/>
+                <input asp-for="EmailSetup" type="hidden"/>
+                <input asp-for="DataSetup" type="hidden"/>
+                <div class="form-group">
+                    <input type="submit" value="Setup" class="btn btn-primary"/>
+                </div>
+            }
+            else
+            {
+                <p>The following shows the status of this site's setup.</p>
+                <div class="form-group form-check">
+                    <label class="form-check-label">
+                        @Html.Kendo().CheckBoxFor(m => m.IconsSetup).Enable(false)
+                    </label>
+                </div>
+                <div class="form-group form-check">
+                    <label class="form-check-label">
+                        @Html.Kendo().CheckBoxFor(m => m.RolesSetup).Enable(false)
+                    </label>
+                </div>
+                <div class="form-group form-check">
+                    <label class="form-check-label">
+                        @Html.Kendo().CheckBoxFor(m => m.SetupAdmin).Enable(false)
+                    </label>
+                </div>
+                <div class="form-group form-check">
+                    <label class="form-check-label">
+                        @Html.Kendo().CheckBoxFor(m => m.RedisSetup).Enable(false)
+                    </label>
+                </div>
+                <div class="form-group form-check">
+                    <label class="form-check-label">
+                        @Html.Kendo().CheckBoxFor(m => m.EmailSetup).Enable(false)
+                    </label>
+                </div>
+                <div class="form-group form-check">
+                    <label class="form-check-label">
+                        @Html.Kendo().CheckBoxFor(m => m.DataSetup).Enable(false)
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <a asp-action="Index" asp-controller="Home" class="btn btn-success">Home</a>
+                </div>
+            }
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

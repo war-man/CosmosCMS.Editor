@@ -1,0 +1,217 @@
+﻿@using Kendo.Mvc.UI
+@model FileManagerViewModel;
+@{
+    ViewData["Title"] = "File Manager";
+    var blobUrl = (string) ViewData["BlobEndpointUrl"];
+}
+@(Html.Kendo().Window()
+    .Name("window")
+    .Title("Image Preview")
+    .Visible(false)
+    .Content(@<text>
+                 <img id="imagePreview" src="#" alt="Image Preview"/>
+              </text>)
+    .Draggable()
+    .Resizable()
+    .Actions(actions => actions.Pin().Minimize().Maximize().Close())
+    )
+<script src="~/js/clipboard.min.js"></script>
+<div id="main-content" class="main-content">
+    <main class="main-primary">
+        <div class="row">
+            <div class="col-md-12">
+                <a id="frmEditFile" class="btn btn-primary btn-sm" style="display: none" href="javascript:editCode()">Edit File</a> <a id="frmEditImage" class="btn btn-primary btn-sm" style="display: none" href="javascript:editImage()">Edit Image</a>
+                <button id="btnCopyUrl" style="display: none" class="clipboard btn btn-sm btn-success" data-clipboard-text="" title="Click to copy url">Click to copy URL <span class="ca-gov-icon-clipboard"></span></button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 text-light" style="background-color: #363636">
+                <form asp-action="Index" id="frmTeam" class="row gy-2 gx-3 align-items-center  bg-dark text-light">
+                    <div class="col-md-1">
+                        <h5>Team:</h5>
+                    </div>
+                    <div class="col-md-11">
+                        <div class="input-group">
+                            @if (User.IsInRole("Team Members"))
+                            {
+                                @(Html.Kendo().DropDownListFor(m => m.TeamId)
+                                    .BindTo(Model.TeamFolders)
+                                    .Value(Model.TeamId.ToString())
+                                    .Events(eve => eve.Change("onSelectTeam"))
+                                    .HtmlAttributes(new {style = "width:100%"}))
+                            }
+                            else
+                            {
+                                @(Html.Kendo().DropDownListFor(m => m.TeamId)
+                                    .BindTo(Model.TeamFolders)
+                                    .Value(Model.TeamId.HasValue ? Model.TeamId.Value.ToString() : "")
+                                    .OptionLabel("* choose one (optional) *")
+                                    .Events(eve => eve.Change("onSelectTeam"))
+                                    .HtmlAttributes(new {style = "width:100%"}))
+                            }
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="row" id="uploader">
+            <div class="col-md-12">
+                @(Html.Kendo().Upload()
+                    .Name("files")
+                    .Async(a => a
+                        .Save("Upload", "FileManager", new {teamId = Model.TeamId})
+                        .Remove("Remove", "FileManager", new {teamId = Model.TeamId})
+                        .ChunkSize(2 * 1024 * 1024) // 10 MB
+                    )
+                    .Events(e => e.Upload("getPath").Success("onUploadSuccess").Remove("getPath"))
+                    )
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                @(Html.Kendo().FileManager().Name("filemanager")
+                    .DataSource(ds =>
+                    {
+                        ds.Read(operation => operation
+                            .Type(HttpVerbs.Post)
+                            .Action("Read", "FileManager", new {teamId = Model.TeamId})
+                            );
+                        ds.Destroy(operation => operation
+                            .Type(HttpVerbs.Post)
+                            .Action("Destroy", "FileManager", new {teamId = Model.TeamId})
+                            );
+                        ds.Create(operation => operation
+                            .Type(HttpVerbs.Post)
+                            .Action("Create", "FileManager", new {teamId = Model.TeamId})
+                            );
+                        ds.Update(operation => operation
+                            .Type(HttpVerbs.Post)
+                            .Action("Update", "FileManager", new {teamId = Model.TeamId})
+                            );
+                    })
+                    .Toolbar(tb => tb.Items(items =>
+                    {
+                        items.Add("createFolder");
+                        items.Add("sortDirection");
+                        items.Add("sortField");
+                        items.Add("changeView");
+                        items.Add("spacer");
+                        items.Add("details");
+                        items.Add("search");
+                    }))
+                    .ContextMenu(context => context.Items(items =>
+                    {
+                        items.Add("rename");
+                        items.Add("delete");
+                    }))
+                    .Events(eve => eve.Select("onSelect").Navigate("onNavigate").Open("onOpen"))
+                    )
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    var path;
+    var blobRelativePath = "";
+
+    var clipboard = new ClipboardJS('.clipboard');
+    clipboard.on('success',
+        function(e) {
+            console.info('Action:', e.action);
+            console.info('Text:', e.text);
+            console.info('Trigger:', e.trigger);
+            alert("Copied: " + e.text);
+            e.clearSelection();
+        });
+
+    function getPath(e) {
+        e.data = {
+            path: blobRelativePath
+        };
+    }
+
+    function onUploadSuccess(e) {
+        var fileManager = $("#filemanager").data("kendoFileManager");
+        fileManager.refresh();
+    }
+
+    function onSelect(e) {
+        // event: Select; context: files/Tone/clipboard.min.js, false, .js
+        var entry = e.entries[0];
+
+        if (entry.isDirectory === false) {
+            switch (entry.extension) {
+            case ".js":
+            case ".css":
+            case ".html":
+            case ".htm":
+                path = entry.id;
+                $("#frmEditFile").show();
+                $("#frmEditImage").hide();
+                break;
+            case ".png":
+            case ".jpg":
+            case ".jpeg":
+            case ".gif":
+                $("#frmEditFile").hide();
+                $("#frmEditImage").hide();
+                break;
+            default:
+                $("#frmEditFile").hide();
+                $("#frmEditImage").hide();
+            }
+
+            $("#btnCopyUrl").attr("data-clipboard-text", "@blobUrl" + entry.path);
+            $("#btnCopyUrl").show();
+            return;
+        } else {
+            blobRelativePath = entry.path + "/";
+            $("#frmEditFile").hide();
+            $("#frmEditImage").hide();
+            $("#btnCopyUrl").hide();
+        }
+    }
+
+    function onNavigate(e) {
+        $("#frmEditFile").hide();
+        $("#frmEditImage").hide();
+        $("#btnCopyUrl").hide();
+        blobRelativePath = e.path + "/";
+        $("#frmEditFile").hide();
+        $("#frmEditImage").hide();
+        $("#btnCopyUrl").hide();
+    }
+
+    function editCode() {
+        window.location.href = "@Url.Action("EditCode", "FileManager")?path=" + path;
+    }
+
+    function editImage() {
+        window.location.href = "@Url.Action("EditImage", "FileManager")?path=" + path;
+    }
+
+    function onOpen(e) {
+        if (e.entry.extension == ".png" || e.entry.extension == ".jpg") {
+            $("#imagePreview").attr("src", "@blobUrl" + e.entry.path);
+            $("#window").data("kendoWindow").center().open();
+        }
+    }
+
+    function onSelectTeam(e) {
+        //if (e.item) {
+        //    var dataItem = this.dataItem(e.item);
+        //    kendoConsole.log("event :: select (" + dataItem.Text + " : " + dataItem.Value + ")");
+        //} else {
+        //    kendoConsole.log("event :: select");
+        //}
+        $("#frmTeam").submit();
+    }
+
+    $(document).ready(function() {
+        var filemanager = $("#filemanager").getKendoFileManager();
+
+        filemanager.executeCommand({ command: "TogglePaneCommand", options: { type: "preview" } });
+        filemanager.toolbar.fileManagerDetailsToggle.switchInstance.toggle();
+    });
+</script>

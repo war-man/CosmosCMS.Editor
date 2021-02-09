@@ -1,0 +1,31 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Register ";
+}
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card bg-secondary text-light">
+                <div class="card-header">
+                    <h4 class="card-title">
+                        Training Reset Complete
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <section>
+                        <p>Your website has been reset to the beginning, so a person can start training from Session 1.</p>
+
+                        <p>Please click button below to log out and close your web browser.</p>
+
+                        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new {area = ""})">
+                            <button class="btn btn-dark" type="submit">Logout</button>
+                        </form>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

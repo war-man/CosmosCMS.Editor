@@ -1,0 +1,61 @@
+﻿@using Kendo.Mvc.UI
+@{
+    Html.ViewContext.ViewBag.BrowserTitle = "Cosmos Setup";
+}
+
+<div class="row">
+    <div class="col-md-6">
+
+        <h1><span class="badge badge-danger">WARNING!</span> Training Site Reset</h1>
+
+        <p>This page is enabled when a site is set in training mode with this setting: </p>
+        <code>SiteCustomizations.AllowTrainingReset = false</code>
+        <p>Disable this setting to prevent the following action to occur.</p>
+        <hr/>
+        <p>
+            Pressing the button below will wipe clean this website, and reset it to a beginning
+            state ready to start training. This clear out and remove all of the following:
+        </p>
+        <ul>
+            <li>All web pages</li>
+            <li>All users</li>
+            <li>All log files</li>
+            <li>All uploaded files</li>
+        </ul>
+        <p><span class="badge badge-danger">WARNING!</span> This cannot be undone.</p>
+        <p>Flip this switch to allow reset to proceed.</p>
+        @(Html.Kendo().Switch()
+            .Name("switch")
+            .Events(ev => ev.Change("onChange"))
+            )
+        <div id="frmReset" style="display: none">
+            <form asp-action="TrainingReset" asp-controller="Setup">
+                <input id="reset" name="reset" value="false" type="hidden"/>
+                <h3><span class="badge badge-warning">Alert!</span> Reset now armed!</h3>
+                <p>Click the button below at your own peril!</p>
+                <a class="btn btn-lg btn-success" asp-action="Index" asp-controller="Home">Cancel!</a> &nbsp; | &nbsp; <button class="btn btn-lg btn-danger" type="submit">Reset Website</button>
+            </form>
+        </div>
+
+
+        <div>
+
+        </div>
+    </div>
+</div>
+<script>
+    function onChange(e) {
+        if (e.checked) {
+            $("#frmReset").show();
+            $("#reset").val("true");
+        } else {
+            $("#reset").val("false");
+            $("#frmReset").hide();
+        }
+    }
+</script>
+
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

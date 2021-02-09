@@ -1,0 +1,77 @@
+﻿@using Kendo.Mvc.UI
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Navigation Menu Editor";
+}
+<link href="~/css/cagov-fonts-only.css" rel="stylesheet" />
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <p>Use this list to create a navigation menu in the top banner bar of the website.</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-8">
+            <p>Placement of the navigation menu is determined where this code snippet is found in the page header:</p>
+        </div>
+        <div class="col-4">
+            <div class="alert alert-secondary" role="alert">
+                &lt;!--{COSMOS-UL-NAV}--&gt;
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        @(Html.Kendo().TreeList<MenuItemViewModel>()
+            .Name("WebsiteMenu")
+            .Toolbar(toolbar => toolbar.Create())
+            .Columns(columns =>
+            {
+                columns.Add().Field(e => e.SortOrder).Title("Sort#").Width(76);
+                columns.Add().Field(e => e.Url).Title("Url").TemplateId("url-template");
+                columns.Add().Field(e => e.MenuText).Title("Menu Text");
+                columns.Add().Field(e => e.IconCode).Title("Icon Class").TemplateId("icon-template").MinScreenWidth(200);
+                columns.Add().Command(c =>
+                {
+                    c.Edit().Text("Edit");
+                    c.Destroy().Text("Delete");
+                    c.CreateChild().Text("Child");
+                });
+            })
+            .HtmlAttributes(new {style = "width:100%"})
+            .Reorderable(true)
+            .Pageable()
+            .Filterable()
+            .Editable(e => e.Mode("inline"))
+            .DataSource(dataSource => dataSource
+                .Create(create => create.Action("Create", "Menu"))
+                .Read(read => read.Action("Read", "Menu"))
+                .Update(update => update.Action("Update", "Menu"))
+                .Destroy(delete => delete.Action("Destroy", "Menu"))
+                .Model(m =>
+                {
+                    m.Id(f => f.Id);
+                    m.ParentId(f => f.ParentId);
+                    m.Expanded(true);
+                    m.Field(f => f.SortOrder);
+                    m.Field(f => f.IconCode);
+                    m.Field(f => f.MenuText);
+                    m.Field(f => f.Url);
+                })
+            )
+            )
+        <script id="icon-template" type="text/kendo-ui-template">
+            <div style="display:inline;margin-right: 15px">
+                <span class='#: IconCode #'></span> <span>#: IconCode #</span>
+            </div>
+        </script>
+        <script id="url-template" type="text/kendo-ui-tempate">
+            <a class="btn btn-small btn-primary" target="_blank" title="#: Url #" href="#: Url #">Open #: Url #</a>
+        </script>
+        <style>
+            .k-treelist .k-command-cell .k-button {
+                min-width: 0px;
+                padding: 10px 10px 10px 10px;
+            }
+        </style>
+    </div>
+</div>

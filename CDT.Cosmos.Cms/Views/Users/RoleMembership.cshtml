@@ -1,0 +1,162 @@
+﻿@model UserRolesViewModel
+@{
+    Html.ViewContext.ViewBag.BrowserTitle = "User Roles";
+}
+<form role="form" method="post">
+
+    <input asp-for="UserId" name="UserId" type="hidden"/>
+    <input asp-for="UserEmailAddress" type="hidden"/>
+    <div class="row">
+        <div class="col-md-6">
+            <h4>Access Management</h4>
+            <h3>User: @Model.UserEmailAddress</h3>
+            <p>Set permissions for this user by selecting one of the options below.</p>
+            <br/>
+            @if (ViewData["saved"] != null)
+            {
+                <div class="col-md-4">
+                    <h4>
+                        <span class="badge badge-pill badge-success">Changes Saved</span>
+                    </h4>
+                </div>
+            }
+            <a href="@Url.Action("Index")" style="color: yellow;">Back to list</a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="card-deck col-md-12">
+            <div class="card bg-secondary text-light">
+                <div class="card-header">
+                    <input type="radio" name="UserRole" id="TeamMember" class="k-radio" checked="@Model.TeamMember"
+                           value="TeamMember" style="float: left; margin-right: 15px; margin-top: 5px;"/>
+                    <h4 class="card-title">
+                        Team Member
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p>&quot;Teams&quot; manage their own subset of pages on this website, and team members have familiar roles like &quot;Editor,&quot; &quot;Author&quot; and &quot;Reviewer.&quot;</p>
+                    <p>
+                        After adding
+                        a person to this role, then go to the <a asp-action="Index" asp-controller="Teams" style="color: yellow">Teams page</a>.
+                    </p>
+                    <p>
+                        Once there, select which team(s) this person should be on and what role they should have.
+                    </p>
+                </div>
+            </div>
+            <div class="card bg-secondary text-light">
+                <div class="card-header">
+                    <input type="radio" name="UserRole" id="Reviewer" class="k-radio" checked="@Model.Reviewer"
+                           value="Reviewer" style="float: left; margin-right: 15px; margin-top: 5px;"/>
+                    <h4 class="card-title">
+                        Reviewer
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p>Reviewers can:</p>
+                    <p>Review draft pages in preview mode.</p>
+                </div>
+            </div>
+            <div class="card bg-secondary text-light">
+                <div class="card-header">
+                    <input type="radio" name="UserRole" id="Author" class="k-radio" checked="@Model.Author"
+                           value="Author" style="float: left; margin-right: 15px; margin-top: 5px;"/>
+                    <h4 class="card-title">Author</h4>
+                </div>
+                <div class="card-body">
+                    <p>Authors can:</p>
+                    <p>Review draft pages in preview mode.</p>
+                    <p>Create and edit a new page.</p>
+                    <p>Create a new version of a page.</p>
+                    <p>Edit an unpublished page.</p>
+                </div>
+            </div>
+            <div class="card bg-secondary text-light">
+                <div class="card-header">
+                    <input type="radio" name="UserRole" id="Editor" class="k-radio" checked="@Model.Editor"
+                           value="Editor" style="float: left; margin-right: 15px; margin-top: 5px;"/>
+                    <h4 class="card-title">Editor</h4>
+                </div>
+                <div class="card-body">
+                    <p>Editors can:</p>
+                    <p>Review draft pages in preview mode.</p>
+                    <p>Create and edit a new page.</p>
+                    <p>Create a new version of a page.</p>
+                    <p>Edit an unpublished page.</p>
+                    <p>Plus, they can:</p>
+                    <p>Edit pages already published (live editing).</p>
+                    <p>&quot;Publish&quot; pages, this makes them viewable by the public.</p>
+                </div>
+            </div>
+        </div>
+        <br/>
+        <br/>
+    </div>
+    <div class="row">
+        <div class="card-deck col-md-12">
+            <div class="card bg-secondary text-light">
+                <div class="card-header">
+                    <input type="radio" name="UserRole" id="Administrator" class="k-radio" checked="@Model.Administrator"
+                           value="Administrator" style="float: left; margin-right: 15px; margin-top: 5px;"/>
+                    <h4 class="card-title">Administrator</h4>
+                </div>
+                <div class="card-body">
+                    <p>Administrator can:</p>
+                    <p>Review draft pages in preview mode.</p>
+                    <p>Create and edit a new page.</p>
+                    <p>Create a new version of a page.</p>
+                    <p>Edit an unpublished page.</p>
+                    <p>&quot;Publish&quot; pages, this makes them viewable by the public.</p>
+                    <p>&quot;Edit&quot; pages already published.</p>
+                    <p>Plus, they can:</p>
+                    <p>Grant access to users.</p>
+                </div>
+            </div>
+            <div class="card bg-secondary text-light">
+                <div class="card-header">
+                    <h4 class="card-title">
+                        Limit or remove access
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div>
+                        <input type="radio" name="UserRole" id="LimitAccess" class="k-radio" checked="@Model.NoRole"
+                               value="NoRole" style="float: left; margin-right: 15px; margin-top: 5px;"/>
+                        <h5 class="card-title">
+                            Limit or remove access
+                        </h5>
+                    </div>
+                    <p>
+                        This option disables user privileged access, but does not remove their account on this system.
+                    </p>
+                    <hr/>
+                    <div>
+                        <input type="radio" name="UserRole" id="RemoveAccount" class="k-radio" checked="@Model.RemoveAccount"
+                               value="RemoveAccount" style="float: left; margin-right: 15px; margin-top: 5px;" onchange="onRemoveAccount"/>
+                        <h5 class="card-title">
+                            Remove Account
+                        </h5>
+                    </div>
+                    <p>
+                        This option removes this account from the system. Users will have to re-register to regain access.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <br/>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="@Url.Action("Index")" class="btn btn-secondary">User List</a>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    $('#RemoveAccount').on('click',
+        function(e) {
+            alert("WARNING: You are about to delete this account.");
+        });
+</script>

@@ -1,0 +1,34 @@
+﻿@{
+    Layout = "_CodeEditorLayout";
+
+}
+<div >
+    <div id="editspace" class="editor"></div>
+</div>
+
+
+<form>
+    <input type="hidden" id="code1" value="<h1>Hello World!</h1>"/>
+</form>
+<script src="/lib/monaco-editor/min/vs/loader.js"></script>
+<script>
+    var editor;
+    require.config({ paths: { 'vs': '/lib/monaco-editor/min/vs' } });
+    require(['vs/editor/editor.main'],
+        function() {
+            editor = monaco.editor.create(document.getElementById('editspace'),
+                {
+                    language: 'html',
+                    theme: "vs-dark",
+                    value: document.getElementById("code1").value
+                });
+        });
+
+    function showValue() {
+        alert(editor.getValue());
+    }
+
+    function btnCustomClick(e) {
+        alert("Custom click: " + e.target.text());
+    }
+</script>

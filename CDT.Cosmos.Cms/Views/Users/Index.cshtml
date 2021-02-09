@@ -1,0 +1,34 @@
+﻿@using Kendo.Mvc.UI
+@model List<UsersIndexViewModel>
+@{
+    Html.ViewContext.ViewBag.BrowserTitle = "Users";
+    ViewData["Title"] = "User Accounts";
+}
+
+<main class="main-primary">
+    <div class="container">
+        @(Html.Kendo().Grid<UsersIndexViewModel>
+            ().Name("grid")
+            .BindTo(Model)
+            .Columns(col =>
+            {
+                col.Bound(b => b.UserId).Hidden();
+                col.Bound(b => b.EmailAddress);
+                col.Bound(b => b.EmailConfirmed).Hidden();
+                col.Bound(b => b.PhoneNumber);
+                col.Bound(b => b.Role);
+                col.Bound(b => b.LoginProvider);
+                col.Command(command => command.Custom("Manage").Click("manageRoles"));
+            })
+            .Search(t => t.Field("EmailAddress"))
+            .ToolBar(s => s.Search())
+            )
+    </div>
+</main>
+
+<script type="text/javascript">
+    function manageRoles(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        window.location = "@Url.Action("RoleMembership")/" + dataItem.UserId;
+    }
+</script>

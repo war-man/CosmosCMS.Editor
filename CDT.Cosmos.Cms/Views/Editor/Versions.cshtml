@@ -1,0 +1,55 @@
+﻿@using Kendo.Mvc.UI
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Versions";
+    Html.ViewContext.ViewBag.BrowserTitle = "Versions";
+    var isReviewer = User.IsInRole("Reviewers");
+    var isAuthor = User.IsInRole("Authors");
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <h6>Version list for page:</h6>
+        <h1>@ViewData["ArticleTitle"]</h1>
+        <p class="text-muted">Page ID Number: @ViewData["ArticleId"]</p>
+    </div>
+</div>
+@if (!isReviewer)
+{
+    <div class="row">
+        <div class="col-md-12">
+            <a class="btn btn-sm btn-primary" title="Creates a new version of this article using the last version, and puts it in edit mode." asp-action="CreateVersion" asp-route-id="@ViewData["ArticleId"]">Create New Version</a>
+            <br/><br/>
+        </div>
+    </div>
+}
+<div class="row">
+    <div class="col-md-12">
+        <p>Shown below are the list of version for this article.</p>
+        <br/>
+        @(Html.Kendo().Grid<ArticleVersionInfo>().Name("grid")
+            .Columns(c =>
+            {
+                c.Bound(b => b.Id).Hidden(true);
+                c.Template($"<a class=\"btn btn-sm btn-secondary\" href=\"{Url.Action("Edit", "Editor")}/#: Id #\" title=\"Edit Article\" #: visibleStyle('{isReviewer}', '{isAuthor}', Published) #>Edit HTML</a> <a class=\"btn btn-sm btn-secondary\" href=\"{Url.Action("EditCode", "Editor")}/#: Id #\" title=\"Edit Code\" #: visibleStyle('{isReviewer}', '{isAuthor}', Published) #>Edit Code</a> <a target=\"_blank\" class=\"btn btn-sm btn-secondary\" href=\"{Url.Action("Preview", "Home")}/#: Id #\" title=\"Open preview\">Preview</a>").Width(260);
+                c.Bound(b => b.VersionNumber).Title("Version");
+                c.Bound(b => b.Title).Width(260);
+                c.Bound(b => b.Updated).Title("Edited").Format("{0:MM/dd/yy H:mm:ss}");
+                c.Bound(b => b.Published).Title("Published").Format("{0:MM/dd/yy H:mm:ss}");
+            })
+            .Sortable()
+            .Filterable()
+            .Pageable()
+            .DataSource(dataSource => { dataSource.Ajax().Read(read => read.Action("Get_Versions", "Editor", new {id = (int) ViewData["ArticleId"]})); })
+            )
+    </div>
+</div>
+
+<script>
+    function visibleStyle(isReviewer, isAuthor, isPublished) {
+        if (isReviewer === "True" || (isAuthor === "True" && isPublished !== null)) {
+            return "style=display:none";
+        }
+        return "";
+    }
+</script>

@@ -1,0 +1,23 @@
+﻿@using Kendo.Mvc.UI
+@model TeamRoleLookupItem
+@(Html.Kendo().DropDownListFor(m => m)
+    .DataValueField("TeamRoleId")
+    .DataTextField("TeamRoleName")
+    .BindTo(new[]
+    {
+        new
+        {
+            TeamRoleId = (int) TeamRoleEnum.Reviewer,
+            TeamRoleName = Enum.GetName(typeof(TeamRoleEnum), TeamRoleEnum.Reviewer)
+        },
+        new
+        {
+            TeamRoleId = (int) TeamRoleEnum.Author,
+            TeamRoleName = Enum.GetName(typeof(TeamRoleEnum), TeamRoleEnum.Author)
+        },
+        new
+        {
+            TeamRoleId = (int) TeamRoleEnum.Editor,
+            TeamRoleName = Enum.GetName(typeof(TeamRoleEnum), TeamRoleEnum.Editor)
+        }
+    }))

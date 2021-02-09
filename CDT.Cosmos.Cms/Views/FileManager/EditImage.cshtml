@@ -1,0 +1,44 @@
+﻿@model FileManagerEditCodeViewModel
+@{
+    Layout = "_CodeEditorLayout";
+    Layout = "_CodeEditorLayout";
+    ViewData["Title"] = Model.EditorTitle;
+}
+<form id="codeForm" asp-action="Edit">
+    <input type="hidden" asp-for="Id"/>
+    <input type="hidden" asp-for="Path"/>
+    <input type="hidden" asp-for="EditingField"/>
+    <input type="hidden" asp-for="Content"/>
+</form>
+<script>
+    function showValue() {
+        alert(editor.getValue());
+    }
+
+    function btnCustomClick(e) {
+        switch (e.target.text()) {
+
+        }
+    }
+
+    function editHtml() {
+        window.location.href = "@Url.Action("Edit", "Editor", new {Model.Id})";
+    }
+</script>
+<kendo-dialog name="editCodeDialog" title="Edit Code" modal="true" visible="false" min-width="500">
+    <content>
+        <p>You are about to edit HTML for this page.</p>
+        <h5> Any unsaved changes will be lost!</h5>
+        <p>To save, click cancel and then the save button.</p>
+    </content>
+    <actions>
+        <action text="Cancel">
+        </action>
+        <action action="editHtml" primary="true" text="Yes" title="Confirm">
+        </action>
+    </actions>
+    <popup-animation>
+        <open duration="500" effects="fade:in"/>
+        <close duration="500" effects="fade:out"/>
+    </popup-animation>
+</kendo-dialog>

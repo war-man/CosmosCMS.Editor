@@ -1,0 +1,20 @@
+﻿@using Kendo.Mvc.UI
+@using Microsoft.AspNetCore.Identity
+@model List<Microsoft.AspNetCore.Identity.IdentityRole>
+@{
+    Html.ViewContext.ViewBag.BrowserTitle = "Index";
+}
+
+<main class="main-primary">
+    <div class="container pb-md-4 pt-md-4 pb-3 pt-3">
+        <h1>User Accounts</h1>
+        @(Html.Kendo().Grid<IdentityRole>().Name("grid")
+            .BindTo(Model)
+            .Columns(col =>
+            {
+                col.Bound(b => b.Id).Hidden();
+                col.Bound(b => b.Name);
+            })
+            )
+    </div>
+</main>

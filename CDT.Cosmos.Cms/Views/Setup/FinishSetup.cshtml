@@ -1,0 +1,43 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Register ";
+}
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card bg-secondary text-light">
+                <div class="card-header">
+                    <h4 class="card-title">
+                        Two more steps:
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <section>
+                        <p>To finish your setup, we need you to do two things:</p>
+                        <ul>
+                            <li>
+                                <p>In your website settings, please change the following from true to false so that setup is disabled.</p>
+                                <code>SiteCustomizations.AllowSetup = false</code>
+                                <p style="margin-top: 10px">For an Azure App Service, this configuration change can be done using the <a target="_blank" rel="noopener noreferrer" href="https://portal.azure.com">Azure Portal</a>.</p>
+                            </li>
+                            <li>
+                                <p>
+                                    Next, we need you to log out, close your web browser, and log in again. This will allow you to log back in as an administrator, and start building web
+                                    pages right away.
+                                </p>
+                            </li>
+                        </ul>
+
+                        <p>Please click the logout button below to log out:</p>
+                        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new {area = ""})">
+                            <button class="btn btn-primary" type="submit">Logout</button>
+                        </form>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

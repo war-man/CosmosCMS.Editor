@@ -1,0 +1,31 @@
+﻿@model ArticleViewModel
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+    <title>@Model.Title</title>
+    @Html.Raw(Model.Layout.Head)
+    <script>
+        @Html.Raw(Model.HeaderJavaScript)
+    </script>
+</head>
+<body>
+<header @Html.Raw(Model.Layout.BodyHeaderHtmlAttributes)>
+    @Html.Raw(Model.Layout.HtmlHeader)
+</header>
+<div id="main-content" class="main-content">
+    @RenderBody()
+</div>
+<footer @Html.Raw(Model.Layout.FooterHtmlAttributes)>
+    @Html.Raw(Model.Layout.FooterHtmlContent)
+</footer>
+@(await RenderSectionAsync("Scripts", false))
+@Html.Raw(Model.Layout.PostFooterBlock)
+<script>
+    @Html.Raw(Model.FooterJavaScript)
+    var ccmsLangDisplayName = "@(Model.LanguageName ?? "US English")";
+    var langCode = "@(Model.LanguageCode ?? "en-US")";
+    var ccmsUrlPath = "@(Model.UrlPath)";
+</script>
+<script src="~/js/Rosetta.js"></script>
+</body>
+</html>

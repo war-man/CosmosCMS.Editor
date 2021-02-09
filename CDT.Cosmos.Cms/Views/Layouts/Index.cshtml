@@ -1,0 +1,48 @@
+﻿@using Kendo.Mvc.UI
+@model ArticleViewModel
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Website Layouts";
+    var previewTemplate = $"<a class=\"btn btn-secondary\" href=\"{Url.Action("Preview", "Layouts")}/#: Id #\" title=\"Edit Notes\"><span class=\"fa fa-binoculars\"></span></a>";
+    var notesTemplate = $"<a class=\"btn btn-secondary\" href=\"{Url.Action("EditNotes", "Layouts")}/#: Id #\" title=\"Edit Notes\"><span class=\"fa fa-clipboard\"></span></a>";
+    var editCodeTemplate = $"<a class=\"btn btn-secondary\" href=\"{Url.Action("EditCode", "Layouts")}/#: Id #\" title=\"Edit Code\"><span class=\"fa fa-edit\"></span></a>";
+    var btnGroup = "<div class=\"btn-group btn-group-sm\" role=\"group\" aria-label=\"Basic example\">#= getDefaultButton(IsDefault, Id) #" +
+                   previewTemplate + notesTemplate + editCodeTemplate + "</div>";
+}
+<div class="row">
+    <div class="col-md-12">
+        <p>Layouts control what appears in headers and footers, and the overall look of your website.</p>
+        <p><span class="badge-warning">WARNING:</span> Beyond appearance, changing layouts can have far reaching affects on how your site functions. Change layouts with caution.</p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <a class="btn btn-sm btn-primary" href="@Url.Action("Create")">Create New</a>
+        @(Html.Kendo().Grid<LayoutIndexViewModel>().Name("grid")
+            .Columns(col =>
+            {
+                col.Template(btnGroup).Title("Menu");
+                col.Bound(m => m.Id).Visible(false);
+                col.Bound(m => m.IsDefault).Visible(false);
+                col.Bound(m => m.LayoutName).Encoded(false);
+                col.Bound(m => m.Notes).Encoded(false);
+            })
+            .ToolBar(tool => { tool.Search(); })
+            .DataSource(data =>
+            {
+                data.Ajax()
+                    .Model(m => { m.Id("Id"); })
+                    .Read("Read_Layouts", "Layouts");
+            })
+            )
+    </div>
+</div>
+<script>
+    function getDefaultButton(isDefault, id) {
+        if (isDefault === null || isDefault === false) {
+            return "<a href='@Url.Action("SetLayoutAsDefault")/" + id + "' title='Set this as the default layout.' class='btn btn-sm btn-secondary'><span class='fa fa-check-circle-o'></span></a>";
+        }
+        return "<div class='btn btn-sm btn-primary' title='Is now the default layout for this website.'><span class='fa fa-check-circle'></span></div>";
+    }
+</script>
