@@ -52,7 +52,11 @@ namespace CDT.Cosmos.Cms
             var siteCustomConfig = siteCustomizationsSection.Get<SiteCustomizationsConfig>();
             services.Configure<SiteCustomizationsConfig>(siteCustomizationsSection);
 
+            // Add Redis Cache Service here
             services.AddTransient<RedisCacheService>();
+
+            // Google Translation Services
+            services.AddTransient<TranslationServices>();
 
             // Get CDN Configuration
             var azureCdnConfig = siteCustomizationsSection.Get<AzureCdnConfig>();
@@ -65,7 +69,7 @@ namespace CDT.Cosmos.Cms
             services.Configure<AzureBlobServiceConfig>(Configuration.GetSection("AzureBlobServiceConfig"));
             services.Configure<AuthMessageSenderOptions>(Configuration.GetSection("AuthMessageSenderOptions"));
 
-            // For ResettaStone
+            // For Google Translator Services
             Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", "CA-Response-Portal-bfc617b86937.json");
 
             services.AddTransient<AzureBlobService>();

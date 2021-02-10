@@ -28,13 +28,13 @@ namespace CDT.Cosmos.Cms.Controllers
 
         public HomeController(ILogger<HomeController> logger, ApplicationDbContext dbContext,
             IOptions<SiteCustomizationsConfig> options, IDistributedCache distributedCache,
-            IOptions<RedisContextConfig> redisOptions)
+            IOptions<RedisContextConfig> redisOptions, GoogleCloudAuthConfig googleConfig)
         {
             _redisOptions = redisOptions;
             _logger = logger;
             _dbContext = dbContext;
             _siteOptions = options;
-            _articleLogic = new ArticleLogic(dbContext, distributedCache, options.Value, logger, redisOptions);
+            _articleLogic = new ArticleLogic(dbContext, distributedCache, options.Value, logger, redisOptions, googleConfig);
         }
 
         public async Task<IActionResult> Index(string id, string lang)
