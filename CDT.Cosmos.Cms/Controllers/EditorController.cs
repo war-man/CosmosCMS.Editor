@@ -41,6 +41,7 @@ namespace CDT.Cosmos.Cms.Controllers
             IDistributedCache distributedCache,
             IOptions<AzureCdnConfig> azureCdnService,
             IOptions<AkamaiContextConfig> akamaiService,
+            ArticleLogic articleLogic,
             IOptions<RedisContextConfig> redisOptions,
             IOptions<AzureBlobServiceConfig> blobConfig
         ) :
@@ -48,6 +49,7 @@ namespace CDT.Cosmos.Cms.Controllers
                 dbContext,
                 logger,
                 userManager,
+                articleLogic,
                 distributedCache,
                 redisOptions)
         {
@@ -423,7 +425,7 @@ namespace CDT.Cosmos.Cms.Controllers
 
                 if (_azureCdnConfig != null && !string.IsNullOrEmpty(_azureCdnConfig.Value.CdnProfileName))
                 {
-                    var cdnManager = new AzureCdnService(_azureCdnConfig, _logger, DbContext, SiteOptions);
+                    var cdnManager = new AzureCdnService(_azureCdnConfig, DbContext, ArticleLogic);
                     model = await cdnManager.Purge("/*");
                 }
                 else if (_akamaiConfig != null && !string.IsNullOrEmpty(_akamaiConfig.Value.AccessToken))

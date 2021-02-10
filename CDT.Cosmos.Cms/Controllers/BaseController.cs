@@ -28,13 +28,13 @@ namespace CDT.Cosmos.Cms.Controllers
         internal IOptions<RedisContextConfig> RedisOptions;
 
         internal BaseController(IOptions<SiteCustomizationsConfig> options, ApplicationDbContext dbContext,
-            ILogger logger, UserManager<IdentityUser> userManager,
+            ILogger logger, UserManager<IdentityUser> userManager, ArticleLogic articleLogic,
             IDistributedCache distributedCache = null,
             IOptions<RedisContextConfig> redisOptions = null)
         {
             SiteOptions = options;
             DbContext = dbContext;
-            ArticleLogic = new ArticleLogic(dbContext, distributedCache, options.Value, logger, redisOptions);
+            ArticleLogic = articleLogic;
             Logger = logger;
             UserManager = userManager;
             DistributedCache = distributedCache;
@@ -160,8 +160,7 @@ namespace CDT.Cosmos.Cms.Controllers
         /// <exception cref="ControllerBase.Unauthorized()"></exception>
         /// <exception cref="ControllerBase.NotFound()"></exception>
         [HttpPost]
-        internal async Task<IActionResult> Article_Post(ArticleViewModel model, EnumControllerName controllerName,
-            string blobStorageRoot)
+        internal async Task<IActionResult> Article_Post(ArticleViewModel model, EnumControllerName controllerName)
         {
             if (!SiteOptions.Value.ReadWriteMode) return Unauthorized();
 
@@ -238,8 +237,7 @@ namespace CDT.Cosmos.Cms.Controllers
         /// <exception cref="ControllerBase.Unauthorized()"> is returned if not in edit mode.</exception>
         /// <exception cref="ControllerBase.NotFound()"> is returned if post model is null.</exception>
         [HttpPost]
-        internal async Task<IActionResult> Article_AjaxPost(ArticleViewModel model, EnumControllerName controllerName,
-            string blobStorageRoot)
+        internal async Task<IActionResult> Article_AjaxPost(ArticleViewModel model, EnumControllerName controllerName)
         {
             if (!SiteOptions.Value.ReadWriteMode) return Unauthorized();
 

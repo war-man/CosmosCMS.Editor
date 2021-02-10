@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 
-namespace CDT.Cosmos.Cms.Services
+namespace CDT.Cosmos.Cms.Common.Services
 {
     public class EmailSender : IEmailSender
     {

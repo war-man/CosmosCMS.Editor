@@ -62,6 +62,7 @@ namespace CDT.Cosmos.Cms.Tests
                 _dbContext,
                 siteOptions,
                 GetUserManager(),
+                StaticUtilities.GetArticleLogic(),
                 null,
                 Options.Create(StaticUtilities.GetRedisContextConfig()))
             {

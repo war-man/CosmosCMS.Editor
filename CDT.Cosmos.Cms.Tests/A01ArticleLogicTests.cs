@@ -8,9 +8,7 @@ using CDT.Cosmos.Cms.Common.Models;
 using CDT.Cosmos.Cms.Common.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 
 namespace CDT.Cosmos.Cms.Tests
 {
@@ -50,13 +48,7 @@ namespace CDT.Cosmos.Cms.Tests
         [TestMethod]
         public async Task A_Create_And_Save_Root()
         {
-            var siteOptions = Options.Create(new SiteCustomizationsConfig
-            {
-                ReadWriteMode = true,
-                AllowSetup = true
-            });
-
-            var logic = new ArticleLogic(_dbContext, siteOptions.Value);
+            var logic = StaticUtilities.GetArticleLogic();
 
             var rootModel = await logic.Create($"New Title {Guid.NewGuid().ToString()}");
 
@@ -98,14 +90,7 @@ namespace CDT.Cosmos.Cms.Tests
         [TestMethod]
         public async Task B_Get_Home_Page()
         {
-            var siteOptions = Options.Create(new SiteCustomizationsConfig
-            {
-                ReadWriteMode = true,
-                AllowSetup = true
-            });
-            var logic = new ArticleLogic(_dbContext, siteOptions.Value);
-
-            //var article = await _dbContext.Articles.FirstOrDefaultAsync(w => w.UrlPath == "ROOT");
+            var logic = StaticUtilities.GetArticleLogic();
 
             //
             // All four should find the home page.
@@ -128,12 +113,7 @@ namespace CDT.Cosmos.Cms.Tests
         [TestMethod]
         public async Task C_Add_Versions_Some_Published()
         {
-            var siteOptions = Options.Create(new SiteCustomizationsConfig
-            {
-                ReadWriteMode = true,
-                AllowSetup = true
-            });
-            var logic = new ArticleLogic(_dbContext, siteOptions.Value);
+            var logic = StaticUtilities.GetArticleLogic();
 
             //var article = await _dbContext.Articles.FirstOrDefaultAsync(w => w.UrlPath == "ROOT");
 
@@ -181,12 +161,7 @@ namespace CDT.Cosmos.Cms.Tests
         [TestMethod]
         public async Task C_Get_Last_Published_Version()
         {
-            var siteOptions = Options.Create(new SiteCustomizationsConfig
-            {
-                ReadWriteMode = true,
-                AllowSetup = true
-            });
-            var logic = new ArticleLogic(_dbContext, siteOptions.Value);
+            var logic = StaticUtilities.GetArticleLogic();
             var article = await logic.GetByUrl("");
             var article1 = article;
             var lastPublishedArticle = await _dbContext.Articles
@@ -211,18 +186,11 @@ namespace CDT.Cosmos.Cms.Tests
         [TestMethod]
         public async Task D_Create_New_Article_Versions_TestRedirect_Publish()
         {
-            var siteOptions = Options.Create(new SiteCustomizationsConfig
-            {
-                ReadWriteMode = true,
-                AllowSetup = true
-            });
-
-            var logic = new ArticleLogic(_dbContext, siteOptions.Value);
+            var logic = StaticUtilities.GetArticleLogic();
 
             // Create and save version 1
             var version1 = await logic.UpdateOrInsert(await logic.Create("This is a second page" + Guid.NewGuid()),
                 _testUser.Id);
-            var oldPath = version1.UrlPath;
             Assert.AreEqual(1, version1.VersionNumber);
             Assert.AreEqual(2, version1.ArticleNumber);
 
@@ -329,7 +297,7 @@ namespace CDT.Cosmos.Cms.Tests
             // Test redirect
             //
             //var alist = await _dbContext.Articles.Where(w => w.StatusCode == 3).ToListAsync();
-            var redirectResult = await logic.GetByUrl(version2.UrlPath, "en-US");
+            var redirectResult = await logic.GetByUrl(version2.UrlPath);
             Assert.AreEqual(StatusCodeEnum.Redirect, redirectResult.StatusCode);
             Assert.AreEqual(redirectResult.Content, titleChangeVersion3.UrlPath);
 
@@ -357,42 +325,54 @@ namespace CDT.Cosmos.Cms.Tests
         [TestMethod]
         public async Task E_SetStatus()
         {
-            var siteOptions = Options.Create(new SiteCustomizationsConfig
-            {
-                ReadWriteMode = true,
-                AllowSetup = true
-            });
-            var logic = new ArticleLogic(_dbContext, siteOptions.Value);
+            var logic = StaticUtilities.GetArticleLogic();
+
+            //
+            // Get the expected entity
+            //
             var entity = await _dbContext.Articles.FirstOrDefaultAsync(f => f.Title.Contains("New Version"));
 
+            //
+            // Get the last article by path, unpublished
+            //
             var article = await logic.GetByUrl(entity.UrlPath, "en-US", false);
+            var expectedVersionCount = _dbContext.Articles.Count(a => a.ArticleNumber == article.ArticleNumber);
 
+            //
+            // This should delete the article
+            //
             var results1 = await logic.SetStatus(article.ArticleNumber, StatusCodeEnum.Deleted,
                 _testUser.Id);
 
-            Assert.AreEqual(_dbContext.Articles.Where(a => a.ArticleNumber == article.ArticleNumber).Count(), results1);
+            //
+            // The result count should match the version count.
+            //
+            Assert.AreEqual(expectedVersionCount, results1);
 
+            //
             // Since this is deleted, this should not be able to be retrieved through any of these options.
-
-            Assert.IsNull(await logic.GetByUrl(entity.UrlPath, "en-US"));
+            //
+            Assert.IsNull(await logic.GetByUrl(entity.UrlPath));
             Assert.IsNull(await logic.GetByUrl(entity.UrlPath, "en-US", false));
             Assert.IsNull(await logic.GetByUrl(entity.UrlPath, "en-US", false,
                 false)); // The article is deleted, can't even retrieve it here
             // Now set to inactive, this article should now be found.
-            var results1b = await logic.SetStatus(article.ArticleNumber, StatusCodeEnum.Inactive,
-                _testUser.Id);
-            Assert.IsNull(await logic.GetByUrl(entity.UrlPath, "en-US"));
+            Assert.IsNull(await logic.GetByUrl(entity.UrlPath));
             Assert.IsNull(await logic.GetByUrl(entity.UrlPath, "en-US", false));
-            Assert.IsNotNull(await logic.GetByUrl(entity.UrlPath, "en-US", false,
-                false)); // The article is deleted, can't even retrieve it here
 
+            // The article is deleted, can't even retrieve it here
+            Assert.IsNull(await logic.GetByUrl(entity.UrlPath, "en-US", false,
+                false)); 
 
-            var results2 = await logic.SetStatus(article.ArticleNumber, StatusCodeEnum.Inactive,
+            //
+            // Now "un-delete" this article.
+            //
+            await logic.SetStatus(article.ArticleNumber, StatusCodeEnum.Inactive,
                 _testUser.Id);
 
-            Assert.AreEqual(_dbContext.Articles.Where(a => a.ArticleNumber == article.ArticleNumber).Count(), results2);
-
-            // Now this should be visible
+            //
+            // Now this should be visible with "onlyActive" set to false.
+            //
             var result3 = await logic.GetByUrl(entity.UrlPath, "en-US", false, false);
 
             Assert.IsNotNull(result3);
@@ -401,12 +381,7 @@ namespace CDT.Cosmos.Cms.Tests
         [TestMethod]
         public async Task F_CheckTitle()
         {
-            var siteOptions = Options.Create(new SiteCustomizationsConfig
-            {
-                ReadWriteMode = true,
-                AllowSetup = true
-            });
-            var logic = new ArticleLogic(_dbContext, siteOptions.Value);
+            var logic = StaticUtilities.GetArticleLogic();
             var entity = await _dbContext.Articles.FirstOrDefaultAsync(f => f.ArticleNumber == 1);
             var article = await logic.GetByUrl(entity.UrlPath, "en-US", false, false);
             Assert.IsFalse(await logic.ValidateTitle(entity.Title, 0));
@@ -416,82 +391,93 @@ namespace CDT.Cosmos.Cms.Tests
         [TestMethod]
         public async Task G_FindByUrlTest()
         {
-            //Public_Safety_Power_Shutoff_(PSPS)
-            var siteOptions = Options.Create(new SiteCustomizationsConfig
-            {
-                ReadWriteMode = true,
-                AllowSetup = true
-            });
-            var logic = new ArticleLogic(_dbContext, siteOptions.Value);
+            var logic = StaticUtilities.GetArticleLogic();
             var article = await logic.Create("Public Safety Power Shutoff (PSPS)" + Guid.NewGuid());
             article.ArticleNumber = 0;
             article.Published = DateTime.Now.AddDays(-1);
-            article.Content = "Hellow world!";
+            article.Content = "Hello world!";
             var saved = await logic.UpdateOrInsert(article, _testUser.Id);
 
-            var find = await logic.GetByUrl(saved.UrlPath, "en-US");
+            var find = await logic.GetByUrl(saved.UrlPath);
             Assert.IsNotNull(find);
         }
 
         [TestMethod]
         public async Task H_Test_ScheduledPublishing()
         {
-            var siteOptions = Options.Create(new SiteCustomizationsConfig
-            {
-                ReadWriteMode = true,
-                AllowSetup = true
-            });
-            var logic = new ArticleLogic(_dbContext, siteOptions.Value);
-            var article = await logic.GetByUrl("", "en-US");
+            var logic = StaticUtilities.GetArticleLogic();
 
-            var lastPublishedArticle = await _dbContext.Articles
-                .Where(p => p.Published != null && p.ArticleNumber == article.ArticleNumber)
+            //
+            // Get the home page that the public now sees
+            //
+            var originalArticle = await logic.GetByUrl("");
+            var articleNumber = originalArticle.ArticleNumber;
+
+            //
+            // Now validate by retrieving the same via Entity Framework
+            //
+            var mostRecentPublishedArticle = await _dbContext.Articles
+                .Where(p => p.Published != null && p.ArticleNumber == articleNumber)
                 .OrderByDescending(o => o.VersionNumber).FirstOrDefaultAsync();
-            //var lastArticlePeriod = await _dbContext.Articles.Where(p => p.ArticleNumber == article.ArticleNumber).OrderByDescending(o => o.VersionNumber).FirstOrDefaultAsync();
+            
+            //
+            // The logic should have returned the current "live" article
+            //
+            Assert.AreEqual(mostRecentPublishedArticle.ArticleNumber, originalArticle.ArticleNumber);
+            Assert.AreEqual(mostRecentPublishedArticle.VersionNumber,
+                originalArticle.VersionNumber); // VERSION 4 is NOT PUBLISHED!! .
 
-            Assert.AreEqual(lastPublishedArticle.ArticleNumber, article.ArticleNumber);
-            Assert.AreEqual(lastPublishedArticle.VersionNumber,
-                article.VersionNumber); // VERSION 4 is NOT PUBLISHED!! .
+            var versionNumber = originalArticle.VersionNumber;
+            
+            //
+            // Now get the very last version
+            //
+            var lastArticleVersion = await logic.GetByUrl("", "en-US", false);
+            
+            //
+            // It should not yet be published
+            //
+            Assert.IsNull(lastArticleVersion.Published);
 
-            var articleNumber = article.ArticleNumber;
-            var versionNumber = article.VersionNumber;
-
-            // Now get the very last version, unpublished or not.
-            article = await logic.GetByUrl("", "en-US", false);
-            Assert.AreEqual(articleNumber, article.ArticleNumber);
-            Assert.AreNotEqual(versionNumber, article.VersionNumber);
+            //
+            // The article number should still match
+            //
+            Assert.AreEqual(articleNumber, lastArticleVersion.ArticleNumber);
+            //
+            // But the version number should not.
+            //
+            Assert.AreNotEqual(versionNumber, lastArticleVersion.VersionNumber);
 
             // Update the last version, publish for 20 seconds from now...
-            article.Published = DateTime.UtcNow.AddSeconds(20);
-            var newArticleViewModel = await logic.UpdateOrInsert(article, _testUser.Id);
+            lastArticleVersion.Published = DateTime.UtcNow.AddSeconds(20);
+            var newArticleViewModel = await logic.UpdateOrInsert(lastArticleVersion, _testUser.Id);
 
+            //
             // We should still be getting the original article.
-            var oldArticleViewModel = await logic.GetByUrl("", "en-US");
+            //
+            var currentArticle = await logic.GetByUrl("");
+            Assert.AreEqual(originalArticle.Id, currentArticle.Id);
 
-            // Wait 20 seconds for the new article to become published...
-            Thread.Sleep(20000);
+            //
+            // Wait 25 seconds for the new article to become published...
+            //
+            Thread.Sleep(25000);
 
+            //
             // Now get the article, with same URL, this should be different.
-            var publishedArticle = await logic.GetByUrl("", "en-US");
+            //
+            var publishedArticle = await logic.GetByUrl("");
 
-            // This should be the same article ID.
-            Assert.AreEqual(lastPublishedArticle.Id, oldArticleViewModel.Id);
+            //
+            // This should be the NEW article ID.
+            Assert.AreEqual(newArticleViewModel.Id, publishedArticle.Id);
 
-            // This should be the new article ID
-            Assert.AreEqual(article.Id, publishedArticle.Id);
         }
 
         [TestMethod]
         public async Task I_Get_Translations_Home_Page()
         {
-            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", "CA-Response-Portal-bfc617b86937.json");
-
-            var siteOptions = Options.Create(new SiteCustomizationsConfig
-            {
-                ReadWriteMode = true,
-                AllowSetup = true
-            });
-            var logic = new ArticleLogic(_dbContext, siteOptions.Value);
+            var logic = StaticUtilities.GetArticleLogic();
 
             //var article = await _dbContext.Articles.FirstOrDefaultAsync(w => w.UrlPath == "ROOT");
 
@@ -522,8 +508,6 @@ namespace CDT.Cosmos.Cms.Tests
 
             Assert.AreEqual("đá Rosetta", test3.Title);
             //Assert.AreEqual(test1.Id, test4.Id);
-
-
         }
 
         [TestMethod]
@@ -531,35 +515,30 @@ namespace CDT.Cosmos.Cms.Tests
         {
             var redisContextConfig = StaticUtilities.GetRedisContextConfig();
             var distributedCache = StaticUtilities.GetRedisDistributedCache();
-            var siteOptions = Options.Create(new SiteCustomizationsConfig
-            {
-                ReadWriteMode = false,
-                AllowSetup = false
-            });
 
-            var logic = new ArticleLogic(_dbContext, distributedCache, siteOptions.Value, StaticUtilities.GetLogger<ArticleLogic>(), Options.Create(redisContextConfig));
+            //
+            // Get the logic
+            //
+            var logic = StaticUtilities.GetArticleLogic(false, false);
 
-            var article = await logic.GetByUrl("root", "en");
+            //
+            // Call a page, this should create a Redis cached item.
+            //
+            await logic.GetByUrl("root", "en");
 
+            //
+            // Which should now exist.
+            //
             var key = RedisCacheService.GetPageCacheKey(redisContextConfig.CacheId, "en",
                 RedisCacheService.CacheOptions.Database, "root");
             var cache = await distributedCache.GetAsync(key);
             Assert.IsNotNull(cache);
-
         }
 
         [TestMethod]
         public async Task K_TestRedisCachePurge()
         {
-            var redisContextConfig = StaticUtilities.GetRedisContextConfig();
-            var distributedCache = StaticUtilities.GetRedisDistributedCache();
-            var siteOptions = Options.Create(new SiteCustomizationsConfig
-            {
-                ReadWriteMode = false,
-                AllowSetup = false
-            });
-
-            var logic = new ArticleLogic(_dbContext, distributedCache, siteOptions.Value, StaticUtilities.GetLogger<ArticleLogic>(), Options.Create(redisContextConfig));
+            var logic = StaticUtilities.GetArticleLogic();
 
             // Get list of articles...
             var articles = await logic.GetArticleList(_dbContext.Articles.AsQueryable());
@@ -567,6 +546,7 @@ namespace CDT.Cosmos.Cms.Tests
             foreach (var article in articles)
             {
                 var item = logic.GetByUrl(article.UrlPath);
+                Assert.IsNotNull(item);
             }
 
             var results = await logic.FlushRedis("");

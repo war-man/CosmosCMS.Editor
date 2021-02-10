@@ -2,7 +2,6 @@
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using CDT.Cosmos.Cms.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -53,7 +52,7 @@ namespace CDT.Cosmos.Cms.Areas.Identity.Pages.Account
                 Input.Email,
                 "Confirm your email",
                 $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-            ViewData["SendGridResponse"] = ((EmailSender) _emailSender).Response;
+            ViewData["SendGridResponse"] = ((Common.Services.EmailSender) _emailSender).Response;
             ModelState.AddModelError(string.Empty, "Verification email sent. Please check your email.");
             return Page();
         }

@@ -7,7 +7,6 @@ using CDT.Cosmos.Cms.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
@@ -27,14 +26,15 @@ namespace CDT.Cosmos.Cms.Controllers
         private readonly IOptions<SiteCustomizationsConfig> _siteOptions;
 
         public HomeController(ILogger<HomeController> logger, ApplicationDbContext dbContext,
-            IOptions<SiteCustomizationsConfig> options, IDistributedCache distributedCache,
-            IOptions<RedisContextConfig> redisOptions, GoogleCloudAuthConfig googleConfig)
+            IOptions<SiteCustomizationsConfig> options,
+            IOptions<RedisContextConfig> redisOptions,
+            ArticleLogic articleLogic)
         {
             _redisOptions = redisOptions;
             _logger = logger;
             _dbContext = dbContext;
             _siteOptions = options;
-            _articleLogic = new ArticleLogic(dbContext, distributedCache, options.Value, logger, redisOptions, googleConfig);
+            _articleLogic = articleLogic;
         }
 
         public async Task<IActionResult> Index(string id, string lang)
@@ -64,7 +64,7 @@ namespace CDT.Cosmos.Cms.Controllers
                         //
                         // See if we need to register a new user.
                         //
-                        if (await _dbContext.Users.CountAsync() > 0) return Redirect("~/Identity/Account/Login");
+                        if (await _dbContext.Users.AnyAsync()) return Redirect("~/Identity/Account/Login");
                         return Redirect("~/Identity/Account/Register");
                     }
 
