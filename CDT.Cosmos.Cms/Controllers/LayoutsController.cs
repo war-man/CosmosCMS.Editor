@@ -26,9 +26,10 @@ namespace CDT.Cosmos.Cms.Controllers
     public class LayoutsController : BaseController
     {
         public LayoutsController(ILogger<LayoutsController> logger, ApplicationDbContext dbContext,
-            UserManager<IdentityUser> userManager, IOptions<SiteCustomizationsConfig> options,
+            UserManager<IdentityUser> userManager, IOptions<SiteCustomizationsConfig> options, ArticleLogic articleLogic,
             IDistributedCache distributedCache, IOptions<RedisContextConfig> redisOptions) : base(options, dbContext,
-            logger, userManager, distributedCache, redisOptions)
+            logger, userManager, articleLogic
+            , distributedCache, redisOptions)
         {
         }
 

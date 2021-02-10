@@ -19,13 +19,13 @@ namespace CDT.Cosmos.Cms.Services
         private readonly Management _cdnManagement;
         private readonly ApplicationDbContext _dbContext;
 
-        public AzureCdnService(IOptions<AzureCdnConfig> options, ILogger logger, ApplicationDbContext dbContext,
-            IOptions<SiteCustomizationsConfig> customOptions)
+        public AzureCdnService(IOptions<AzureCdnConfig> options, ApplicationDbContext dbContext,
+            ArticleLogic articleLogic)
         {
             _dbContext = dbContext;
             _azureCdnConfig = options.Value;
             _cdnManagement = new Management(options.Value);
-            _articleLogic = new ArticleLogic(dbContext, null, customOptions.Value, logger, null);
+            _articleLogic = articleLogic;
         }
 
         public CdnProvider CdnProvider => _cdnManagement.CdnProvider;

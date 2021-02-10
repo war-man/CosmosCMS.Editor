@@ -6,6 +6,10 @@
 		<IsPackable>false</IsPackable>
 
 		<UserSecretsId>fe977e78-b037-4b95-bbda-4f68db48c420</UserSecretsId>
+
+		<AssemblyVersion>2021.2.10.40938</AssemblyVersion>
+
+		<FileVersion>2021.2.10.40938</FileVersion>
 	</PropertyGroup>
 
 	<ItemGroup>

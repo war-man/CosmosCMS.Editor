@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Azure.Identity;
 using CDT.Cosmos.Cms.Common.Data;
+using CDT.Cosmos.Cms.Common.Data.Logic;
 using CDT.Cosmos.Cms.Common.Services;
 using CDT.Cosmos.Cms.Controllers;
 using CDT.Cosmos.Cms.Services;
@@ -79,7 +80,7 @@ namespace CDT.Cosmos.Cms.Tests
 
         public static ApplicationDbContext GetApplicationDbContext()
         {
-            var config = (Microsoft.Extensions.Configuration.ConfigurationRoot) GetConfig();
+            var config = (ConfigurationRoot) GetConfig();
             var providerList = config.Providers.ToList();
             var localSecrets =  providerList[1];
 
@@ -216,10 +217,10 @@ namespace CDT.Cosmos.Cms.Tests
                 FormOptions = new FormOptions(),
                 Items = new Dictionary<object, object>(),
                 RequestAborted = default,
-                RequestServices = null,
-                ServiceScopeFactory = null,
-                Session = null,
-                TraceIdentifier = null,
+                RequestServices = null!,
+                ServiceScopeFactory = null!,
+                Session = null!,
+                TraceIdentifier = null!,
                 User = user
             };
         }
@@ -236,12 +237,37 @@ namespace CDT.Cosmos.Cms.Tests
             var controller = new HomeController(logger,
                 GetApplicationDbContext(),
                 siteOptions,
-                GetRedisDistributedCache(),
-                Options.Create(GetRedisContextConfig()))
+                Options.Create(GetRedisContextConfig()),
+                GetArticleLogic()
+                )
             {
                 ControllerContext = {HttpContext = GetMockContext(user)}
             };
             return controller;
+        }
+
+        public static ArticleLogic GetArticleLogic(bool readWriteModeOn = true, bool allSetupOn = true)
+        {
+            var siteOptions = Options.Create(new SiteCustomizationsConfig
+            {
+                ReadWriteMode = readWriteModeOn,
+                AllowSetup = allSetupOn
+            });
+            var distributedCache = StaticUtilities.GetRedisDistributedCache();
+            return new ArticleLogic(
+                GetApplicationDbContext(),
+                distributedCache,
+                GetLogger<ArticleLogic>(),
+                siteOptions,
+                Options.Create(GetRedisContextConfig()),
+                GetGoogleOptions());
+        }
+
+        public static IOptions<GoogleCloudAuthConfig> GetGoogleOptions()
+        {
+            var googleAuthConfigSection = GetConfig().GetSection("GoogleCloudAuthConfig");
+            var options = googleAuthConfigSection.Get<GoogleCloudAuthConfig>();
+            return Options.Create(options);
         }
 
         public static EditorController GetEditorController(ClaimsPrincipal user)
@@ -253,12 +279,15 @@ namespace CDT.Cosmos.Cms.Tests
             });
             var logger = new Logger<EditorController>(new NullLoggerFactory());
 
-            var controller = new EditorController(logger,
+            var controller = new EditorController(
+                logger,
                 GetApplicationDbContext(),
                 GetUserManager(),
                 siteOptions,
-                GetRedisDistributedCache(), null,
+                GetRedisDistributedCache(), 
                 null,
+                null,
+                GetArticleLogic(),
                 Options.Create(GetRedisContextConfig()),
                 GetBlobOptions())
             {
@@ -286,6 +315,7 @@ namespace CDT.Cosmos.Cms.Tests
                 GetEmailSender(),
                 siteOptions,
                 null,
+                GetArticleLogic(),
                 redisConfig,
                 GetAzureBlobService())
             {
@@ -305,7 +335,7 @@ namespace CDT.Cosmos.Cms.Tests
             //var blobOptions = Options.Create(new AzureBlobServiceConfig());
             var claimsPrincipal = GetPrincipal(TestUsers.Foo).Result;
 
-            var controller = new TeamsController(siteOptions, GetApplicationDbContext(), logger, GetUserManager())
+            var controller = new TeamsController(siteOptions, GetApplicationDbContext(), logger, GetUserManager(), GetArticleLogic())
             {
                 ControllerContext = {HttpContext = GetMockContext(claimsPrincipal)}
             };
@@ -376,11 +406,13 @@ namespace CDT.Cosmos.Cms.Tests
             });
             var logger = new Logger<FileManagerController>(new NullLoggerFactory());
 
-            var controller = new FileManagerController(logger,
+            var controller = new FileManagerController(
+                logger,
                 GetApplicationDbContext(),
                 GetUserManager(),
                 siteOptions,
                 GetRedisDistributedCache(),
+                GetArticleLogic(),
                 GetAzureBlobServiceOptions(),
                 Options.Create(GetRedisContextConfig()),
                 GetAzureBlobService())

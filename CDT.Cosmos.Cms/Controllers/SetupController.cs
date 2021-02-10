@@ -29,9 +29,10 @@ namespace CDT.Cosmos.Cms.Controllers
             IEmailSender emailSender,
             IOptions<SiteCustomizationsConfig> options,
             IDistributedCache distributedCache,
+            ArticleLogic articleLogic,
             IOptions<RedisContextConfig> redisOptions,
             AzureBlobService blobService) :
-            base(options, dbContext, logger, userManager, distributedCache, redisOptions)
+            base(options, dbContext, logger, userManager, articleLogic, distributedCache, redisOptions)
         {
             _roleManager = roleManager;
             _emailSender = (EmailSender) emailSender;

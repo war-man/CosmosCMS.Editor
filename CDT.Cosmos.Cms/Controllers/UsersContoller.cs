@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CDT.Cosmos.Cms.Common.Data;
+using CDT.Cosmos.Cms.Common.Data.Logic;
 using CDT.Cosmos.Cms.Common.Services;
 using CDT.Cosmos.Cms.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -31,10 +32,10 @@ namespace CDT.Cosmos.Cms.Controllers
             SignInManager<IdentityUser> signInManager,
             RoleManager<IdentityRole> roleManager,
             ILogger<UsersController> logger,
-            IOptions<SiteCustomizationsConfig> options, ApplicationDbContext dbContext,
+            IOptions<SiteCustomizationsConfig> options, ApplicationDbContext dbContext, ArticleLogic articleLogic,
             IDistributedCache distributedCache,
             IOptions<RedisContextConfig> redisOptions) :
-            base(options, dbContext, logger, userManager, distributedCache, redisOptions)
+            base(options, dbContext, logger, userManager, articleLogic, distributedCache, redisOptions)
         {
             _userManager = userManager;
             _signInManager = signInManager;

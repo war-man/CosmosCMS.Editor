@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CDT.Cosmos.Cms.Common.Controllers;
 using CDT.Cosmos.Cms.Common.Data;
+using CDT.Cosmos.Cms.Common.Data.Logic;
 using CDT.Cosmos.Cms.Common.Models;
 using CDT.Cosmos.Cms.Common.Services;
 using CDT.Cosmos.Cms.Models;
@@ -23,9 +24,9 @@ namespace CDT.Cosmos.Cms.Controllers
     public class TemplatesController : BaseController
     {
         public TemplatesController(ILogger<TemplatesController> logger, ApplicationDbContext dbContext,
-            IOptions<SiteCustomizationsConfig> options, UserManager<IdentityUser> userManager,
+            IOptions<SiteCustomizationsConfig> options, UserManager<IdentityUser> userManager, ArticleLogic articleLogic,
             IDistributedCache distributedCache, IOptions<RedisContextConfig> redisOptions) :
-            base(options, dbContext, logger, userManager, distributedCache, redisOptions)
+            base(options, dbContext, logger, userManager, articleLogic, distributedCache, redisOptions)
         {
         }
 

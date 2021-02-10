@@ -8,6 +8,10 @@
     <UserSecretsId>0dd2d861-1e49-4e33-8e22-cb1be3da6809</UserSecretsId>
 
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
+
+    <AssemblyVersion>2021.2.10.40938</AssemblyVersion>
+
+    <FileVersion>2021.2.10.40938</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

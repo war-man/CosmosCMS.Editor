@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using CDT.Cosmos.Cms.Common.Data;
+using CDT.Cosmos.Cms.Common.Data.Logic;
 using CDT.Cosmos.Cms.Common.Models;
 using CDT.Cosmos.Cms.Common.Services;
 using CDT.Cosmos.Cms.Models;
@@ -23,10 +24,10 @@ namespace CDT.Cosmos.Cms.Controllers
     public class TeamsController : BaseController
     {
         public TeamsController(IOptions<SiteCustomizationsConfig> options, ApplicationDbContext dbContext,
-            ILogger<TeamsController> logger, UserManager<IdentityUser> userManager,
+            ILogger<TeamsController> logger, UserManager<IdentityUser> userManager, ArticleLogic articleLogic,
             IDistributedCache distributedCache = null,
             IOptions<RedisContextConfig> redisOptions = null) :
-            base(options, dbContext, logger, userManager, distributedCache, redisOptions)
+            base(options, dbContext, logger, userManager, articleLogic, distributedCache, redisOptions)
         {
         }
 

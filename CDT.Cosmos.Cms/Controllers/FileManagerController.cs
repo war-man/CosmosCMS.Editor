@@ -9,6 +9,7 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Blobs.Specialized;
 using CDT.Cosmos.Cms.Common.Data;
+using CDT.Cosmos.Cms.Common.Data.Logic;
 using CDT.Cosmos.Cms.Common.Services;
 using CDT.Cosmos.Cms.Models;
 using CDT.Cosmos.Cms.Services;
@@ -34,12 +35,14 @@ namespace CDT.Cosmos.Cms.Controllers
             UserManager<IdentityUser> userManager,
             IOptions<SiteCustomizationsConfig> options,
             IDistributedCache distributedCache,
+            ArticleLogic articleLogic,
             IOptions<AzureBlobServiceConfig> blobConfig,
             IOptions<RedisContextConfig> redisOptions,
             AzureBlobService blobService) : base(options,
             dbContext,
             logger,
             userManager,
+            articleLogic,
             distributedCache,
             redisOptions)
         {

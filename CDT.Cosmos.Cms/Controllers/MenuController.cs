@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CDT.Cosmos.Cms.Common.Controllers;
 using CDT.Cosmos.Cms.Common.Data;
+using CDT.Cosmos.Cms.Common.Data.Logic;
 using CDT.Cosmos.Cms.Common.Services;
 using CDT.Cosmos.Cms.Models;
 using Kendo.Mvc.Extensions;
@@ -24,9 +25,9 @@ namespace CDT.Cosmos.Cms.Controllers
         private readonly IDistributedCache _distributedCache;
 
         public MenuController(ILogger<MenuController> logger, ApplicationDbContext dbContext,
-            UserManager<IdentityUser> userManager, IOptions<SiteCustomizationsConfig> options,
+            UserManager<IdentityUser> userManager, IOptions<SiteCustomizationsConfig> options, ArticleLogic articleLogic,
             IDistributedCache distributedCache, IOptions<RedisContextConfig> redisOptions) :
-            base(options, dbContext, logger, userManager, distributedCache, redisOptions)
+            base(options, dbContext, logger, userManager, articleLogic, distributedCache, redisOptions)
         {
             _distributedCache = distributedCache;
         }

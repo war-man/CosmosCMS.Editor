@@ -2,6 +2,7 @@ using System;
 using System.Security.Authentication;
 using CDT.Azure.CDN;
 using CDT.Cosmos.Cms.Common.Data;
+using CDT.Cosmos.Cms.Common.Data.Logic;
 using CDT.Cosmos.Cms.Common.Services;
 using CDT.Cosmos.Cms.Services;
 using Microsoft.AspNetCore.Builder;
@@ -48,9 +49,11 @@ namespace CDT.Cosmos.Cms
             var azureCdnSection = Configuration.GetSection("AzureCdnConfig");
             var siteCustomizationsSection = Configuration.GetSection("SiteCustomizations");
             var redisSection = Configuration.GetSection("RedisContextConfig");
+            var googleAuthSection = Configuration.GetSection("GoogleCloudAuthConfig");
 
             var siteCustomConfig = siteCustomizationsSection.Get<SiteCustomizationsConfig>();
             services.Configure<SiteCustomizationsConfig>(siteCustomizationsSection);
+            services.Configure<GoogleCloudAuthConfig>(googleAuthSection);
 
             // Add Redis Cache Service here
             services.AddTransient<RedisCacheService>();
@@ -85,6 +88,8 @@ namespace CDT.Cosmos.Cms
                 o.SlidingExpiration = true;
             });
 
+
+            services.AddTransient<ArticleLogic>();
 
             // Add this before identity
             services.AddControllersWithViews();
@@ -133,7 +138,7 @@ namespace CDT.Cosmos.Cms
             // requires
             // using Microsoft.AspNetCore.Identity.UI.Services;
             // using WebPWrecover.Services;
-            services.AddTransient<IEmailSender, EmailSender>();
+            services.AddTransient<IEmailSender, CDT.Cosmos.Cms.Common.Services.EmailSender>();
 
             var authConfig = Configuration.GetSection("Authentication");
             var config = authConfig.Get<AuthenticationConfig>();
