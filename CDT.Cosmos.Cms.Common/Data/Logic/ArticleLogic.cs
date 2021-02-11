@@ -26,11 +26,12 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
         private readonly SiteCustomizationsConfig _config;
         private readonly ApplicationDbContext _dbContext;
         private readonly IDistributedCache _distributedCache;
-        private readonly IOptions<GoogleCloudAuthConfig> _googleCloudAuthConfig;
+        //private readonly IOptions<GoogleCloudAuthConfig> _googleCloudAuthConfig;
 
         //private readonly IOptions<AzureBlobServiceConfig> _blobConfig;
         private readonly ILogger _logger;
         private readonly IOptions<RedisContextConfig> _redisOptions;
+        private readonly TranslationServices _translationServices;
 
         /// <summary>
         ///     Constructor
@@ -40,20 +41,20 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
         /// <param name="config"></param>
         /// <param name="logger"></param>
         /// <param name="redisOptions"></param>
-        /// <param name="googleCloudAuthConfig"></param>
+        /// <param name="translationServices"></param>
         public ArticleLogic(ApplicationDbContext dbContext,
             IDistributedCache distributedCache,
             ILogger<ArticleLogic> logger,
             IOptions<SiteCustomizationsConfig> config,
             IOptions<RedisContextConfig> redisOptions,
-            IOptions<GoogleCloudAuthConfig> googleCloudAuthConfig)
+            TranslationServices translationServices)
         {
             _dbContext = dbContext;
             _distributedCache = distributedCache;
             _config = config.Value;
             _logger = logger;
             _redisOptions = redisOptions;
-            _googleCloudAuthConfig = googleCloudAuthConfig;
+            _translationServices = translationServices;
         }
 
         #region CREATE METHODS
@@ -448,37 +449,33 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
         /// <returns></returns>
         public async Task<SupportedLanguages> GetSupportedLanguages(string lang)
         {
-            if (_googleCloudAuthConfig == null) return new SupportedLanguages();
+            if (_translationServices == null) return new SupportedLanguages();
 
             if (_config.ReadWriteMode || _distributedCache == null)
             {
-                var translator = new TranslationServices(_googleCloudAuthConfig);
-                var languages = await translator.GetSupportedLanguages(lang);
+                var languages = await _translationServices.GetSupportedLanguages(lang);
                 return languages;
             }
-            else
+
+            var cachKey = RedisCacheService.GetPageCacheKey(_redisOptions.Value.CacheId, "en-US",
+                RedisCacheService.CacheOptions.GoogleLanguages,
+                "GoogleLang");
+
+            var bytes = await _distributedCache.GetAsync(cachKey);
+
+            if (bytes != null)
+                return Deserialize<SupportedLanguages>(bytes);
+
+            var model = await _translationServices.GetSupportedLanguages(lang);
+            var cacheBytes = Serialize(model);
+            var cacheOptions = new DistributedCacheEntryOptions
             {
-                var cachKey = RedisCacheService.GetPageCacheKey(_redisOptions.Value.CacheId, "en-US",
-                    RedisCacheService.CacheOptions.GoogleLanguages,
-                    "GoogleLang");
+                AbsoluteExpirationRelativeToNow =
+                    TimeSpan.FromSeconds(_redisOptions.Value.CacheDuration)
+            };
+            await _distributedCache.SetAsync(cachKey, cacheBytes, cacheOptions);
 
-                var bytes = await _distributedCache.GetAsync(cachKey);
-
-                if (bytes != null)
-                    return Deserialize<SupportedLanguages>(bytes);
-
-                var translator = new TranslationServices(_googleCloudAuthConfig);
-                var model = await translator.GetSupportedLanguages(lang);
-                var cacheBytes = Serialize(model);
-                var cacheOptions = new DistributedCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow =
-                        TimeSpan.FromSeconds(_redisOptions.Value.CacheDuration)
-                };
-                await _distributedCache.SetAsync(cachKey, cacheBytes, cacheOptions);
-
-                return model;
-            }
+            return model;
         }
 
         #endregion
@@ -948,12 +945,10 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
 
             var languageName = "US English";
 
-            if (_googleCloudAuthConfig != null && !lang.Equals("en", StringComparison.CurrentCultureIgnoreCase) &&
+            if (_translationServices != null && !lang.Equals("en", StringComparison.CurrentCultureIgnoreCase) &&
                 !lang.Equals("en-us", StringComparison.CurrentCultureIgnoreCase))
             {
-                var translator = new TranslationServices(_googleCloudAuthConfig);
-
-                var result = await translator.GetTranslation(lang, "en-us", new[] {article.Title, article.Content});
+                var result = await _translationServices.GetTranslation(lang, "en-us", new[] {article.Title, article.Content});
 
                 languageName =
                     (await GetSupportedLanguages(lang))?.Languages.FirstOrDefault(f => f.LanguageCode == lang)

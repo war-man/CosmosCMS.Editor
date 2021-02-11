@@ -115,7 +115,7 @@ namespace CDT.Cosmos.CmsCommon.Tests
                 GetLogger<ArticleLogic>(),
                 siteOptions,
                 Options.Create(GetRedisContextConfig()),
-                GetGoogleOptions());
+                new TranslationServices(GetGoogleOptions()));
         }
 
         public static ILogger<T> GetLogger<T>()
