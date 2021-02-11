@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Security.Authentication;
 using CDT.Azure.CDN;
 using CDT.Cosmos.Cms.Common.Data;
@@ -46,40 +47,18 @@ namespace CDT.Cosmos.Cms
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var azureCdnSection = Configuration.GetSection("AzureCdnConfig");
-            var siteCustomizationsSection = Configuration.GetSection("SiteCustomizations");
-            var redisSection = Configuration.GetSection("RedisContextConfig");
-            var googleAuthSection = Configuration.GetSection("GoogleCloudAuthConfig");
-
-            var siteCustomConfig = siteCustomizationsSection.Get<SiteCustomizationsConfig>();
-            services.Configure<SiteCustomizationsConfig>(siteCustomizationsSection);
-            services.Configure<GoogleCloudAuthConfig>(googleAuthSection);
-
-            // Add Redis Cache Service here
-            services.AddTransient<RedisCacheService>();
-
-            // Google Translation Services
-            services.AddTransient<TranslationServices>();
-
-            // Get CDN Configuration
-            var azureCdnConfig = siteCustomizationsSection.Get<AzureCdnConfig>();
-            if (azureCdnConfig != null)
-                services.Configure<AzureCdnConfig>(azureCdnSection);
-            else
-                // Akamai premium.
-                services.Configure<AkamaiContextConfig>(Configuration.GetSection("AkamaiContextConfig"));
-
-            services.Configure<AzureBlobServiceConfig>(Configuration.GetSection("AzureBlobServiceConfig"));
+            //
+            // Get configurations
+            //
+            services.Configure<SiteCustomizationsConfig>(Configuration.GetSection("SiteCustomizations"));
             services.Configure<AuthMessageSenderOptions>(Configuration.GetSection("AuthMessageSenderOptions"));
-
-            // For Google Translator Services
-            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", "CA-Response-Portal-bfc617b86937.json");
-
-            services.AddTransient<AzureBlobService>();
+            services.Configure<AzureBlobServiceConfig>(Configuration.GetSection("AzureBlobServiceConfig"));
+            services.Configure<GoogleCloudAuthConfig>(Configuration.GetSection("GoogleCloudAuthConfig"));
+            services.Configure<AzureCdnConfig>(Configuration.GetSection("AzureCdnConfig"));
+            services.Configure<AkamaiContextConfig>(Configuration.GetSection("AkamaiContextConfig"));
 
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             // https://docs.microsoft.com/en-us/aspnet/core/security/authentication/accconfirm?view=aspnetcore-3.1&tabs=visual-studio
             services.ConfigureApplicationCookie(o =>
@@ -88,17 +67,11 @@ namespace CDT.Cosmos.Cms
                 o.SlidingExpiration = true;
             });
 
-
-            services.AddTransient<ArticleLogic>();
-
-            // Add this before identity
-            services.AddControllersWithViews();
-            services.AddRazorPages();
-
             try
             {
                 //https://docs.microsoft.com/en-us/aspnet/core/performance/caching/middleware?view=aspnetcore-3.1
-
+                var redisSection = Configuration.GetSection("RedisContextConfig");
+                services.Configure<RedisContextConfig>(redisSection);
                 var redisContext = redisSection.Get<RedisContextConfig>();
 
                 services.Configure<RedisContextConfig>(redisSection);
@@ -122,11 +95,19 @@ namespace CDT.Cosmos.Cms
                 // var t = "E";
             }
 
-            if (siteCustomConfig.UseAzureSignalR)
-                // See: https://github.com/aspnet/AzureSignalR-samples/tree/master/samples/ChatRoom
-                services.AddSignalR().AddAzureSignalR();
-            else
-                services.AddSignalR();
+            //
+            // Add services
+            //
+            services.AddTransient<IEmailSender, EmailSender>();
+            services.AddTransient<AzureBlobService>();
+            services.AddTransient<RedisCacheService>();
+            services.AddTransient<TranslationServices>();
+            services.AddTransient<ArticleLogic>();
+
+            // Add this before identity
+            services.AddControllersWithViews();
+            services.AddRazorPages();
+
             // End before identity
 
             // See: https://docs.microsoft.com/en-us/aspnet/core/security/authentication/accconfirm?view=aspnetcore-3.1&tabs=visual-studio
@@ -138,11 +119,10 @@ namespace CDT.Cosmos.Cms
             // requires
             // using Microsoft.AspNetCore.Identity.UI.Services;
             // using WebPWrecover.Services;
-            services.AddTransient<IEmailSender, CDT.Cosmos.Cms.Common.Services.EmailSender>();
 
             var authConfig = Configuration.GetSection("Authentication");
             var config = authConfig.Get<AuthenticationConfig>();
-            services.Configure<AuthenticationConfig>(authConfig);
+            services.Configure<AuthenticationConfig>(Configuration.GetSection("Authentication"));
 
             // https://forums.asp.net/t/2130410.aspx?Roles+and+RoleManager+in+ASP+NET+Core+2
             services.AddIdentity<IdentityUser, IdentityRole>(options =>
@@ -189,24 +169,18 @@ namespace CDT.Cosmos.Cms
                 .SetCompatibilityVersion(CompatibilityVersion.Latest)
                 .AddRazorPagesOptions(options =>
                 {
-                    if (siteCustomConfig.ReadWriteMode)
-                    {
-                        // This section docs are here: https://docs.microsoft.com/en-us/aspnet/core/security/authentication/scaffold-identity?view=aspnetcore-3.1&tabs=visual-studio#full
-                        //options.AllowAreas = true;
-                        options.Conventions.AuthorizeAreaFolder("Identity", "/Account/Manage");
-                        options.Conventions.AuthorizeAreaPage("Identity", "/Account/Logout");
-                    }
+                    // This section docs are here: https://docs.microsoft.com/en-us/aspnet/core/security/authentication/scaffold-identity?view=aspnetcore-3.1&tabs=visual-studio#full
+                    //options.AllowAreas = true;
+                    options.Conventions.AuthorizeAreaFolder("Identity", "/Account/Manage");
+                    options.Conventions.AuthorizeAreaPage("Identity", "/Account/Logout");
                 });
 
             services.ConfigureApplicationCookie(options =>
             {
-                if (siteCustomConfig.ReadWriteMode)
-                {
-                    // This section docs are here: https://docs.microsoft.com/en-us/aspnet/core/security/authentication/scaffold-identity?view=aspnetcore-3.1&tabs=visual-studio#full
-                    options.LoginPath = "/Identity/Account/Login";
-                    options.LogoutPath = "/Identity/Account/Logout";
-                    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
-                }
+                // This section docs are here: https://docs.microsoft.com/en-us/aspnet/core/security/authentication/scaffold-identity?view=aspnetcore-3.1&tabs=visual-studio#full
+                options.LoginPath = "/Identity/Account/Login";
+                options.LogoutPath = "/Identity/Account/Logout";
+                options.AccessDeniedPath = "/Identity/Account/AccessDenied";
             });
         }
 
@@ -267,7 +241,7 @@ namespace CDT.Cosmos.Cms
 
                 // This route must go last.  A page name can't conflict with any of the above.
                 // This route allows page titles to become URLs.
-                endpoints.MapControllerRoute("DynamicPage", "/{id?}/{lang?}", new {controller = "Home", action = "Index"});
+                endpoints.MapControllerRoute("DynamicPage", "/{id?}/{lang?}", new { controller = "Home", action = "Index" });
             });
         }
     }
