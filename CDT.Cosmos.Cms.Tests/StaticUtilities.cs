@@ -21,7 +21,6 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -67,7 +66,7 @@ namespace CDT.Cosmos.Cms.Tests
             var vaultUrl = config["VaultUrl"];
             if (string.IsNullOrEmpty(vaultUrl)) vaultUrl = Environment.GetEnvironmentVariable("AzureVaultUrl");
 
-            builder.AddAzureKeyVault(new Uri(vaultUrl), new ClientSecretCredential(tenantId, clientId, key));
+            builder.AddAzureKeyVault(new Uri(vaultUrl!), new ClientSecretCredential(tenantId, clientId, key));
             _configuration = builder.Build();
 
             return _configuration;
@@ -260,7 +259,7 @@ namespace CDT.Cosmos.Cms.Tests
                 GetLogger<ArticleLogic>(),
                 siteOptions,
                 Options.Create(GetRedisContextConfig()),
-                GetGoogleOptions());
+                new TranslationServices(GetGoogleOptions()));
         }
 
         public static IOptions<GoogleCloudAuthConfig> GetGoogleOptions()
