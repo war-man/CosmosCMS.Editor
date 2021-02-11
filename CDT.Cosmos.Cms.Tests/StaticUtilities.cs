@@ -311,7 +311,6 @@ namespace CDT.Cosmos.Cms.Tests
                 GetApplicationDbContext(),
                 GetRoleManager(),
                 GetUserManager(),
-                GetEmailSender(),
                 siteOptions,
                 null,
                 GetArticleLogic(),

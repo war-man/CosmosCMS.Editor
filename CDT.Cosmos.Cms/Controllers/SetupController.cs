@@ -1,32 +1,30 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using CDT.Cosmos.Cms.Common.Data;
+﻿using CDT.Cosmos.Cms.Common.Data;
 using CDT.Cosmos.Cms.Common.Data.Logic;
 using CDT.Cosmos.Cms.Common.Services;
 using CDT.Cosmos.Cms.Services;
 using Kendo.Mvc.UI;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace CDT.Cosmos.Cms.Controllers
 {
     public class SetupController : BaseController
     {
         private readonly AzureBlobService _blobService;
-        private readonly EmailSender _emailSender;
+        //private readonly EmailSender _emailSender;
         private readonly RoleManager<IdentityRole> _roleManager;
 
         public SetupController(ILogger<SetupController> logger,
             ApplicationDbContext dbContext,
             RoleManager<IdentityRole> roleManager,
             UserManager<IdentityUser> userManager,
-            IEmailSender emailSender,
             IOptions<SiteCustomizationsConfig> options,
             IDistributedCache distributedCache,
             ArticleLogic articleLogic,
@@ -35,7 +33,7 @@ namespace CDT.Cosmos.Cms.Controllers
             base(options, dbContext, logger, userManager, articleLogic, distributedCache, redisOptions)
         {
             _roleManager = roleManager;
-            _emailSender = (EmailSender) emailSender;
+            //_emailSender = (EmailSender) emailSender;
             _blobService = blobService;
         }
 
