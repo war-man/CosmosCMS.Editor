@@ -4,9 +4,8 @@ using System.Threading.Tasks;
 using Microsoft.Azure.Management.Cdn;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.Rest; //using Microsoft.Azure.Management.Resources;
-//using Microsoft.Azure.Management.Resources.Models;
 
-namespace CDT.Azure.CDN
+namespace CDT.Cosmos.Cms.Services
 {
     public enum CdnProvider
     {

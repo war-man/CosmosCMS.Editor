@@ -5,37 +5,50 @@
 
     <IsPackable>false</IsPackable>
 
-    <UserSecretsId>ecb0333b-6428-40da-b43c-f3f1fa1cdbd3</UserSecretsId>
+    <AssemblyVersion>2021.2.11.38897</AssemblyVersion>
 
-    <AssemblyVersion>2021.2.10.41569</AssemblyVersion>
+    <FileVersion>2021.2.11.38897</FileVersion>
 
-    <FileVersion>2021.2.10.41569</FileVersion>
+    <UserSecretsId>e80bc001-6916-48ac-a051-38d3838268a1</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CDT.Cosmos.Cms.Common" Version="2.0.1" />
-    <PackageReference Include="Microsoft.CodeAnalysis" Version="3.8.0" />
+    <Compile Remove="A00EnvironmentTests.cs" />
+    <Compile Remove="A01ArticleLogicTests.cs" />
+    <Compile Remove="A02AzureBlobServiceTests.cs" />
+    <Compile Remove="A03EditControllerTests.cs" />
+    <Compile Remove="A04TemplatesControllerTests.cs" />
+    <Compile Remove="A05HomeControllerTests.cs" />
+    <Compile Remove="A06TeamsTests.cs" />
+    <Compile Remove="A07FileManagerTests.cs" />
+    <Compile Remove="AkamaiCdnClientTests.cs" />
+    <Compile Remove="AzureKeyVaultUtils.cs" />
+    <Compile Remove="CdnManagerTests.cs" />
+    <Compile Remove="JsonResultViewModel.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+	  
+    <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.0.2" />
+	  
+    <PackageReference Include="Microsoft.Extensions.Configuration.AzureKeyVault" Version="3.1.12" />
+	  
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="5.0.0" />
+	  
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.1.2" />
     <PackageReference Include="MSTest.TestFramework" Version="2.1.2" />
+
     <PackageReference Include="coverlet.collector" Version="3.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Telerik.UI.for.AspNet.Core" Version="2021.1.119" />
+   
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CDT.Cosmos.Cms.Common\CDT.Cosmos.Cms.Common.csproj" />
     <ProjectReference Include="..\CDT.Cosmos.Cms\CDT.Cosmos.Cms.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 
 </Project>

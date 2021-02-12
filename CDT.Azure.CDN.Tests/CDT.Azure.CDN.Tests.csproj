@@ -9,9 +9,9 @@
 
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
 
-    <AssemblyVersion>2021.2.10.40938</AssemblyVersion>
+    <AssemblyVersion>2021.2.11.30254</AssemblyVersion>
 
-    <FileVersion>2021.2.10.40938</FileVersion>
+    <FileVersion>2021.2.11.30254</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,10 +24,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\CDT.Azure.CDN\CDT.Azure.CDN.csproj" />
   </ItemGroup>
 
 </Project>

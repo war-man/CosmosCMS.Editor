@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CDT.Cosmos.CmsCommon.Tests
+namespace CDT.Cosmos.Cms.Common.Tests
 {
     [TestClass]
     public class ArticleLogicTests
