@@ -1,5 +1,8 @@
-﻿namespace CDT.Azure.CDN
+﻿namespace CDT.Cosmos.Cms.Services
 {
+    /// <summary>
+    /// Configuration for Azure CDN
+    /// </summary>
     public class AzureCdnConfig
     {
         public string ClientId { get; set; }

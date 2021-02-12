@@ -1,7 +1,5 @@
 using System;
-using System.Linq;
 using System.Security.Authentication;
-using CDT.Azure.CDN;
 using CDT.Cosmos.Cms.Common.Data;
 using CDT.Cosmos.Cms.Common.Data.Logic;
 using CDT.Cosmos.Cms.Common.Services;

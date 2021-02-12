@@ -1,21 +1,23 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using CDT.Akamai.EdgeAuth;
 using Newtonsoft.Json;
 
-namespace CDT.Akamai.FastPurge
+namespace CDT.Cosmos.Cms.Services
 {
-    public class Client
+    public class AkamaiCdnClient
     {
         private readonly string _accessToken;
         private readonly string _akamaiApiHostUrl;
         private readonly string _clientSecret;
         private readonly string _clientToken;
 
-        public Client(string clientToken, string accessToken, string clientSecret, string akamaiApiHostUrl)
+        public AkamaiCdnClient(string clientToken, string accessToken, string clientSecret, string akamaiApiHostUrl)
         {
             _akamaiApiHostUrl = akamaiApiHostUrl;
             var error = string.Empty;
@@ -70,11 +72,11 @@ namespace CDT.Akamai.FastPurge
             if (uploadStream.CanSeek)
                 webRequest.ContentLength = uploadStream.Length;
             else if (webRequest is HttpWebRequest)
-                ((HttpWebRequest) webRequest).SendChunked = true;
+                ((HttpWebRequest)webRequest).SendChunked = true;
 
             // avoid internal memory allocation before buffering the output
             if (webRequest is HttpWebRequest)
-                ((HttpWebRequest) webRequest).AllowWriteStreamBuffering = false;
+                ((HttpWebRequest)webRequest).AllowWriteStreamBuffering = false;
 
             using var requestStream = webRequest.GetRequestStream();
             using (uploadStream)
@@ -91,7 +93,7 @@ namespace CDT.Akamai.FastPurge
         /// <param name="purgeObject"></param>
         /// <param name="endpoint"></param>
         /// <returns></returns>
-        public string PurgeProduction(PurgeObjects purgeObject, string endpoint)
+        public string PurgeProduction(AkamaiPurgeObjects purgeObject, string endpoint)
         {
             // http://asparticles.com/Articles/103/how-to-post-json-data-to-webapi-using-csharp
             var request = CreateWebRequest(endpoint, "POST", purgeObject);
@@ -99,7 +101,7 @@ namespace CDT.Akamai.FastPurge
             try
             {
                 // Fails with 401 Signature does not match
-                var httpResponse = (HttpWebResponse) request.GetResponse();
+                var httpResponse = (HttpWebResponse)request.GetResponse();
                 using var reader = new StreamReader(httpResponse.GetResponseStream()!, Encoding.ASCII);
                 var responseText = reader.ReadToEnd();
                 return responseText;
@@ -107,7 +109,7 @@ namespace CDT.Akamai.FastPurge
             catch (WebException e)
             {
                 using var response = e.Response;
-                var httpResponse = (HttpWebResponse) response;
+                var httpResponse = (HttpWebResponse)response;
                 Console.WriteLine("Error code: {0}", httpResponse.StatusCode);
                 using var data = response.GetResponseStream();
                 using var reader = new StreamReader(data!);
@@ -123,7 +125,7 @@ namespace CDT.Akamai.FastPurge
         /// <returns>Purge result JSON</returns>
         public string PurgeProductionByUrls(string[] urls)
         {
-            var purgeObjects = new PurgeObjects
+            var purgeObjects = new AkamaiPurgeObjects
             {
                 Objects = urls.ToArray()
             };

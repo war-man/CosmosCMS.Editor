@@ -3,10 +3,10 @@ using CDT.Cosmos.Cms.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CDT.Akamai.Tests
+namespace CDT.Cosmos.Cms.Common.Tests
 {
     [TestClass]
-    public class ClientTests
+    public class AkamaiCdnClientTests
     {
         //private const string AccessToken =;
         //private const string ClientToken = ;
@@ -51,7 +51,7 @@ namespace CDT.Akamai.Tests
 
         public static string GetConfigValue(string keyName)
         {
-            if (_config == null) _config = ConfigUtilities.GetConfig().GetSection("Akamai");
+            if (_config == null) _config = StaticUtilities.GetConfig().GetSection("Akamai");
             var value = _config[keyName];
 
             return value;
@@ -73,7 +73,7 @@ namespace CDT.Akamai.Tests
             //string json = "{ \"objects\": [ 959654 ] }";
             try
             {
-                var result = client.PurgeProduction(new AkamaiPurgeObjects {Objects = new[] {"1118561"}},
+                var result = client.PurgeProduction(new AkamaiPurgeObjects { Objects = new[] { "1118561" } },
                     PurgeEndPoints.CpCodeProductionEndpoint);
                 Assert.IsTrue(result.Contains("Request accepted"));
             }
@@ -100,7 +100,7 @@ namespace CDT.Akamai.Tests
             {
                 var result =
                     client.PurgeProduction(
-                        new AkamaiPurgeObjects {Objects = new[] {"https://akamaipremium.dev.technology.ca.gov/"}},
+                        new AkamaiPurgeObjects { Objects = new[] { "https://akamaipremium.dev.technology.ca.gov/" } },
                         PurgeEndPoints.UrlProductionEndpoint);
                 Assert.IsTrue(result.Contains("Request accepted"));
             }

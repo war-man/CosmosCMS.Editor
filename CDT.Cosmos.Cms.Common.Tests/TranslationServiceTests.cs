@@ -3,7 +3,7 @@ using CDT.Cosmos.Cms.Common.Services;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CDT.Cosmos.CmsCommon.Tests
+namespace CDT.Cosmos.Cms.Common.Tests
 {
     [TestClass]
     public class TranslationServiceTests

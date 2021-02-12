@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -8,7 +7,6 @@ using System.Security.Authentication;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using Azure.Identity;
 using CDT.Cosmos.Cms.Common.Data;
 using CDT.Cosmos.Cms.Common.Data.Logic;
 using CDT.Cosmos.Cms.Common.Services;
@@ -19,7 +17,6 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.Configuration;
@@ -42,7 +39,7 @@ namespace CDT.Cosmos.Cms.Tests
         //private const string EditorRoleName = "Editors";
         private static IConfiguration _configuration;
 
-        private static IConfiguration GetConfig()
+        internal static IConfiguration GetConfig()
         {
             if (_configuration != null) return _configuration;
 
@@ -66,7 +63,7 @@ namespace CDT.Cosmos.Cms.Tests
             var vaultUrl = config["VaultUrl"];
             if (string.IsNullOrEmpty(vaultUrl)) vaultUrl = Environment.GetEnvironmentVariable("AzureVaultUrl");
 
-            builder.AddAzureKeyVault(new Uri(vaultUrl!), new ClientSecretCredential(tenantId, clientId, key));
+            builder.AddAzureKeyVault(vaultUrl, clientId, key);
             _configuration = builder.Build();
 
             return _configuration;
@@ -106,14 +103,14 @@ namespace CDT.Cosmos.Cms.Tests
             return context;
         }
 
-        private static DbConnection CreateInMemoryDatabase()
-        {
-            var connection = new SqliteConnection("Filename=:memory:");
+        //private static DbConnection CreateInMemoryDatabase()
+        //{
+        //    var connection = new SqliteConnection("Filename=:memory:");
 
-            connection.Open();
+        //    connection.Open();
 
-            return connection;
-        }
+        //    return connection;
+        //}
 
         public static ILogger<T> GetLogger<T>()
         {
