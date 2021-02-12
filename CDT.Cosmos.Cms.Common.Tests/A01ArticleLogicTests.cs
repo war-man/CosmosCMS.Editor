@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CDT.Cosmos.Cms.Common.Data;
 using CDT.Cosmos.Cms.Common.Data.Logic;
 using CDT.Cosmos.Cms.Common.Models;
 using CDT.Cosmos.Cms.Common.Services;
@@ -12,11 +11,13 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CDT.Cosmos.Cms.Common.Tests
 {
+    /// <summary>
+    /// Tests the <see cref="ArticleLogic"/> functions independent of controllers.
+    /// </summary>
     [TestClass]
     public class ArticleLogicTests
     {
         private static IdentityUser _testUser;
-        private static ApplicationDbContext _dbContext;
 
         [ClassInitialize]
         public static void Initialize(TestContext context)
@@ -24,23 +25,16 @@ namespace CDT.Cosmos.Cms.Common.Tests
             //
             // Setup context.
             //
-            _dbContext = StaticUtilities.GetApplicationDbContext();
+
+            using var dbContext = StaticUtilities.GetApplicationDbContext();
             _testUser = StaticUtilities.GetIdentityUser(TestUsers.Foo).Result;
 
-            _dbContext.ArticleLogs.RemoveRange(_dbContext.ArticleLogs.ToList());
-            _dbContext.Articles.RemoveRange(_dbContext.Articles.ToList());
+            dbContext.ArticleLogs.RemoveRange(dbContext.ArticleLogs.ToList());
+            dbContext.Articles.RemoveRange(dbContext.Articles.ToList());
 
-            _dbContext.SaveChanges();
+            dbContext.SaveChanges();
         }
 
-        [ClassCleanup]
-        public static void CleanupClass()
-        {
-            //_dbContext.Articles.RemoveRange(_dbContext.Articles.ToList());
-            //_dbContext.Users.RemoveRange(_dbContext.Users.ToList());
-            //_dbContext.SaveChanges();
-            _dbContext.Dispose();
-        }
 
         /// <summary>
         ///     Test the creation of root page, and, version it.
@@ -82,7 +76,8 @@ namespace CDT.Cosmos.Cms.Common.Tests
             //
             // Check Logs
             //
-            var logs = await _dbContext.ArticleLogs.Where(l => l.ArticleId == homePage.Id).ToListAsync();
+            await using var dbContext = StaticUtilities.GetApplicationDbContext();
+            var logs = await dbContext.ArticleLogs.Where(l => l.ArticleId == homePage.Id).ToListAsync();
 
             Assert.AreEqual(4, logs.Count);
         }
@@ -153,7 +148,8 @@ namespace CDT.Cosmos.Cms.Common.Tests
             Assert.AreEqual(5, version5.VersionNumber);
             Assert.IsFalse(version5.Published.HasValue);
 
-            var versions = await _dbContext.Articles
+            await using var dbContext = StaticUtilities.GetApplicationDbContext();
+            var versions = await dbContext.Articles
                 .Where(a => a.ArticleNumber == version5.ArticleNumber).ToListAsync();
             Assert.AreEqual(5, versions.Count);
         }
@@ -161,10 +157,13 @@ namespace CDT.Cosmos.Cms.Common.Tests
         [TestMethod]
         public async Task C_Get_Last_Published_Version()
         {
+
+            await using var dbContext = StaticUtilities.GetApplicationDbContext();
             var logic = StaticUtilities.GetArticleLogic();
             var article = await logic.GetByUrl("");
             var article1 = article;
-            var lastPublishedArticle = await _dbContext.Articles
+
+            var lastPublishedArticle = await dbContext.Articles
                 .Where(p => p.Published != null && p.ArticleNumber == article1.ArticleNumber)
                 .OrderByDescending(o => o.VersionNumber).FirstOrDefaultAsync();
             //var lastArticlePeriod = await _dbContext.Articles.Where(p => p.ArticleNumber == article.ArticleNumber).OrderByDescending(o => o.VersionNumber).FirstOrDefaultAsync();
@@ -187,6 +186,7 @@ namespace CDT.Cosmos.Cms.Common.Tests
         public async Task D_Create_New_Article_Versions_TestRedirect_Publish()
         {
             var logic = StaticUtilities.GetArticleLogic();
+            await using var dbContext = StaticUtilities.GetApplicationDbContext();
 
             // Create and save version 1
             var version1 = await logic.UpdateOrInsert(await logic.Create("This is a second page" + Guid.NewGuid()),
@@ -236,13 +236,13 @@ namespace CDT.Cosmos.Cms.Common.Tests
             //
             // Get all four versions
             //
-            var testVersion1 = _dbContext.Articles.Include(i => i.ArticleLogs)
+            var testVersion1 = dbContext.Articles.Include(i => i.ArticleLogs)
                 .FirstOrDefault(f => f.ArticleNumber == 2 && f.VersionNumber == 1);
-            var testVersion2 = _dbContext.Articles.Include(i => i.ArticleLogs)
+            var testVersion2 = dbContext.Articles.Include(i => i.ArticleLogs)
                 .FirstOrDefault(f => f.ArticleNumber == 2 && f.VersionNumber == 2);
-            var testVersion3 = _dbContext.Articles.Include(i => i.ArticleLogs)
+            var testVersion3 = dbContext.Articles.Include(i => i.ArticleLogs)
                 .FirstOrDefault(f => f.ArticleNumber == 2 && f.VersionNumber == 3);
-            var testVersion4 = _dbContext.Articles.Include(i => i.ArticleLogs)
+            var testVersion4 = dbContext.Articles.Include(i => i.ArticleLogs)
                 .FirstOrDefault(f => f.ArticleNumber == 2 && f.VersionNumber == 4);
 
             Assert.IsNotNull(testVersion1);
@@ -319,24 +319,25 @@ namespace CDT.Cosmos.Cms.Common.Tests
             //
             // There should be 4 versions
             //
-            Assert.AreEqual(4, _dbContext.Articles.Where(a => a.ArticleNumber == version1.ArticleNumber).Count());
+            Assert.AreEqual(4, dbContext.Articles.Where(a => a.ArticleNumber == version1.ArticleNumber).Count());
         }
 
         [TestMethod]
         public async Task E_SetStatus()
         {
             var logic = StaticUtilities.GetArticleLogic();
+            await using var dbContext = StaticUtilities.GetApplicationDbContext();
 
             //
             // Get the expected entity
             //
-            var entity = await _dbContext.Articles.FirstOrDefaultAsync(f => f.Title.Contains("New Version"));
+            var entity = await dbContext.Articles.FirstOrDefaultAsync(f => f.Title.Contains("New Version"));
 
             //
             // Get the last article by path, unpublished
             //
             var article = await logic.GetByUrl(entity.UrlPath, "en-US", false);
-            var expectedVersionCount = _dbContext.Articles.Count(a => a.ArticleNumber == article.ArticleNumber);
+            var expectedVersionCount = dbContext.Articles.Count(a => a.ArticleNumber == article.ArticleNumber);
 
             //
             // This should delete the article
@@ -381,8 +382,9 @@ namespace CDT.Cosmos.Cms.Common.Tests
         [TestMethod]
         public async Task F_CheckTitle()
         {
+            await using var dbContext = StaticUtilities.GetApplicationDbContext();
             var logic = StaticUtilities.GetArticleLogic();
-            var entity = await _dbContext.Articles.FirstOrDefaultAsync(f => f.ArticleNumber == 1);
+            var entity = await dbContext.Articles.FirstOrDefaultAsync(f => f.ArticleNumber == 1);
             var article = await logic.GetByUrl(entity.UrlPath, "en-US", false, false);
             Assert.IsFalse(await logic.ValidateTitle(entity.Title, 0));
             Assert.IsTrue(await logic.ValidateTitle(article.Title, article.ArticleNumber));
@@ -406,6 +408,7 @@ namespace CDT.Cosmos.Cms.Common.Tests
         public async Task H_Test_ScheduledPublishing()
         {
             var logic = StaticUtilities.GetArticleLogic();
+            await using var dbContext = StaticUtilities.GetApplicationDbContext();
 
             //
             // Get the home page that the public now sees
@@ -416,7 +419,7 @@ namespace CDT.Cosmos.Cms.Common.Tests
             //
             // Now validate by retrieving the same via Entity Framework
             //
-            var mostRecentPublishedArticle = await _dbContext.Articles
+            var mostRecentPublishedArticle = await dbContext.Articles
                 .Where(p => p.Published != null && p.ArticleNumber == articleNumber)
                 .OrderByDescending(o => o.VersionNumber).FirstOrDefaultAsync();
             
@@ -539,9 +542,10 @@ namespace CDT.Cosmos.Cms.Common.Tests
         public async Task K_TestRedisCachePurge()
         {
             var logic = StaticUtilities.GetArticleLogic();
+            await using var dbContext = StaticUtilities.GetApplicationDbContext();
 
             // Get list of articles...
-            var articles = await logic.GetArticleList(_dbContext.Articles.AsQueryable());
+            var articles = await logic.GetArticleList(dbContext.Articles.AsQueryable());
 
             foreach (var article in articles)
             {
