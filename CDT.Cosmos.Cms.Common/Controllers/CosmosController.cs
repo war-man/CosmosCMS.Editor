@@ -19,6 +19,7 @@ namespace CDT.Cosmos.Cms.Common.Controllers
         private readonly ArticleLogic _articleLogic;
         private readonly ILogger _logger;
         private readonly IOptions<RedisContextConfig> _redisOptions;
+        private readonly IOptions<GoogleCloudAuthConfig> _gglConfig;
 
         /// <summary>
         ///     Base constructor
@@ -26,12 +27,15 @@ namespace CDT.Cosmos.Cms.Common.Controllers
         /// <param name="logger"></param>
         /// <param name="articleLogic"></param>
         /// <param name="redisOptions"></param>
+        /// <param name="gglConfig"></param>
         protected CosmosController(ILogger logger,
             ArticleLogic articleLogic,
-            IOptions<RedisContextConfig> redisOptions)
+            IOptions<RedisContextConfig> redisOptions,
+            IOptions<GoogleCloudAuthConfig> gglConfig)
         {
             _logger = logger;
             _redisOptions = redisOptions;
+            _gglConfig = gglConfig;
             _articleLogic = articleLogic;
         }
 
@@ -74,6 +78,9 @@ namespace CDT.Cosmos.Cms.Common.Controllers
 
                 // Akamai, Microsoft and Verizon CDN all support watching last modified for changes.
                 Response.Headers[HeaderNames.LastModified] = article.Updated.ToUniversalTime().ToString("R");
+
+                // Determine if Google Translate v3 is configured so the javascript support will be added
+                ViewData["UseGoogleTranslate"] = string.IsNullOrEmpty(_gglConfig?.Value?.ClientId) == false;
 
                 return View(article);
             }

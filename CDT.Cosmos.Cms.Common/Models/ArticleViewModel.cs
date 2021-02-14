@@ -33,12 +33,12 @@ namespace CDT.Cosmos.Cms.Common.Models
         /// <summary>
         ///     ISO language code of this article
         /// </summary>
-        public string LanguageCode { get; set; } = "en-US";
+        public string LanguageCode { get; set; } = "en";
 
         /// <summary>
         ///     Language name
         /// </summary>
-        public string LanguageName { get; set; } = "US English";
+        public string LanguageName { get; set; } = "English";
 
         /// <summary>
         ///     Url of this page

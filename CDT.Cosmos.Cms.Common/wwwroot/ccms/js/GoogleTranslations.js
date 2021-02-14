@@ -7,7 +7,11 @@
     }
 };
 
-$(function() {
+$(function () {
+
+    // Get parameters send to this script
+    var scriptTag = $("#ccms-lang-script");
+    var ccmsLangDisplayName = scriptTag.attr('data-lang');
     // Construct a bootstrap drop down control here.
     var ctrl =
         "<div class=\"input-group mb-2\"><div class=\"dropdown\"><div class=\"input-group-prepend\"><div class=\"input-group-text input-group-text-sm\">Language: </div>";

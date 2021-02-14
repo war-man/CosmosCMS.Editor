@@ -24,17 +24,20 @@ namespace CDT.Cosmos.Cms.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IOptions<RedisContextConfig> _redisOptions;
         private readonly IOptions<SiteCustomizationsConfig> _siteOptions;
+        private readonly IOptions<GoogleCloudAuthConfig> _gglConfig;
 
         public HomeController(ILogger<HomeController> logger, ApplicationDbContext dbContext,
             IOptions<SiteCustomizationsConfig> options,
             IOptions<RedisContextConfig> redisOptions,
-            ArticleLogic articleLogic)
+            ArticleLogic articleLogic,
+            IOptions<GoogleCloudAuthConfig> gglConfig)
         {
             _redisOptions = redisOptions;
             _logger = logger;
             _dbContext = dbContext;
             _siteOptions = options;
             _articleLogic = articleLogic;
+            _gglConfig = gglConfig;
         }
 
         public async Task<IActionResult> Index(string id, string lang)
@@ -42,6 +45,10 @@ namespace CDT.Cosmos.Cms.Controllers
             try
             {
                 // ViewData["EditModeOn"] = false;
+
+                // Determine if Google Translate v3 is configured so the javascript support will be added
+                ViewData["UseGoogleTranslate"] = string.IsNullOrEmpty(_gglConfig?.Value?.ClientId) == false;
+
 
                 // Make sure this is Url Encoded, because this is the way it is stored in DB.
                 if (!string.IsNullOrEmpty(id))
@@ -126,7 +133,7 @@ namespace CDT.Cosmos.Cms.Controllers
                 article.EditModeOn = false;
                 article.ReadWriteMode = false;
 
-                return View("Index_standard1RO", article);
+                return View("CosmosIndex", article);
             }
             catch (Exception e)
             {
@@ -157,7 +164,7 @@ namespace CDT.Cosmos.Cms.Controllers
                     article.ReadWriteMode = false;
                     article.EditModeOn = false;
 
-                    return View("Index_standard1RO", article);
+                    return View("CosmosIndex", article);
                 }
 
                 return NotFound();

@@ -1,1616 +1,1682 @@
 <?xml version="1.0"?>
-
 <doc>
-	<assembly>
-		<name>CDT.Cosmos.Cms.Common</name>
-	</assembly>
-	<members>
-		<member name="T:CDT.Cosmos.Cms.Common.Controllers.CosmosController">
-			<summary>
-				Base class for the Cosmos CMS controller.
-			</summary>
-		</member>
-		<member
-			name="M:CDT.Cosmos.Cms.Common.Controllers.CosmosController.#ctor(Microsoft.Extensions.Logging.ILogger,CDT.Cosmos.Cms.Common.Data.ApplicationDbContext,Microsoft.Extensions.Options.IOptions{CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig},Microsoft.Extensions.Caching.Distributed.IDistributedCache,Microsoft.Extensions.Options.IOptions{CDT.Cosmos.Cms.Common.Services.RedisContextConfig})">
-			<summary>
-				Base constructor
-			</summary>
-			<param name="logger"></param>
-			<param name="dbContext"></param>
-			<param name="options"></param>
-			<param name="distributedCache"></param>
-			<param name="redisOptions"></param>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Controllers.CosmosController.Index(System.String,System.String)">
-			<summary>
-				Index method of the home controller, main entry point for web pages.
-			</summary>
-			<param name="id">URL of page</param>
-			<param name="lang">iso language code</param>
-			<returns></returns>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Controllers.CosmosController.GetSupportedLanguages(System.String)">
-			<summary>
-				Gets a list of languages supported for translation
-			</summary>
-			<param name="lang">language code</param>
-			<returns></returns>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Controllers.EnumControllerName">
-			<summary>
-				Controller name enum
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Controllers.EnumControllerName.Edit">
-			<summary>
-				Editor controller
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Controllers.EnumControllerName.Template">
-			<summary>
-				Template controller
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Controllers.EnumControllerName.Home">
-			<summary>
-				Home controller
-			</summary>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext">
-			<summary>
-				Database Context for Cosmos CMS
-			</summary>
-		</member>
-		<member
-			name="M:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext.#ctor(Microsoft.EntityFrameworkCore.DbContextOptions{CDT.Cosmos.Cms.Common.Data.ApplicationDbContext})">
-			<summary>
-				Constructor
-			</summary>
-			<param name="options"></param>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext.#ctor">
-			<summary>
-				Constructor without options.
-			</summary>
-		</member>
-		<member
-			name="M:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext.OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder)">
-			<summary>
-				On model creating
-			</summary>
-			<param name="modelBuilder"></param>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext.Articles">
-			<summary>
-				Articles
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext.ArticleLogs">
-			<summary>
-				Article activity logs
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext.MenuItems">
-			<summary>
-				Menu items
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext.FontIcons">
-			<summary>
-				Font icons
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext.Templates">
-			<summary>
-				Web page templates
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext.Layouts">
-			<summary>
-				Website layouts
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext.Teams">
-			<summary>
-				Page teams
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext.TeamMembers">
-			<summary>
-				Team membership
-			</summary>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Data.Article">
-			<summary>
-				Article
-			</summary>
-			<remarks>An article is the content for a web page.</remarks>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Article.Id">
-			<summary>
-				Unique article entity primary key number (not to be confused with article number)
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Article.LayoutId">
-			<summary>
-				(optional) Layout that this article uses
-			</summary>
-			<remarks>If the page uses a layout other than the default, it will be specified here.</remarks>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Article.TeamId">
-			<summary>
-				(optional) If applicable, the Id of the team managing this web page.
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Article.ArticleNumber">
-			<summary>
-				Article number
-			</summary>
-			<remarks>An article number.</remarks>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Article.StatusCode">
-			<summary>
-				Status of this article
-			</summary>
-			<remarks>See <see cref="T:CDT.Cosmos.Cms.Common.Data.Logic.StatusCodeEnum" /> enum for code numbers.</remarks>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Article.UrlPath">
-			<summary>
-				This is the URL of the article.
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Article.VersionNumber">
-			<summary>
-				Version number of the article.
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Article.Published">
-			<summary>
-				Date/time of when this article is published.
-			</summary>
-			<remarks>Null value here means this article is not published.</remarks>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Article.Title">
-			<summary>
-				Title of the article
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Article.Content">
-			<summary>
-				HTML content of the page.
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Article.Updated">
-			<summary>
-				Date/time of when this article was last updated.
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Article.HeaderJavaScript">
-			<summary>
-				JavaScript injected into the header of the web page.
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Article.FooterJavaScript">
-			<summary>
-				JavaScript injected into the footer of the web page.
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Article.Layout">
-			<summary>
-				(optional) The layout of this page if other than the default.
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Article.ArticleLogs">
-			<summary>
-				Activity logs relating to this article
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Article.MenuItems">
-			<summary>
-				Menu items for this article (soon to be depreciated)
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Article.FontIconId">
-			<summary>
-				(optional) Icon font Id for this article
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Article.FontIcon">
-			<summary>
-				(optional) Icon font for this page (will appear in menu if selected)
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Article.Team">
-			<summary>
-				(optional) Team that manages this page.
-			</summary>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Data.ArticleLog">
-			<summary>
-				Article activity log entry
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.ArticleLog.Id">
-			<summary>
-				Identity key of the entity
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.ArticleLog.IdentityUserId">
-			<summary>
-				User ID of the person who triggered the activity
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.ArticleLog.IdentityUser">
-			<summary>
-				Identity User assocated with this activity
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.ArticleLog.ActivityNotes">
-			<summary>
-				Notes regarding what happened.
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.ArticleLog.DateTimeStamp">
-			<summary>
-				Date and Time (UTC by default)
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.ArticleLog.ArticleId">
-			<summary>
-				ID of the Article associated with this event.
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.ArticleLog.Article">
-			<summary>
-				The article associated with this event.
-			</summary>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Data.FontIcon">
-			<summary>
-				Font icon class in the database
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.FontIcon.Id">
-			<summary>
-				Identity key for this entity
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.FontIcon.IconCode">
-			<summary>
-				CSS code for this icon
-			</summary>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Data.Layout">
-			<summary>
-				Website layout content.
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Layout.Id">
-			<summary>
-				Identity key for this entity.
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Layout.IsDefault">
-			<summary>
-				If true this is the default layout for website.
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Layout.LayoutName">
-			<summary>
-				Friendly name of layout
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Layout.Notes">
-			<summary>
-				Notes about the layout
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Layout.Head">
-			<summary>
-				Content injected into the web page HEAD
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Layout.BodyHtmlAttributes">
-			<summary>
-				Body tag attributes
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Layout.BodyHeaderHtmlAttributes">
-			<summary>
-				Web page header attributes (inside body)
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Layout.HtmlHeader">
-			<summary>
-				Web page header content
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Layout.FooterHtmlAttributes">
-			<summary>
-				Website footer attributes
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Layout.FooterHtmlContent">
-			<summary>
-				Content injected into the web site footer.
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Layout.PostFooterBlock">
-			<summary>
-				Post footer JavaScript code block
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Layout.Articles">
-			<summary>
-				Articles assocated with this layout (soon to be depreciated)
-			</summary>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic">
-			<summary>
-				Main logic behind getting and maintaining web site articles.
-			</summary>
-			<remarks>An article is the "content" behind a web page.</remarks>
-		</member>
-		<member
-			name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.#ctor(CDT.Cosmos.Cms.Common.Data.ApplicationDbContext,CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig)">
-			<summary>
-				Constructor
-			</summary>
-			<param name="dbContext"></param>
-			<param name="config"></param>
-		</member>
-		<member
-			name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.#ctor(CDT.Cosmos.Cms.Common.Data.ApplicationDbContext,Microsoft.Extensions.Caching.Distributed.IDistributedCache,CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig,Microsoft.Extensions.Logging.ILogger,Microsoft.Extensions.Options.IOptions{CDT.Cosmos.Cms.Common.Services.RedisContextConfig})">
-			<summary>
-				Constructor
-			</summary>
-			<param name="dbContext"></param>
-			<param name="distributedCache"></param>
-			<param name="config"></param>
-			<param name="logger"></param>
-			<param name="redisOptions"></param>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.Create(System.String,System.Nullable{System.Int32})">
-			<summary>
-				Creates a new article, does NOT save it to the database before returning a copy for editing.
-			</summary>
-			<param name="title"></param>
-			<param name="templateId"></param>
-			<returns>Unsaved article ready to edit and save</returns>
-			<remarks>
-				<para>
-					Creates a new article, unsaved, ready to edit.  Uses
-					<see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetDefaultLayout(System.String,System.Boolean)" /> to get the layout,
-					and builds the <see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" /> using method
-					<seealso
-						cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildArticleViewModel(CDT.Cosmos.Cms.Common.Data.Article,System.String)" />
-					.
-				</para>
-				<para>
-					If a template ID is given, the contents of this article is loaded with content from the
-					<see cref="T:CDT.Cosmos.Cms.Common.Data.Template" />
-					.
-				</para>
-			</remarks>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.ValidateTitle(System.String,System.Int32)">
-			<summary>
-				Validate that the title is not already taken by another article.
-			</summary>
-			<param name="title"></param>
-			<param name="articleNumber"></param>
-			<returns></returns>
-		</member>
-		<member
-			name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.Get(System.Nullable{System.Int32},CDT.Cosmos.Cms.Common.Controllers.EnumControllerName)">
-			<summary>
-				Gets an article by ID (row Key), or creates a new (unsaved) article if id is null.
-			</summary>
-			<param name="id">Row Id (or identity) number.  If null returns a new article.</param>
-			<param name="controllerName"></param>
-			<remarks>
-				<para>
-					For new articles, uses
-					<see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.Create(System.String,System.Nullable{System.Int32})" />
-					and the method
-					<see
-						cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildArticleViewModel(CDT.Cosmos.Cms.Common.Data.Article,System.String)" />
-					to
-					generate the <see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" /> .
-				</para>
-				<para>
-					Retrieves <see cref="T:CDT.Cosmos.Cms.Common.Data.Article" /> and builds an
-					<see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" /> using the method
-					<see
-						cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildArticleViewModel(CDT.Cosmos.Cms.Common.Data.Article,System.String)" />
-					,
-					or in the case of a template, uses method
-					<see
-						cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildTemplateViewModel(CDT.Cosmos.Cms.Common.Data.Template)" />
-					.
-				</para>
-			</remarks>
-			<returns>
-			</returns>
-			<remarks>
-				<para>
-					Returns <see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" />. For more details on what is returned, see
-					<see
-						cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildArticleViewModel(CDT.Cosmos.Cms.Common.Data.Article,System.String)" />
-					or
-					<see
-						cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildTemplateViewModel(CDT.Cosmos.Cms.Common.Data.Template)" />
-					.
-				</para>
-				<para>NOTE: Cannot access articles that have been deleted.</para>
-			</remarks>
-		</member>
-		<member
-			name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildTemplateViewModel(CDT.Cosmos.Cms.Common.Data.Template)">
-			<summary>
-				Gets a template represented as an <see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" />.
-			</summary>
-			<param name="template"></param>
-			<returns>ArticleViewModel</returns>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.Get(System.Int32,System.Int32)">
-			<summary>
-				Gets a copy of the article ready for edit.
-			</summary>
-			<param name="articleNumber">Article Number</param>
-			<param name="versionNumber">Version to edit</param>
-			<returns>
-				<see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" />
-			</returns>
-			<remarks>
-				<para>
-					Returns <see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" />. For more details on what is returned, see
-					<see
-						cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildArticleViewModel(CDT.Cosmos.Cms.Common.Data.Article,System.String)" />
-				</para>
-				<para>NOTE: Cannot access articles that have been deleted.</para>
-			</remarks>
-		</member>
-		<member
-			name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetByUrl(System.String,System.String,System.Boolean,System.Boolean)">
-			<summary>
-				Gets the current *published* version of an article.  Gets the home page if ID is null.
-			</summary>
-			<param name="urlPath">URL Encoded path</param>
-			<param name="lang">Language to return content as.</param>
-			<param name="publishedOnly">Only retrieve latest published version</param>
-			<param name="onlyActive">Only retrieve active status</param>
-			<returns>
-				<see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" />
-			</returns>
-			<remarks>
-				<para>
-					Returns <see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" />. For more details on what is returned, see
-					<see
-						cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetArticle(System.String,System.Boolean,System.Boolean,System.String)" />
-					and
-					<see
-						cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildArticleViewModel(CDT.Cosmos.Cms.Common.Data.Article,System.String)" />
-					.
-				</para>
-				<para>NOTE: Cannot access articles that have been deleted.</para>
-			</remarks>
-		</member>
-		<member
-			name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetArticle(System.String,System.Boolean,System.Boolean,System.String)">
-			<summary>
-				Private method used return an article view model.
-			</summary>
-			<param name="urlPath"></param>
-			<param name="publishedOnly"></param>
-			<param name="onlyActive"></param>
-			<param name="lang">Language to translate the en-US into.</param>
-			<returns>
-				<para>
-					Returns an <see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" /> created with
-					<see
-						cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildArticleViewModel(CDT.Cosmos.Cms.Common.Data.Article,System.String)" />
-					.
-				</para>
-				<para>NOTE: Cannot access articles that have been deleted.</para>
-			</returns>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.TrashArticle(System.Int32)">
-			<summary>
-				This method puts an article into trash, and, all its versions.
-			</summary>
-			<param name="articleNumber"></param>
-			<returns></returns>
-			<remarks>
-				<para>
-					This method puts an article into trash. Use
-					<see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.RetrieveFromTrash(System.Int32)" /> to restore an article.
-				</para>
-				<para>WARNING: Make sure the menu MenuController.Index does not reference deleted files.</para>
-			</remarks>
-			<exception cref="T:System.Collections.Generic.KeyNotFoundException"></exception>
-			<exception cref="T:System.NotSupportedException"></exception>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.RetrieveFromTrash(System.Int32)">
-			<summary>
-				Retrieves and article and all its versions from trash.
-			</summary>
-			<param name="articleNumber"></param>
-			<returns></returns>
-			<remarks>
-				<para>
-					Please be aware of the following:
-				</para>
-				<list type="bullet">
-					<item>
-						<see cref="P:CDT.Cosmos.Cms.Common.Data.Article.StatusCode" /> is set to
-						<see cref="F:CDT.Cosmos.Cms.Common.Data.Logic.StatusCodeEnum.Active" />.
-					</item>
-					<item><see cref="P:CDT.Cosmos.Cms.Common.Data.Article.Title" /> will be altered if a live article exists with the same title.</item>
-					<item>
-						If the title changed, the <see cref="P:CDT.Cosmos.Cms.Common.Data.Article.UrlPath" /> will be updated using
-						<see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.HandleUrlEncodeTitle(System.String)" />.
-					</item>
-					<item>
-						The article and all its versions are set to unpublished (
-						<see cref="P:CDT.Cosmos.Cms.Common.Data.Article.Published" /> set to null).
-					</item>
-				</list>
-			</remarks>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetSupportedLanguages(System.String)">
-			<summary>
-				Get the list of languages supported for translation by Google.
-			</summary>
-			<param name="lang"></param>
-			<returns></returns>
-		</member>
-		<member
-			name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.UpdateOrInsert(CDT.Cosmos.Cms.Common.Models.ArticleViewModel,System.String,System.Nullable{System.Int32})">
-			<summary>
-				Updates an existing article, or inserts a new one.
-			</summary>
-			<param name="model"></param>
-			<param name="userId"></param>
-			<param name="teamId"></param>
-			<remarks>
-				<para>
-					If the article number is '0', a new article is inserted.  If a version number is '0', then
-					a new version is created. Recreates <see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" /> using method
-					<see
-						cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildArticleViewModel(CDT.Cosmos.Cms.Common.Data.Article,System.String)" />
-					.
-				</para>
-				<list type="bullet">
-					<item>
-					</item>
-					<item>
-						Actions taken here by users are logged using
-						<see
-							cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.HandleLogEntry(CDT.Cosmos.Cms.Common.Data.Article,System.String,System.String)" />
-						.
-					</item>
-					<item>
-						Title changes (and redirects) are handled by adding a new article with redirect info.
-					</item>
-					<item>
-						Publishing and cache management is handled by
-						<see
-							cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.HandlePublishing(CDT.Cosmos.Cms.Common.Models.ArticleViewModel,CDT.Cosmos.Cms.Common.Data.Article,System.String)" />
-					</item>
-					<item>
-						The <see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" /> that is returned, is rebuilt using
-						<see
-							cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildArticleViewModel(CDT.Cosmos.Cms.Common.Data.Article,System.String)" />
-						.
-					</item>
-					<item>
-						Flushes REDIS cache for both data and the page using
-						<see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.FlushRedis(System.String)" />.
-					</item>
-				</list>
-			</remarks>
-			<returns></returns>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.UpdateDateTimeStamp">
-			<summary>
-				Updates the date/time stamp for all published articles.
-			</summary>
-			<returns>Number of articles updated with new date/time</returns>
-			<remarks>This action is used only for "publishing" entire websites.</remarks>
-		</member>
-		<member
-			name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.SetStatus(System.Int32,CDT.Cosmos.Cms.Common.Data.Logic.StatusCodeEnum,System.String)">
-			<summary>
-				Changes the status of an article by marking all versions with that status.
-			</summary>
-			<param name="articleNumber"></param>
-			<param cref="T:CDT.Cosmos.Cms.Common.Data.Logic.StatusCodeEnum" name="code"></param>
-			<param name="userId"></param>
-			<exception cref="T:System.Exception">User ID or article number not found.</exception>
-			<returns></returns>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetArticleList(System.String)">
-			<summary>
-				Gets the latest versions of articles (published or not).
-			</summary>
-			<returns>Gets article number, version number, last data published (if applicable)</returns>
-			<remarks>
-				<para>Note: Cannot list articles that are trashed.</para>
-			</remarks>
-		</member>
-		<member
-			name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetArticleList(System.Linq.IQueryable{CDT.Cosmos.Cms.Common.Data.Article})">
-			<summary>
-				Gets the latest versions of articles (published or not).
-			</summary>
-			<returns>Gets article number, version number, last data published (if applicable)</returns>
-			<remarks>
-				<para>Note: Cannot list articles that are trashed.</para>
-			</remarks>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetArticleList(System.Int32)">
-			<summary>
-				Gets the latest versions of articles (published or not) for a specific team.
-			</summary>
-			<returns>Gets article number, version number, last data published (if applicable)</returns>
-			<remarks>
-				<para>Note: Cannot list articles that are trashed.</para>
-			</remarks>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetArticleTrashList">
-			<summary>
-				Gets the latest versions of articles that are in the trash.
-			</summary>
-			<returns>Gets article number, version number, last data published (if applicable)</returns>
-			<remarks>
-			</remarks>
-		</member>
-		<member
-			name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildArticleViewModel(CDT.Cosmos.Cms.Common.Data.Article,System.String)">
-			<summary>
-				This method creates an <see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" /> ready for display and edit.
-			</summary>
-			<param name="article"></param>
-			<param name="lang"></param>
-			<returns>
-				<para>Returns <see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" /> that includes:</para>
-				<list type="bullet">
-					<item>
-						Current ArticleVersionInfo
-					</item>
-					<item>
-						If the site is in authoring or publishing mode (
-						<see cref="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.ReadWriteMode" />)
-					</item>
-				</list>
-			</returns>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.InternalBuildMenu">
-			<summary>
-				This is the private, internal method used by
-				<see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildMenu(System.String)" /> to create menu content.
-			</summary>
-			<returns>
-				Returns a menu content following the pattern seen here in
-				<a
-					href="https://github.com/Office-of-Digital-Innovation/California-State-Template-NET-core/blob/master/Pages/Shared/header/_Navigation.cshtml">
-					GitHub
-				</a>
-				.
-			</returns>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildMenu(System.String)">
-			<summary>
-				Returns the menu from <see cref="T:Microsoft.Extensions.Caching.Distributed.IDistributedCache" />, or creates a new menu if cache is null or not available.
-			</summary>
-			<returns>Menu content as <see cref="T:System.String" />.</returns>
-			<remarks>
-				If the menu can't be pulled from <see cref="T:Microsoft.Extensions.Caching.Distributed.IDistributedCache" />, this method creates a fresh copy of
-				content using <see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.InternalBuildMenu" />.
-			</remarks>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.HandleUrlEncodeTitle(System.String)">
-			<summary>
-				Provides a standard method for turning a title into a URL Encoded path.
-			</summary>
-			<param name="title">Title to be converted into a URL.</param>
-			<returns></returns>
-			<remarks>
-				<para>This is accomplished using <see cref="M:System.Web.HttpUtility.UrlEncode(System.String)" />.</para>
-				<para>Blanks are turned into underscores (i.e. "_").</para>
-				<para>All strings are normalized to lower case.</para>
-			</remarks>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.NewHomePage(System.Int32,System.String)">
-			<summary>
-				Makes an article the new home page.
-			</summary>
-			<param name="id">Article Id (row key)</param>
-			<param name="userId"></param>
-			<returns></returns>
-			<remarks>
-				The old home page has its URL changed from "root" to its normal path.  Also writes to the log
-				using
-				<see
-					cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.HandleLogEntry(CDT.Cosmos.Cms.Common.Data.Article,System.String,System.String)" />
-				. Also flushes REDIS cache for the home page.
-			</remarks>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetDefaultLayout(System.String,System.Boolean)">
-			<summary>
-				Gets the default layout, including navigation menu.
-			</summary>
-			<param name="lang"></param>
-			<param name="includeMenu"></param>
-			<returns></returns>
-			<remarks>
-				<para>
-					Inserts a Bootstrap style nav bar where this '&lt;!--{COSMOS-UL-NAV}--&gt;' is placed in the
-					<see cref="P:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.HtmlHeader" />
-				</para>
-			</remarks>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildDefaultLayout(System.String,System.Boolean)">
-			<summary>
-				Builds a default layout, including navigation menu.
-			</summary>
-			<param name="lang"></param>
-			<param name="includeMenu"></param>
-			<returns></returns>
-			<remarks>
-				<para>
-					Inserts a <see href="https://getbootstrap.com/docs/4.0/components/navbar/">Bootstrap style nav bar</see>
-					where this '&lt;!--{COSMOS-UL-NAV}--&gt;' is placed in the HtmlHeader
-				</para>
-			</remarks>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.FlushRedis(System.String)">
-			<summary>
-				Flushes REDIS cache for both data and page
-			</summary>
-			<param name="urlPath"></param>
-			<returns></returns>
-			<remarks>
-				Uses
-				<see
-					cref="M:Microsoft.Extensions.Caching.Distributed.IDistributedCache.RemoveAsync(System.String,System.Threading.CancellationToken)" />
-				to remove both data and page caches.
-			</remarks>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.Serialize(System.Object)">
-			<summary>
-				Serializes an object using <see cref="M:Newtonsoft.Json.JsonConvert.SerializeObject(System.Object)" />
-				and <see cref="P:System.Text.Encoding.UTF32" />.
-			</summary>
-			<param name="obj"></param>
-			<returns></returns>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.Deserialize``1(System.Byte[])">
-			<summary>
-				Deserializes an object using <see cref="M:Newtonsoft.Json.JsonConvert.DeserializeObject(System.String)" />
-				and <see cref="P:System.Text.Encoding.UTF32" />.
-			</summary>
-			<param name="bytes"></param>
-			<returns></returns>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Data.Logic.IconLibrary">
-			<summary>
-				Icon library that is loaded when site is setup.
-			</summary>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Data.Logic.IconLibrary.#ctor(CDT.Cosmos.Cms.Common.Data.ApplicationDbContext)">
-			<summary>
-				Constructor
-			</summary>
-			<param name="dbContext"></param>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Data.Logic.IconLibrary.Ensure_FontIconLibraryLoaded">
-			<summary>
-				Ensures the base font icon library is loaded
-			</summary>
-			<returns></returns>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Data.Logic.StatusCodeEnum">
-			<summary>
-				Article status code
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Data.Logic.StatusCodeEnum.Active">
-			<summary>
-				Active, able to display if publish data given.
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Data.Logic.StatusCodeEnum.Inactive">
-			<summary>
-				In active, can be displayed by logged in users
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Data.Logic.StatusCodeEnum.Deleted">
-			<summary>
-				Considered removed, no one can display until status changes.
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Data.Logic.StatusCodeEnum.Redirect">
-			<summary>
-				The article is a redirect.
-			</summary>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Data.MenuItem">
-			<summary>
-				Represents a menu item in the layout navigation menu
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.MenuItem.Id">
-			<summary>
-				Identity key for this entity
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.MenuItem.Guid">
-			<summary>
-				Used for cache management.  No need to scaffold in forms.
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.MenuItem.SortOrder">
-			<summary>
-				Determins where in the sort order does this menu item fall
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.MenuItem.MenuText">
-			<summary>
-				Menu item text or label
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.MenuItem.Url">
-			<summary>
-				URL for this menu item
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.MenuItem.IconCode">
-			<summary>
-				Icon CSS code for this menu item
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.MenuItem.ParentId">
-			<summary>
-				Menu supports a hierarchy, this is the parent menu item
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.MenuItem.ParentItem">
-			<summary>
-				Navitation to the parent item
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.MenuItem.ChildItems">
-			<summary>
-				Items below this one that are "children"
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.MenuItem.HasChildren">
-			<summary>
-				Indicates if this menu item has children
-			</summary>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Data.Team">
-			<summary>
-				Team entity
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Team.Id">
-			<summary>
-				Identity key for this entity
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Team.TeamName">
-			<summary>
-				Friendly name of this team
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Team.TeamDescription">
-			<summary>
-				Description of who this team is and what they are responsible for
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Team.Members">
-			<summary>
-				Team member list
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Team.Articles">
-			<summary>
-				Articles managed by this team
-			</summary>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Data.TeamMember">
-			<summary>
-				A team member
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.TeamMember.Id">
-			<summary>
-				Identity key for this entity
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.TeamMember.TeamRole">
-			<summary>
-				The role ID of this team member as defined by <see cref="T:CDT.Cosmos.Cms.Common.Models.TeamRoleEnum" />
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.TeamMember.TeamId">
-			<summary>
-				ID of the team this member belongs to
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.TeamMember.Team">
-			<summary>
-				The team
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.TeamMember.UserId">
-			<summary>
-				The identity user associated with this membership
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.TeamMember.User">
-			<summary>
-				The identity user assocated with this membership
-			</summary>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Data.Template">
-			<summary>
-				A page template
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Template.Id">
-			<summary>
-				Identity key for this entity
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Template.Title">
-			<summary>
-				Friendly name or title of this page template
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Template.Description">
-			<summary>
-				Description or notes about how to use this template
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Data.Template.Content">
-			<summary>
-				The HTML content of this page template
-			</summary>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Migrations.InitialCreate">
-			<summary>
-				Initial create site
-			</summary>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Models.ArticleListItem">
-			<summary>
-				Article list item used primarily on page list page
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleListItem.Id">
-			<summary>
-				Identity key for this entity
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleListItem.IsDefault">
-			<summary>
-				Indicates if this is the "Home" page
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleListItem.ArticleNumber">
-			<summary>
-				Article number
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleListItem.VersionNumber">
-			<summary>
-				Version number of the article number
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleListItem.Title">
-			<summary>
-				Title of the page, also used as the basis for the URL
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleListItem.Status">
-			<summary>
-				Disposition of the page
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleListItem.Updated">
-			<summary>
-				Date/time of when this page was last updated
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleListItem.LastPublished">
-			<summary>
-				Date and time of when this item was published, and made public
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleListItem.UrlPath">
-			<summary>
-				Url of this item
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleListItem.StatusBadge">
-			<summary>
-				Status HTML badge used on the page list
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleListItem.TeamName">
-			<summary>
-				If applicable, the team that manages this page
-			</summary>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel">
-			<summary>
-				Article view model, used to display content on a web page
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.Id">
-			<summary>
-				Entity key for the article
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.StatusCode">
-			<summary>
-				Status code of the article
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.ArticleNumber">
-			<summary>
-				Article number
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.LanguageCode">
-			<summary>
-				ISO language code of this article
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.LanguageName">
-			<summary>
-				Language name
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.UrlPath">
-			<summary>
-				Url of this page
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.VersionNumber">
-			<summary>
-				Version number of this article
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.Published">
-			<summary>
-				Date and time of when this was published
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.Title">
-			<summary>
-				Article title
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.Content">
-			<summary>
-				HTML Content of the page
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.Updated">
-			<summary>
-				Date and time of when this article was last updated.
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.HeaderJavaScript">
-			<summary>
-				JavaScript block injected into header
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.FooterJavaScript">
-			<summary>
-				JavaScript block injected into the footer
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.Layout">
-			<summary>
-				Layout used by this page.
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.ReadWriteMode">
-			<summary>
-				Indicates if this is in authoring (true) or publishing (false) mode, Default is false.
-			</summary>
-			<remarks>
-				Is the value set by <see cref="P:CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig.ReadWriteMode" /> which
-				is set in Startup and injected into controllers using <see cref="T:Microsoft.Extensions.Options.IOptions`1" />.
-			</remarks>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.PreviewMode">
-			<summary>
-				Indicates is page is in preview model. Default is false.
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.EditModeOn">
-			<summary>
-				Indicates if page is in edit, or authoring mode. Default is false.
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.CacheKey">
-			<summary>
-				Cache key used by REDIS
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.CacheDuration">
-			<summary>
-				Cache duration in seconds used by REDIS
-			</summary>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Models.Attributes.ArticleTitleValidation">
-			<summary>
-				Validates that a title is valid.
-			</summary>
-			<remarks>
-				<para>This validator checks for the following:</para>
-				<list type="bullet">
-					<item>That the title is not null or empty space.</item>
-					<item>Ensures the title must be unique.</item>
-					<item>Prevents titles from being named "root," which is a key word.</item>
-				</list>
-				<para>
-					Note: This validator will return invalid if it cannot connect to the
-					<see cref="T:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext" />.
-				</para>
-			</remarks>
-		</member>
-		<member
-			name="M:CDT.Cosmos.Cms.Common.Models.Attributes.ArticleTitleValidation.IsValid(System.Object,System.ComponentModel.DataAnnotations.ValidationContext)">
-			<summary>
-				Validates the current value
-			</summary>
-			<param name="value"></param>
-			<param name="validationContext"></param>
-			<returns></returns>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Models.FlushRedisResultViewModel">
-			<summary>
-				Redis cache flush result
-			</summary>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Models.FlushRedisResultViewModel.#ctor">
-			<summary>
-				Constructor
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.FlushRedisResultViewModel.CacheConnected">
-			<summary>
-				Indicates that Redis is connected and in use
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.FlushRedisResultViewModel.UrlPath">
-			<summary>
-				URL to flush
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.FlushRedisResultViewModel.Keys">
-			<summary>
-				List of keys flushed (if applicable)
-			</summary>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Models.LayoutDefaults">
-			<summary>
-				Default layouts installed during setup
-			</summary>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Models.LayoutDefaults.GetStarterLayouts">
-			<summary>
-				This method is used to seed the database with all 12 starter web templates.
-			</summary>
-			<returns></returns>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Models.LayoutDefaults.GetOceanside">
-			<summary>
-				CA.GOV Oceanside Layout
-			</summary>
-			<returns></returns>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Models.LayoutViewModel">
-			<summary>
-				VSiew model used on layout list page
-			</summary>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.#ctor">
-			<summary>
-				Constructor
-			</summary>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.#ctor(CDT.Cosmos.Cms.Common.Data.Layout)">
-			<summary>
-				Constructor
-			</summary>
-			<param name="layout"></param>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.Id">
-			<summary>
-				Identity key of the entity
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.IsDefault">
-			<summary>
-				Indicates if this is the default layout of the site
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.LayoutName">
-			<summary>
-				Friendly name of layout
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.Notes">
-			<summary>
-				Notes regarding this layout
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.Head">
-			<summary>
-				Content injected into the head tag
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.BodyHtmlAttributes">
-			<summary>
-				Body tag attribute
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.BodyHeaderHtmlAttributes">
-			<summary>
-				Page header attributes
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.HtmlHeader">
-			<summary>
-				Content injected into page header
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.FooterHtmlAttributes">
-			<summary>
-				Footer html attributes
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.FooterHtmlContent">
-			<summary>
-				Content injected into the page footer
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.PostFooterBlock">
-			<summary>
-				Content injected into post footer block
-			</summary>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.GetLayout(System.Boolean)">
-			<summary>
-				Gets a detached entity.
-			</summary>
-			<returns></returns>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Models.LoremIpsum">
-			<summary>
-				Lorem Ipsum example text.
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.WhyLoremIpsum">
-			<summary>
-				Lorem ipsum explanation text.
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection1">
-			<summary>
-				Example Lorem Ipsum text 1
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection2">
-			<summary>
-				Example Lorem Ipsum text 2
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection3">
-			<summary>
-				Example Lorem Ipsum text 3
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection4">
-			<summary>
-				Example Lorem Ipsum text 4
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection5">
-			<summary>
-				Example Lorem Ipsum text 5
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection6">
-			<summary>
-				Example Lorem Ipsum text 6
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection7">
-			<summary>
-				Example Lorem Ipsum text 7
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection8">
-			<summary>
-				Example Lorem Ipsum text 8
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection9">
-			<summary>
-				Example Lorem Ipsum text 9
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection10">
-			<summary>
-				Example Lorem Ipsum text 10
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection11">
-			<summary>
-				Example Lorem Ipsum text 11
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection12">
-			<summary>
-				Example Lorem Ipsum text 12
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection13">
-			<summary>
-				Example Lorem Ipsum text 13
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection14">
-			<summary>
-				Example Lorem Ipsum text 14
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection15">
-			<summary>
-				Example Lorem Ipsum text 15
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection16">
-			<summary>
-				Example Lorem Ipsum text 16
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection17">
-			<summary>
-				Example Lorem Ipsum text 17
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection18">
-			<summary>
-				Example Lorem Ipsum text 18
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection19">
-			<summary>
-				Example Lorem Ipsum text 19
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection20">
-			<summary>
-				Example Lorem Ipsum text 20
-			</summary>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Models.LangItemViewModel">
-			<summary>
-				Language list item
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.LangItemViewModel.LanguageCode">
-			<summary>
-				ISO code for language
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Models.LangItemViewModel.DisplayName">
-			<summary>
-				Friendly name of language
-			</summary>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Models.TeamRoleEnum">
-			<summary>
-				Team role enum
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Models.TeamRoleEnum.Reviewer">
-			<summary>
-				Review role
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Models.TeamRoleEnum.Author">
-			<summary>
-				Author role
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Models.TeamRoleEnum.Editor">
-			<summary>
-				Editor role
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Models.TeamRoleEnum.NoRole">
-			<summary>
-				No role
-			</summary>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Services.AzureBlobServiceConfig">
-			<summary>
-				Azure blob storage config
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Services.AzureBlobServiceConfig.ConnectionString">
-			<summary>
-				Blob storage connection string.
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Services.AzureBlobServiceConfig.BlobServicePublicUrl">
-			<summary>
-				Public URL to the origin of the blob service.
-			</summary>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Services.RedisCacheService">
-			<summary>
-				Redis cache service
-			</summary>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Services.RedisCacheService.CacheOptions">
-			<summary>
-				Cache Options
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Services.RedisCacheService.CacheOptions.Html">
-			<summary>
-				Use this option to denote caching HTML output on views.
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Services.RedisCacheService.CacheOptions.Database">
-			<summary>
-				Use this to indicate caching of database calls.
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Services.RedisCacheService.CacheOptions.Menu">
-			<summary>
-				This indicates the menu database cache
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Services.RedisCacheService.CacheOptions.GoogleLanguages">
-			<summary>
-				Indicates this is the Google Supported Language List
-			</summary>
-		</member>
-		<member name="F:CDT.Cosmos.Cms.Common.Services.RedisCacheService._config">
-			<summary>
-				Private field holding Redis config
-			</summary>
-		</member>
-		<member
-			name="M:CDT.Cosmos.Cms.Common.Services.RedisCacheService.#ctor(Microsoft.Extensions.Options.IOptions{CDT.Cosmos.Cms.Common.Services.RedisContextConfig})">
-			<summary>
-				Constructor
-			</summary>
-			<param name="config"></param>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Services.RedisCacheService.GetServer">
-			<summary>
-				Gets the Redis
-			</summary>
-			<returns></returns>
-		</member>
-		<member
-			name="M:CDT.Cosmos.Cms.Common.Services.RedisCacheService.GetPageCacheKey(System.Guid,System.String,CDT.Cosmos.Cms.Common.Services.RedisCacheService.CacheOptions,System.String)">
-			<summary>
-				Article ID (Null if home page)
-			</summary>
-			<param name="cacheId"></param>
-			<param name="lang"></param>
-			<param name="option"></param>
-			<param name="urlPath"></param>
-			<returns></returns>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Services.RedisCacheService.GetKeys(System.String)">
-			<summary>
-				Get list of keys in Redis
-			</summary>
-			<param name="path"></param>
-			<returns></returns>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Services.RedisContextConfig.CacheId">
-			<summary>
-				Each Cosmos CMS should have its own cache ID
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Services.RedisContextConfig.CacheDuration">
-			<summary>
-				Number of seconds to cache data in memory (1 minute default).
-			</summary>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Services.RosettaStone">
-			<summary>
-				Cosmos CMS Language translation
-			</summary>
-		</member>
-		<member
-			name="M:CDT.Cosmos.Cms.Common.Services.RosettaStone.GetTranslation(System.String,System.String,System.String[])">
-			<summary>
-				Gets a translation from Google
-			</summary>
-			<param name="destinationLanguage"></param>
-			<param name="sourceLanguage"></param>
-			<param name="content"></param>
-			<returns></returns>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Services.RosettaStone.GetSupportedLanguages(System.String)">
-			<summary>
-				Gets a list of supported languages
-			</summary>
-			<param name="returnLanguage"></param>
-			<returns></returns>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig">
-			<summary>
-				Startup.ConfigureServices method captures the site customization options found in "secrets" in this
-				object.
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig.ReadWriteMode">
-			<summary>
-				Sets the mode of the website. True means authoring mode, false means publishing.
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig.AllowSetup">
-			<summary>
-				Allows a website to go into setup mode. For use only on fresh sites.
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig.AllowReset">
-			<summary>
-				For training purposes, allows a full reset of site to factory settings.
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig.AllowedFileTypes">
-			<summary>
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig.UseAzureSignalR">
-			<summary>
-				Enable Azure Signal R (Required if website is behind Azure Front Door
-			</summary>
-		</member>
-		<member name="P:CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig.AutoVersion">
-			<summary>
-				(Future functionality) Turns on page autoversion
-			</summary>
-		</member>
-		<member name="T:CDT.Cosmos.Cms.Common.Services.TimeZoneUtility">
-			<summary>
-				Time zone conversion utility
-			</summary>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Services.TimeZoneUtility.ConvertUtcDateTimeToPst(System.DateTime)">
-			<summary>
-				Converts a UTC date to Pacific Standard Time
-			</summary>
-			<param name="utcDateTime"></param>
-			<returns></returns>
-		</member>
-		<member name="M:CDT.Cosmos.Cms.Common.Services.TimeZoneUtility.ConvertPstDateTimeToUtc(System.DateTime)">
-			<summary>
-				Converts a PST date to UTC date
-			</summary>
-			<param name="dateTime"></param>
-			<returns></returns>
-		</member>
-	</members>
+    <assembly>
+        <name>CDT.Cosmos.Cms.Common</name>
+    </assembly>
+    <members>
+        <member name="T:CDT.Cosmos.Cms.Common.Controllers.CosmosController">
+            <summary>
+                Base class for the Cosmos CMS controller.
+            </summary>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Controllers.CosmosController.#ctor(Microsoft.Extensions.Logging.ILogger,CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic,Microsoft.Extensions.Options.IOptions{CDT.Cosmos.Cms.Common.Services.RedisContextConfig},Microsoft.Extensions.Options.IOptions{CDT.Cosmos.Cms.Common.Services.GoogleCloudAuthConfig})">
+            <summary>
+                Base constructor
+            </summary>
+            <param name="logger"></param>
+            <param name="articleLogic"></param>
+            <param name="redisOptions"></param>
+            <param name="gglConfig"></param>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Controllers.CosmosController.Index(System.String,System.String)">
+            <summary>
+                Index method of the home controller, main entry point for web pages.
+            </summary>
+            <param name="id">URL of page</param>
+            <param name="lang">iso language code</param>
+            <returns></returns>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Controllers.CosmosController.GetSupportedLanguages(System.String)">
+            <summary>
+                Gets a list of languages supported for translation
+            </summary>
+            <param name="lang">language code</param>
+            <returns></returns>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Controllers.EnumControllerName">
+            <summary>
+                Controller name enum
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Controllers.EnumControllerName.Edit">
+            <summary>
+                Editor controller
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Controllers.EnumControllerName.Template">
+            <summary>
+                Template controller
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Controllers.EnumControllerName.Home">
+            <summary>
+                Home controller
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext">
+            <summary>
+                Database Context for Cosmos CMS
+            </summary>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext.#ctor(Microsoft.EntityFrameworkCore.DbContextOptions{CDT.Cosmos.Cms.Common.Data.ApplicationDbContext})">
+            <summary>
+                Constructor
+            </summary>
+            <param name="options"></param>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext.#ctor">
+            <summary>
+                Constructor without options.
+            </summary>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext.OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <summary>
+                On model creating
+            </summary>
+            <param name="modelBuilder"></param>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext.Articles">
+            <summary>
+                Articles
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext.ArticleLogs">
+            <summary>
+                Article activity logs
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext.MenuItems">
+            <summary>
+                Menu items
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext.FontIcons">
+            <summary>
+                Font icons
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext.Templates">
+            <summary>
+                Web page templates
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext.Layouts">
+            <summary>
+                Website layouts
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext.Teams">
+            <summary>
+                Page teams
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext.TeamMembers">
+            <summary>
+                Team membership
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Data.Article">
+            <summary>
+                Article
+            </summary>
+            <remarks>An article is the content for a web page.</remarks>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Article.Id">
+            <summary>
+                Unique article entity primary key number (not to be confused with article number)
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Article.LayoutId">
+            <summary>
+                (optional) Layout that this article uses
+            </summary>
+            <remarks>If the page uses a layout other than the default, it will be specified here.</remarks>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Article.TeamId">
+            <summary>
+                (optional) If applicable, the Id of the team managing this web page.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Article.ArticleNumber">
+            <summary>
+                Article number
+            </summary>
+            <remarks>An article number.</remarks>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Article.StatusCode">
+            <summary>
+                Status of this article
+            </summary>
+            <remarks>See <see cref="T:CDT.Cosmos.Cms.Common.Data.Logic.StatusCodeEnum" /> enum for code numbers.</remarks>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Article.UrlPath">
+            <summary>
+                This is the URL of the article.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Article.VersionNumber">
+            <summary>
+                Version number of the article.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Article.Published">
+            <summary>
+                Date/time of when this article is published.
+            </summary>
+            <remarks>Null value here means this article is not published.</remarks>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Article.Title">
+            <summary>
+                Title of the article
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Article.Content">
+            <summary>
+                HTML content of the page.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Article.Updated">
+            <summary>
+                Date/time of when this article was last updated.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Article.HeaderJavaScript">
+            <summary>
+                JavaScript injected into the header of the web page.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Article.FooterJavaScript">
+            <summary>
+                JavaScript injected into the footer of the web page.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Article.Layout">
+            <summary>
+                (optional) The layout of this page if other than the default.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Article.ArticleLogs">
+            <summary>
+                Activity logs relating to this article
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Article.MenuItems">
+            <summary>
+                Menu items for this article (soon to be depreciated)
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Article.FontIconId">
+            <summary>
+                (optional) Icon font Id for this article
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Article.FontIcon">
+            <summary>
+                (optional) Icon font for this page (will appear in menu if selected)
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Article.Team">
+            <summary>
+                (optional) Team that manages this page.
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Data.ArticleLog">
+            <summary>
+                Article activity log entry
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.ArticleLog.Id">
+            <summary>
+                Identity key of the entity
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.ArticleLog.IdentityUserId">
+            <summary>
+                User ID of the person who triggered the activity
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.ArticleLog.IdentityUser">
+            <summary>
+                Identity User assocated with this activity
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.ArticleLog.ActivityNotes">
+            <summary>
+                Notes regarding what happened.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.ArticleLog.DateTimeStamp">
+            <summary>
+                Date and Time (UTC by default)
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.ArticleLog.ArticleId">
+            <summary>
+                ID of the Article associated with this event.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.ArticleLog.Article">
+            <summary>
+                The article associated with this event.
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Data.FontIcon">
+            <summary>
+                Font icon class in the database
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.FontIcon.Id">
+            <summary>
+                Identity key for this entity
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.FontIcon.IconCode">
+            <summary>
+                CSS code for this icon
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Data.Layout">
+            <summary>
+                Website layout content.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Layout.Id">
+            <summary>
+                Identity key for this entity.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Layout.IsDefault">
+            <summary>
+                If true this is the default layout for website.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Layout.LayoutName">
+            <summary>
+                Friendly name of layout
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Layout.Notes">
+            <summary>
+                Notes about the layout
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Layout.Head">
+            <summary>
+                Content injected into the web page HEAD
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Layout.BodyHtmlAttributes">
+            <summary>
+                Body tag attributes
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Layout.BodyHeaderHtmlAttributes">
+            <summary>
+                Web page header attributes (inside body)
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Layout.HtmlHeader">
+            <summary>
+                Web page header content
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Layout.FooterHtmlAttributes">
+            <summary>
+                Website footer attributes
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Layout.FooterHtmlContent">
+            <summary>
+                Content injected into the web site footer.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Layout.PostFooterBlock">
+            <summary>
+                Post footer JavaScript code block
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Layout.Articles">
+            <summary>
+                Articles assocated with this layout (soon to be depreciated)
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic">
+            <summary>
+                Main logic behind getting and maintaining web site articles.
+            </summary>
+            <remarks>An article is the "content" behind a web page.</remarks>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.#ctor(CDT.Cosmos.Cms.Common.Data.ApplicationDbContext,Microsoft.Extensions.Caching.Distributed.IDistributedCache,Microsoft.Extensions.Logging.ILogger{CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic},Microsoft.Extensions.Options.IOptions{CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig},Microsoft.Extensions.Options.IOptions{CDT.Cosmos.Cms.Common.Services.RedisContextConfig},CDT.Cosmos.Cms.Common.Services.TranslationServices)">
+            <summary>
+                Constructor
+            </summary>
+            <param name="dbContext"></param>
+            <param name="distributedCache"></param>
+            <param name="config"></param>
+            <param name="logger"></param>
+            <param name="redisOptions"></param>
+            <param name="translationServices"></param>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.Create(System.String,System.Nullable{System.Int32})">
+            <summary>
+                Creates a new article, does NOT save it to the database before returning a copy for editing.
+            </summary>
+            <param name="title"></param>
+            <param name="templateId"></param>
+            <returns>Unsaved article ready to edit and save</returns>
+            <remarks>
+                <para>
+                    Creates a new article, unsaved, ready to edit.  Uses <see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetDefaultLayout(System.String,System.Boolean)" /> to get the layout,
+                    and builds the <see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" /> using method
+                    <seealso cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildArticleViewModel(CDT.Cosmos.Cms.Common.Data.Article,System.String)" />.
+                </para>
+                <para>
+                    If a template ID is given, the contents of this article is loaded with content from the <see cref="T:CDT.Cosmos.Cms.Common.Data.Template" />
+                    .
+                </para>
+            </remarks>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.ValidateTitle(System.String,System.Int32)">
+            <summary>
+                Validate that the title is not already taken by another article.
+            </summary>
+            <param name="title"></param>
+            <param name="articleNumber"></param>
+            <returns></returns>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.Get(System.Nullable{System.Int32},CDT.Cosmos.Cms.Common.Controllers.EnumControllerName)">
+            <summary>
+                Gets an article by ID (row Key), or creates a new (unsaved) article if id is null.
+            </summary>
+            <param name="id">Row Id (or identity) number.  If null returns a new article.</param>
+            <param name="controllerName"></param>
+            <remarks>
+                <para>
+                    For new articles, uses <see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.Create(System.String,System.Nullable{System.Int32})" /> and the method
+                    <see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildArticleViewModel(CDT.Cosmos.Cms.Common.Data.Article,System.String)" /> to
+                    generate the <see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" /> .
+                </para>
+                <para>
+                    Retrieves <see cref="T:CDT.Cosmos.Cms.Common.Data.Article" /> and builds an <see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" /> using the method
+                    <see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildArticleViewModel(CDT.Cosmos.Cms.Common.Data.Article,System.String)" />,
+                    or in the case of a template, uses method <see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildTemplateViewModel(CDT.Cosmos.Cms.Common.Data.Template)" />.
+                </para>
+            </remarks>
+            <returns>
+            </returns>
+            <remarks>
+                <para>
+                    Returns <see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" />. For more details on what is returned, see
+                    <see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildArticleViewModel(CDT.Cosmos.Cms.Common.Data.Article,System.String)" /> or <see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildTemplateViewModel(CDT.Cosmos.Cms.Common.Data.Template)" />.
+                </para>
+                <para>NOTE: Cannot access articles that have been deleted.</para>
+            </remarks>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildTemplateViewModel(CDT.Cosmos.Cms.Common.Data.Template)">
+            <summary>
+                Gets a template represented as an <see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" />.
+            </summary>
+            <param name="template"></param>
+            <returns>ArticleViewModel</returns>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.Get(System.Int32,System.Int32)">
+            <summary>
+                Gets a copy of the article ready for edit.
+            </summary>
+            <param name="articleNumber">Article Number</param>
+            <param name="versionNumber">Version to edit</param>
+            <returns>
+                <see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" />
+            </returns>
+            <remarks>
+                <para>
+                    Returns <see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" />. For more details on what is returned, see
+                    <see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildArticleViewModel(CDT.Cosmos.Cms.Common.Data.Article,System.String)" />
+                </para>
+                <para>NOTE: Cannot access articles that have been deleted.</para>
+            </remarks>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetByUrl(System.String,System.String,System.Boolean,System.Boolean)">
+            <summary>
+                Gets the current *published* version of an article.  Gets the home page if ID is null.
+            </summary>
+            <param name="urlPath">URL Encoded path</param>
+            <param name="lang">Language to return content as.</param>
+            <param name="publishedOnly">Only retrieve latest published version</param>
+            <param name="onlyActive">Only retrieve active status</param>
+            <returns>
+                <see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" />
+            </returns>
+            <remarks>
+                <para>
+                    Returns <see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" />. For more details on what is returned, see <see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetArticle(System.String,System.Boolean,System.Boolean,System.String)" />
+                    and <see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildArticleViewModel(CDT.Cosmos.Cms.Common.Data.Article,System.String)" />.
+                </para>
+                <para>NOTE: Cannot access articles that have been deleted.</para>
+            </remarks>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetArticle(System.String,System.Boolean,System.Boolean,System.String)">
+            <summary>
+                Private method used return an article view model.
+            </summary>
+            <param name="urlPath"></param>
+            <param name="publishedOnly"></param>
+            <param name="onlyActive"></param>
+            <param name="lang">Language to translate the en-US into.</param>
+            <returns>
+                <para>Returns an <see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" /> created with <see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildArticleViewModel(CDT.Cosmos.Cms.Common.Data.Article,System.String)" />.</para>
+                <para>NOTE: Cannot access articles that have been deleted.</para>
+            </returns>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.TrashArticle(System.Int32)">
+            <summary>
+                This method puts an article into trash, and, all its versions.
+            </summary>
+            <param name="articleNumber"></param>
+            <returns></returns>
+            <remarks>
+                <para>This method puts an article into trash. Use <see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.RetrieveFromTrash(System.Int32)" /> to restore an article. </para>
+                <para>WARNING: Make sure the menu MenuController.Index does not reference deleted files.</para>
+            </remarks>
+            <exception cref="T:System.Collections.Generic.KeyNotFoundException"></exception>
+            <exception cref="T:System.NotSupportedException"></exception>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.RetrieveFromTrash(System.Int32)">
+            <summary>
+                Retrieves and article and all its versions from trash.
+            </summary>
+            <param name="articleNumber"></param>
+            <returns></returns>
+            <remarks>
+                <para>
+                    Please be aware of the following:
+                </para>
+                <list type="bullet">
+                    <item><see cref="P:CDT.Cosmos.Cms.Common.Data.Article.StatusCode" /> is set to <see cref="F:CDT.Cosmos.Cms.Common.Data.Logic.StatusCodeEnum.Active" />.</item>
+                    <item><see cref="P:CDT.Cosmos.Cms.Common.Data.Article.Title" /> will be altered if a live article exists with the same title.</item>
+                    <item>
+                        If the title changed, the <see cref="P:CDT.Cosmos.Cms.Common.Data.Article.UrlPath" /> will be updated using
+                        <see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.HandleUrlEncodeTitle(System.String)" />.
+                    </item>
+                    <item>The article and all its versions are set to unpublished (<see cref="P:CDT.Cosmos.Cms.Common.Data.Article.Published" /> set to null).</item>
+                </list>
+            </remarks>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetSupportedLanguages(System.String)">
+            <summary>
+                Get the list of languages supported for translation by Google.
+            </summary>
+            <param name="lang"></param>
+            <returns></returns>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.UpdateOrInsert(CDT.Cosmos.Cms.Common.Models.ArticleViewModel,System.String,System.Nullable{System.Int32})">
+            <summary>
+                Updates an existing article, or inserts a new one.
+            </summary>
+            <param name="model"></param>
+            <param name="userId"></param>
+            <param name="teamId"></param>
+            <remarks>
+                <para>
+                    If the article number is '0', a new article is inserted.  If a version number is '0', then
+                    a new version is created. Recreates <see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" /> using method
+                    <see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildArticleViewModel(CDT.Cosmos.Cms.Common.Data.Article,System.String)" />.
+                </para>
+                <list type="bullet">
+                    <item>
+                    </item>
+                    <item>
+                        Actions taken here by users are logged using <see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.HandleLogEntry(CDT.Cosmos.Cms.Common.Data.Article,System.String,System.String)" />.
+                    </item>
+                    <item>
+                        Title changes (and redirects) are handled by adding a new article with redirect info.
+                    </item>
+                    <item>
+                        Publishing and cache management is handled by <see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.HandlePublishing(CDT.Cosmos.Cms.Common.Models.ArticleViewModel,CDT.Cosmos.Cms.Common.Data.Article,System.String)" />
+                    </item>
+                    <item>
+                        The <see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" /> that is returned, is rebuilt using <see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildArticleViewModel(CDT.Cosmos.Cms.Common.Data.Article,System.String)" />
+                        .
+                    </item>
+                    <item>
+                        Flushes REDIS cache for both data and the page using <see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.FlushRedis(System.String)" />.
+                    </item>
+                </list>
+            </remarks>
+            <returns></returns>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.UpdateDateTimeStamp">
+            <summary>
+                Updates the date/time stamp for all published articles.
+            </summary>
+            <returns>Number of articles updated with new date/time</returns>
+            <remarks>This action is used only for "publishing" entire websites.</remarks>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.SetStatus(System.Int32,CDT.Cosmos.Cms.Common.Data.Logic.StatusCodeEnum,System.String)">
+            <summary>
+                Changes the status of an article by marking all versions with that status.
+            </summary>
+            <param name="articleNumber">Article to set status for</param>
+            <param cref="T:CDT.Cosmos.Cms.Common.Data.Logic.StatusCodeEnum" name="code"></param>
+            <param name="userId"></param>
+            <exception cref="T:System.Exception">User ID or article number not found.</exception>
+            <returns>Returns the number of versions for the given article where status was set</returns>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetArticleList(System.String)">
+            <summary>
+                Gets the latest versions of articles (published or not).
+            </summary>
+            <returns>Gets article number, version number, last data published (if applicable)</returns>
+            <remarks>
+                <para>Note: Cannot list articles that are trashed.</para>
+            </remarks>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetArticleList(System.Linq.IQueryable{CDT.Cosmos.Cms.Common.Data.Article})">
+            <summary>
+                Gets the latest versions of articles (published or not).
+            </summary>
+            <returns>Gets article number, version number, last data published (if applicable)</returns>
+            <remarks>
+                <para>Note: Cannot list articles that are trashed.</para>
+            </remarks>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetArticleList(System.Int32)">
+            <summary>
+                Gets the latest versions of articles (published or not) for a specific team.
+            </summary>
+            <returns>Gets article number, version number, last data published (if applicable)</returns>
+            <remarks>
+                <para>Note: Cannot list articles that are trashed.</para>
+            </remarks>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetArticleTrashList">
+            <summary>
+                Gets the latest versions of articles that are in the trash.
+            </summary>
+            <returns>Gets article number, version number, last data published (if applicable)</returns>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildArticleViewModel(CDT.Cosmos.Cms.Common.Data.Article,System.String)">
+            <summary>
+                This method creates an <see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" /> ready for display and edit.
+            </summary>
+            <param name="article"></param>
+            <param name="lang"></param>
+            <returns>
+                <para>Returns <see cref="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel" /> that includes:</para>
+                <list type="bullet">
+                    <item>
+                        Current ArticleVersionInfo
+                    </item>
+                    <item>
+                        If the site is in authoring or publishing mode (<see cref="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.ReadWriteMode" />)
+                    </item>
+                </list>
+            </returns>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.InternalBuildMenu">
+            <summary>
+                This is the private, internal method used by <see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildMenu(System.String)" /> to create menu content.
+            </summary>
+            <returns>
+                Returns a menu content following the pattern seen here in
+                <a
+                    href="https://github.com/Office-of-Digital-Innovation/California-State-Template-NET-core/blob/master/Pages/Shared/header/_Navigation.cshtml">
+                    GitHub
+                </a>
+                .
+            </returns>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildMenu(System.String)">
+            <summary>
+                Returns the menu from <see cref="T:Microsoft.Extensions.Caching.Distributed.IDistributedCache" />, or creates a new menu if cache is null or not available.
+            </summary>
+            <returns>Menu content as <see cref="T:System.String" />.</returns>
+            <remarks>
+                If the menu can't be pulled from <see cref="T:Microsoft.Extensions.Caching.Distributed.IDistributedCache" />, this method creates a fresh copy of
+                content using <see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.InternalBuildMenu" />.
+            </remarks>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.HandleUrlEncodeTitle(System.String)">
+            <summary>
+                Provides a standard method for turning a title into a URL Encoded path.
+            </summary>
+            <param name="title">Title to be converted into a URL.</param>
+            <returns></returns>
+            <remarks>
+                <para>This is accomplished using <see cref="M:System.Web.HttpUtility.UrlEncode(System.String)" />.</para>
+                <para>Blanks are turned into underscores (i.e. "_").</para>
+                <para>All strings are normalized to lower case.</para>
+            </remarks>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.NewHomePage(System.Int32,System.String)">
+            <summary>
+                Makes an article the new home page.
+            </summary>
+            <param name="id">Article Id (row key)</param>
+            <param name="userId"></param>
+            <returns></returns>
+            <remarks>
+                The old home page has its URL changed from "root" to its normal path.  Also writes to the log
+                using <see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.HandleLogEntry(CDT.Cosmos.Cms.Common.Data.Article,System.String,System.String)" />. Also flushes REDIS cache for the home page.
+            </remarks>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetDefaultLayout(System.String,System.Boolean)">
+            <summary>
+                Gets the default layout, including navigation menu.
+            </summary>
+            <param name="lang"></param>
+            <param name="includeMenu"></param>
+            <returns></returns>
+            <remarks>
+                <para>
+                    Inserts a Bootstrap style nav bar where this '&lt;!--{COSMOS-UL-NAV}--&gt;' is placed in the
+                    <see cref="P:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.HtmlHeader" />
+                </para>
+            </remarks>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.BuildDefaultLayout(System.String,System.Boolean)">
+            <summary>
+                Builds a default layout, including navigation menu.
+            </summary>
+            <param name="lang"></param>
+            <param name="includeMenu"></param>
+            <returns></returns>
+            <remarks>
+                <para>
+                    Inserts a <see href="https://getbootstrap.com/docs/4.0/components/navbar/">Bootstrap style nav bar</see>
+                    where this '&lt;!--{COSMOS-UL-NAV}--&gt;' is placed in the HtmlHeader
+                </para>
+            </remarks>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.FlushRedis(System.String)">
+            <summary>
+                Flushes REDIS cache for both data and page
+            </summary>
+            <param name="urlPath"></param>
+            <returns></returns>
+            <remarks>
+                Uses <see cref="M:Microsoft.Extensions.Caching.Distributed.IDistributedCache.RemoveAsync(System.String,System.Threading.CancellationToken)" /> to remove both data and page caches.
+            </remarks>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.Serialize(System.Object)">
+            <summary>
+                Serializes an object using <see cref="M:Newtonsoft.Json.JsonConvert.SerializeObject(System.Object)" />
+                and <see cref="P:System.Text.Encoding.UTF32" />.
+            </summary>
+            <param name="obj"></param>
+            <returns></returns>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.Deserialize``1(System.Byte[])">
+            <summary>
+                Deserializes an object using <see cref="M:Newtonsoft.Json.JsonConvert.DeserializeObject(System.String)" />
+                and <see cref="P:System.Text.Encoding.UTF32" />.
+            </summary>
+            <param name="bytes"></param>
+            <returns></returns>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Data.Logic.IconLibrary">
+            <summary>
+                Icon library that is loaded when site is setup.
+            </summary>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.IconLibrary.#ctor(CDT.Cosmos.Cms.Common.Data.ApplicationDbContext)">
+            <summary>
+                Constructor
+            </summary>
+            <param name="dbContext"></param>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.IconLibrary.Ensure_FontIconLibraryLoaded">
+            <summary>
+                Ensures the base font icon library is loaded
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Data.Logic.StatusCodeEnum">
+            <summary>
+                Article status code
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Data.Logic.StatusCodeEnum.Active">
+            <summary>
+                Active, able to display if publish data given.
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Data.Logic.StatusCodeEnum.Inactive">
+            <summary>
+                In active, can be displayed by logged in users
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Data.Logic.StatusCodeEnum.Deleted">
+            <summary>
+                Considered removed, no one can display until status changes.
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Data.Logic.StatusCodeEnum.Redirect">
+            <summary>
+                The article is a redirect.
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Data.MenuItem">
+            <summary>
+                Represents a menu item in the layout navigation menu
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.MenuItem.Id">
+            <summary>
+                Identity key for this entity
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.MenuItem.Guid">
+            <summary>
+                Used for cache management.  No need to scaffold in forms.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.MenuItem.SortOrder">
+            <summary>
+                Determins where in the sort order does this menu item fall
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.MenuItem.MenuText">
+            <summary>
+                Menu item text or label
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.MenuItem.Url">
+            <summary>
+                URL for this menu item
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.MenuItem.IconCode">
+            <summary>
+                Icon CSS code for this menu item
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.MenuItem.ParentId">
+            <summary>
+                Menu supports a hierarchy, this is the parent menu item
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.MenuItem.ParentItem">
+            <summary>
+                Navitation to the parent item
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.MenuItem.ChildItems">
+            <summary>
+                Items below this one that are "children"
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.MenuItem.HasChildren">
+            <summary>
+                Indicates if this menu item has children
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Data.Team">
+            <summary>
+                Team entity
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Team.Id">
+            <summary>
+                Identity key for this entity
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Team.TeamName">
+            <summary>
+                Friendly name of this team
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Team.TeamDescription">
+            <summary>
+                Description of who this team is and what they are responsible for
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Team.Members">
+            <summary>
+                Team member list
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Team.Articles">
+            <summary>
+                Articles managed by this team
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Data.TeamMember">
+            <summary>
+                A team member
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.TeamMember.Id">
+            <summary>
+                Identity key for this entity
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.TeamMember.TeamRole">
+            <summary>
+                The role ID of this team member as defined by <see cref="T:CDT.Cosmos.Cms.Common.Models.TeamRoleEnum" />
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.TeamMember.TeamId">
+            <summary>
+                ID of the team this member belongs to
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.TeamMember.Team">
+            <summary>
+                The team
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.TeamMember.UserId">
+            <summary>
+                The identity user associated with this membership
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.TeamMember.User">
+            <summary>
+                The identity user assocated with this membership
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Data.Template">
+            <summary>
+                A page template
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Template.Id">
+            <summary>
+                Identity key for this entity
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Template.Title">
+            <summary>
+                Friendly name or title of this page template
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Template.Description">
+            <summary>
+                Description or notes about how to use this template
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Template.Content">
+            <summary>
+                The HTML content of this page template
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Migrations.InitialCreate">
+            <summary>
+                Initial create site
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Models.ArticleListItem">
+            <summary>
+                Article list item used primarily on page list page
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleListItem.Id">
+            <summary>
+                Identity key for this entity
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleListItem.IsDefault">
+            <summary>
+                Indicates if this is the "Home" page
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleListItem.ArticleNumber">
+            <summary>
+                Article number
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleListItem.VersionNumber">
+            <summary>
+                Version number of the article number
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleListItem.Title">
+            <summary>
+                Title of the page, also used as the basis for the URL
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleListItem.Status">
+            <summary>
+                Disposition of the page
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleListItem.Updated">
+            <summary>
+                Date/time of when this page was last updated
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleListItem.LastPublished">
+            <summary>
+                Date and time of when this item was published, and made public
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleListItem.UrlPath">
+            <summary>
+                Url of this item
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleListItem.StatusBadge">
+            <summary>
+                Status HTML badge used on the page list
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleListItem.TeamName">
+            <summary>
+                If applicable, the team that manages this page
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Models.ArticleViewModel">
+            <summary>
+                Article view model, used to display content on a web page
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.Id">
+            <summary>
+                Entity key for the article
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.StatusCode">
+            <summary>
+                Status code of the article
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.ArticleNumber">
+            <summary>
+                Article number
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.LanguageCode">
+            <summary>
+                ISO language code of this article
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.LanguageName">
+            <summary>
+                Language name
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.UrlPath">
+            <summary>
+                Url of this page
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.VersionNumber">
+            <summary>
+                Version number of this article
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.Published">
+            <summary>
+                Date and time of when this was published
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.Title">
+            <summary>
+                Article title
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.Content">
+            <summary>
+                HTML Content of the page
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.Updated">
+            <summary>
+                Date and time of when this article was last updated.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.HeaderJavaScript">
+            <summary>
+                JavaScript block injected into header
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.FooterJavaScript">
+            <summary>
+                JavaScript block injected into the footer
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.Layout">
+            <summary>
+                Layout used by this page.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.ReadWriteMode">
+            <summary>
+                Indicates if this is in authoring (true) or publishing (false) mode, Default is false.
+            </summary>
+            <remarks>
+                Is the value set by <see cref="P:CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig.ReadWriteMode" /> which
+                is set in Startup and injected into controllers using <see cref="T:Microsoft.Extensions.Options.IOptions`1" />.
+            </remarks>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.PreviewMode">
+            <summary>
+                Indicates is page is in preview model. Default is false.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.EditModeOn">
+            <summary>
+                Indicates if page is in edit, or authoring mode. Default is false.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.CacheKey">
+            <summary>
+                Cache key used by REDIS
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.CacheDuration">
+            <summary>
+                Cache duration in seconds used by REDIS
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Models.Attributes.ArticleTitleValidation">
+            <summary>
+                Validates that a title is valid.
+            </summary>
+            <remarks>
+                <para>This validator checks for the following:</para>
+                <list type="bullet">
+                    <item>That the title is not null or empty space.</item>
+                    <item>Ensures the title must be unique.</item>
+                    <item>Prevents titles from being named "root," which is a key word.</item>
+                </list>
+                <para>Note: This validator will return invalid if it cannot connect to the <see cref="T:CDT.Cosmos.Cms.Common.Data.ApplicationDbContext" />.</para>
+            </remarks>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Models.Attributes.ArticleTitleValidation.IsValid(System.Object,System.ComponentModel.DataAnnotations.ValidationContext)">
+            <summary>
+                Validates the current value
+            </summary>
+            <param name="value"></param>
+            <param name="validationContext"></param>
+            <returns></returns>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Models.FlushRedisResultViewModel">
+            <summary>
+                Redis cache flush result
+            </summary>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Models.FlushRedisResultViewModel.#ctor">
+            <summary>
+                Constructor
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.FlushRedisResultViewModel.CacheConnected">
+            <summary>
+                Indicates that Redis is connected and in use
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.FlushRedisResultViewModel.UrlPath">
+            <summary>
+                URL to flush
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.FlushRedisResultViewModel.Keys">
+            <summary>
+                List of keys flushed (if applicable)
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Models.LayoutDefaults">
+            <summary>
+                Default layouts installed during setup
+            </summary>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Models.LayoutDefaults.GetStarterLayouts">
+            <summary>
+                This method is used to seed the database with all 12 starter web templates.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Models.LayoutDefaults.GetOceanside">
+            <summary>
+                CA.GOV Oceanside Layout
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Models.LayoutViewModel">
+            <summary>
+                VSiew model used on layout list page
+            </summary>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.#ctor">
+            <summary>
+                Constructor
+            </summary>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.#ctor(CDT.Cosmos.Cms.Common.Data.Layout)">
+            <summary>
+                Constructor
+            </summary>
+            <param name="layout"></param>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.Id">
+            <summary>
+                Identity key of the entity
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.IsDefault">
+            <summary>
+                Indicates if this is the default layout of the site
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.LayoutName">
+            <summary>
+                Friendly name of layout
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.Notes">
+            <summary>
+                Notes regarding this layout
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.Head">
+            <summary>
+                Content injected into the head tag
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.BodyHtmlAttributes">
+            <summary>
+                Body tag attribute
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.BodyHeaderHtmlAttributes">
+            <summary>
+                Page header attributes
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.HtmlHeader">
+            <summary>
+                Content injected into page header
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.FooterHtmlAttributes">
+            <summary>
+                Footer html attributes
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.FooterHtmlContent">
+            <summary>
+                Content injected into the page footer
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.PostFooterBlock">
+            <summary>
+                Content injected into post footer block
+            </summary>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Models.LayoutViewModel.GetLayout(System.Boolean)">
+            <summary>
+                Gets a detached entity.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Models.LoremIpsum">
+            <summary>
+                Lorem Ipsum example text.
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.WhyLoremIpsum">
+            <summary>
+                Lorem ipsum explanation text.
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection1">
+            <summary>
+                Example Lorem Ipsum text 1
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection2">
+            <summary>
+                Example Lorem Ipsum text 2
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection3">
+            <summary>
+                Example Lorem Ipsum text 3
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection4">
+            <summary>
+                Example Lorem Ipsum text 4
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection5">
+            <summary>
+                Example Lorem Ipsum text 5
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection6">
+            <summary>
+                Example Lorem Ipsum text 6
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection7">
+            <summary>
+                Example Lorem Ipsum text 7
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection8">
+            <summary>
+                Example Lorem Ipsum text 8
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection9">
+            <summary>
+                Example Lorem Ipsum text 9
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection10">
+            <summary>
+                Example Lorem Ipsum text 10
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection11">
+            <summary>
+                Example Lorem Ipsum text 11
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection12">
+            <summary>
+                Example Lorem Ipsum text 12
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection13">
+            <summary>
+                Example Lorem Ipsum text 13
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection14">
+            <summary>
+                Example Lorem Ipsum text 14
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection15">
+            <summary>
+                Example Lorem Ipsum text 15
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection16">
+            <summary>
+                Example Lorem Ipsum text 16
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection17">
+            <summary>
+                Example Lorem Ipsum text 17
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection18">
+            <summary>
+                Example Lorem Ipsum text 18
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection19">
+            <summary>
+                Example Lorem Ipsum text 19
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Models.LoremIpsum.SubSection20">
+            <summary>
+                Example Lorem Ipsum text 20
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Models.LangItemViewModel">
+            <summary>
+                Language list item
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.LangItemViewModel.LanguageCode">
+            <summary>
+                ISO code for language
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.LangItemViewModel.DisplayName">
+            <summary>
+                Friendly name of language
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Models.TeamRoleEnum">
+            <summary>
+                Team role enum
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Models.TeamRoleEnum.Reviewer">
+            <summary>
+                Review role
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Models.TeamRoleEnum.Author">
+            <summary>
+                Author role
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Models.TeamRoleEnum.Editor">
+            <summary>
+                Editor role
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Models.TeamRoleEnum.NoRole">
+            <summary>
+                No role
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Services.AuthMessageSenderOptions">
+            <summary>
+            SendGrid Authentication Options
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.AuthMessageSenderOptions.SendGridKey">
+            <summary>
+            SendGrid key
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.AuthMessageSenderOptions.EmailFrom">
+            <summary>
+            From Email address
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Services.AzureBlobServiceConfig">
+            <summary>
+                Azure blob storage config
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.AzureBlobServiceConfig.ConnectionString">
+            <summary>
+                Blob storage connection string.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.AzureBlobServiceConfig.BlobServicePublicUrl">
+            <summary>
+                Public URL to the origin of the blob service.
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Services.EmailSender">
+            <summary>
+            SendGrid Email sender service
+            </summary>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Services.EmailSender.#ctor(Microsoft.Extensions.Options.IOptions{CDT.Cosmos.Cms.Common.Services.AuthMessageSenderOptions})">
+            <summary>
+            Constructor
+            </summary>
+            <param name="options"></param>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.EmailSender.Options">
+            <summary>
+            SendGrid configuration options
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.EmailSender.Response">
+            <summary>
+            Email response from SendGrid
+            </summary>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Services.EmailSender.SendEmailAsync(System.String,System.String,System.String)">
+            <summary>
+            Send email method
+            </summary>
+            <param name="email"></param>
+            <param name="subject"></param>
+            <param name="message"></param>
+            <returns></returns>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Services.EmailSender.Execute(System.String,System.String,System.String,System.String)">
+            <summary>
+            Execute send email method
+            </summary>
+            <param name="subject"></param>
+            <param name="message"></param>
+            <param name="email"></param>
+            <param name="emailFrom"></param>
+            <returns></returns>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Services.GoogleCloudAuthConfig">
+            <summary>
+                Google cloud account information
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.GoogleCloudAuthConfig.ServiceType">
+            <summary>
+                Service type
+            </summary>
+            <remarks>Default is "service_account"</remarks>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.GoogleCloudAuthConfig.ProjectId">
+            <summary>
+                Project id
+            </summary>
+            <remarks>For example "translator-oet"</remarks>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.GoogleCloudAuthConfig.PrivateKeyId">
+            <summary>
+                Private key Id
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.GoogleCloudAuthConfig.PrivateKey">
+            <summary>
+                Google account private key
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.GoogleCloudAuthConfig.ClientEmail">
+            <summary>
+                Google account client email
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.GoogleCloudAuthConfig.ClientId">
+            <summary>
+                Client ID
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.GoogleCloudAuthConfig.AuthUri">
+            <summary>
+                Google authentication end point
+            </summary>
+            <remarks>Default value is "https://accounts.google.com/o/oauth2/auth"</remarks>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.GoogleCloudAuthConfig.TokenUri">
+            <summary>
+                Token end point
+            </summary>
+            <remarks>Default value is "https://oauth2.googleapis.com/token"</remarks>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.GoogleCloudAuthConfig.AuthProviderX509CertUrl">
+            <summary>
+                Authentication provider certificate URL
+            </summary>
+            <remarks>Default value is "https://www.googleapis.com/oauth2/v1/certs"</remarks>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.GoogleCloudAuthConfig.ClientX509CertificateUrl">
+            <summary>
+                Client certificate URL
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Services.RedisCacheService">
+            <summary>
+                Redis cache service
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Services.RedisCacheService.CacheOptions">
+            <summary>
+                Cache Options
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Services.RedisCacheService.CacheOptions.Html">
+            <summary>
+                Use this option to denote caching HTML output on views.
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Services.RedisCacheService.CacheOptions.Database">
+            <summary>
+                Use this to indicate caching of database calls.
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Services.RedisCacheService.CacheOptions.Menu">
+            <summary>
+                This indicates the menu database cache
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Services.RedisCacheService.CacheOptions.GoogleLanguages">
+            <summary>
+                Indicates this is the Google Supported Language List
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Services.RedisCacheService._config">
+            <summary>
+                Private field holding Redis config
+            </summary>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Services.RedisCacheService.#ctor(Microsoft.Extensions.Options.IOptions{CDT.Cosmos.Cms.Common.Services.RedisContextConfig})">
+            <summary>
+                Constructor
+            </summary>
+            <param name="config"></param>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Services.RedisCacheService.GetServer">
+            <summary>
+                Gets the Redis
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Services.RedisCacheService.GetPageCacheKey(System.Guid,System.String,CDT.Cosmos.Cms.Common.Services.RedisCacheService.CacheOptions,System.String)">
+            <summary>
+                Article ID (Null if home page)
+            </summary>
+            <param name="cacheId"></param>
+            <param name="lang"></param>
+            <param name="option"></param>
+            <param name="urlPath"></param>
+            <returns></returns>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Services.RedisCacheService.GetKeys(System.String)">
+            <summary>
+                Get list of keys in Redis
+            </summary>
+            <param name="path"></param>
+            <returns></returns>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Services.RedisContextConfig">
+            <summary>
+            Redis configuration context
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.RedisContextConfig.CacheId">
+            <summary>
+                Each Cosmos CMS should have its own cache ID
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.RedisContextConfig.Host">
+            <summary>
+            Server host name
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.RedisContextConfig.Port">
+            <summary>
+            Port to communicate on (default 6380)
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.RedisContextConfig.Password">
+            <summary>
+            Password
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.RedisContextConfig.Ssl">
+            <summary>
+            Use SSL/TLS connection (default true)
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.RedisContextConfig.AbortConnect">
+            <summary>
+            Abort connection (default false)
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.RedisContextConfig.CacheDuration">
+            <summary>
+                Number of seconds to cache data in memory (1 minute default).
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig">
+            <summary>
+                Startup.ConfigureServices method captures the site customization options found in "secrets" in this
+                object.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig.ReadWriteMode">
+            <summary>
+                Sets the mode of the website. True means authoring mode, false means publishing.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig.AllowSetup">
+            <summary>
+                Allows a website to go into setup mode. For use only on fresh sites.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig.AllowReset">
+            <summary>
+                For training purposes, allows a full reset of site to factory settings.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig.AllowedFileTypes">
+            <summary>
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig.UseAzureSignalR">
+            <summary>
+                Enable Azure Signal R (Required if website is behind Azure Front Door
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig.AutoVersion">
+            <summary>
+                (Future functionality) Turns on page autoversion
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Services.TimeZoneUtility">
+            <summary>
+                Time zone conversion utility
+            </summary>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Services.TimeZoneUtility.ConvertUtcDateTimeToPst(System.DateTime)">
+            <summary>
+                Converts a UTC date to Pacific Standard Time
+            </summary>
+            <param name="utcDateTime"></param>
+            <returns></returns>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Services.TimeZoneUtility.ConvertPstDateTimeToUtc(System.DateTime)">
+            <summary>
+                Converts a PST date to UTC date
+            </summary>
+            <param name="dateTime"></param>
+            <returns></returns>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Services.TranslationServices">
+            <summary>
+                Cosmos CMS Language translation
+            </summary>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Services.TranslationServices.#ctor(Microsoft.Extensions.Options.IOptions{CDT.Cosmos.Cms.Common.Services.GoogleCloudAuthConfig})">
+            <summary>
+                Constructor
+            </summary>
+            <param name="config"></param>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Services.TranslationServices.GetTranslation(System.String,System.String,System.String[])">
+            <summary>
+                Returns content translated into the specified language.
+            </summary>
+            <param name="destinationLanguage"></param>
+            <param name="sourceLanguage"></param>
+            <param name="content"></param>
+            <returns></returns>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Services.TranslationServices.GetSupportedLanguages(System.String)">
+            <summary>
+                Gets a list of supported languages
+            </summary>
+            <param name="returnLanguage"></param>
+            <returns></returns>
+        </member>
+    </members>
 </doc>
