@@ -1,18 +1,26 @@
-﻿$.urlParam = function (name) {
-    var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+﻿$.urlParam = function(name) {
+    var results = new RegExp("[\?&]" + name + "=([^&#]*)").exec(window.location.href);
     if (results == null) {
         return null;
-    }
-    else {
+    } else {
         return decodeURI(results[1]) || 0;
     }
-}
+};
 
 $(function () {
+
+    // Get parameters send to this script
+    var scriptTag = $("#ccms-lang-script");
+    var ccmsLangDisplayName = scriptTag.attr('data-lang');
     // Construct a bootstrap drop down control here.
-    var ctrl = "<div class=\"input-group mb-2\"><div class=\"dropdown\"><div class=\"input-group-prepend\"><div class=\"input-group-text input-group-text-sm\">Language: </div>";
-    ctrl += "<button class=\"form-control btn btn-primary dropdown-toggle\" type=\"button\" id=\"ccms-lang-choice-btn\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">" + ccmsLangDisplayName + "</button>";
-    ctrl += "<ul id=\"ccms-lang-choice-ddl\" class=\"dropdown-menu dropdown-menu-dark dropdown-menu-right\" aria-labelledby=\"ccms-lang-choice-btn\" style=\"height: auto;max-height: 200px;overflow-x:hidden;\">";
+    var ctrl =
+        "<div class=\"input-group mb-2\"><div class=\"dropdown\"><div class=\"input-group-prepend\"><div class=\"input-group-text input-group-text-sm\">Language: </div>";
+    ctrl +=
+        "<button class=\"form-control btn btn-primary dropdown-toggle\" type=\"button\" id=\"ccms-lang-choice-btn\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">" +
+        ccmsLangDisplayName +
+        "</button>";
+    ctrl +=
+        "<ul id=\"ccms-lang-choice-ddl\" class=\"dropdown-menu dropdown-menu-dark dropdown-menu-right\" aria-labelledby=\"ccms-lang-choice-btn\" style=\"height: auto;max-height: 200px;overflow-x:hidden;\">";
     ctrl += "Loading...";
     ctrl += "</ul></div></div>";
 
@@ -27,16 +35,24 @@ $(function () {
     }
 
     function loadLangList() {
-        $.get("/Home/GetSupportedLanguages?lang=" + langCode, function (data) {
-            var ddList = ""; // Initialize a string object
-            $.each(data, function (index, item) {
-                ddList += "<li><a class=\"dropdown-item\" href=\"javascript:langSelect('" + item.LanguageCode + "', '" + item.DisplayName + "')\">" + item.DisplayName + "</a></li>";
-                if (item.languageCode === langCode) {
-                    $("#ccms-lang-choice-btn").html(item.DisplayName);
-                }
+        $.get("/Home/GetSupportedLanguages?lang=" + langCode,
+            function(data) {
+                var ddList = ""; // Initialize a string object
+                $.each(data,
+                    function(index, item) {
+                        ddList += "<li><a class=\"dropdown-item\" href=\"javascript:langSelect('" +
+                            item.LanguageCode +
+                            "', '" +
+                            item.DisplayName +
+                            "')\">" +
+                            item.DisplayName +
+                            "</a></li>";
+                        if (item.languageCode === langCode) {
+                            $("#ccms-lang-choice-btn").html(item.DisplayName);
+                        }
+                    });
+                $("#ccms-lang-choice-ddl").html(ddList);
             });
-            $("#ccms-lang-choice-ddl").html(ddList);
-        });
     }
 
     // modify URLs for language choice
@@ -45,15 +61,15 @@ $(function () {
         if (elements !== null && typeof (elements) !== "undefined" && elements.length > 0) {
             var prefixes = getPrefixes();
             $.each(elements,
-                function (index, item) {
-                    var href = $(item).attr('href');
+                function(index, item) {
+                    var href = $(item).attr("href");
                     if (href !== null && typeof (href) !== "undefined") {
                         href = href.toLowerCase();
                         $.each(prefixes,
-                            function (i, pre) {
+                            function(i, pre) {
                                 if (href.startsWith(pre) && href.endsWith(langCode.toLowerCase()) === false) {
                                     href = href.split("?")[0] + "?lang=" + langCode;
-                                    $(item).attr('href', href);
+                                    $(item).attr("href", href);
                                 }
                             });
                     }
@@ -61,7 +77,8 @@ $(function () {
         }
     }
 
-    var toast = "<div id=\"cms-lang-choice-toast\" class=\"toast\" role=\"alert\" aria-live=\"assertive\" aria-atomic=\"true\" data-delay=\"3000\" style=\"position: absolute; min-height: 200px; top: 200px; right: 100px;\">";
+    var toast =
+        "<div id=\"cms-lang-choice-toast\" class=\"toast\" role=\"alert\" aria-live=\"assertive\" aria-atomic=\"true\" data-delay=\"3000\" style=\"position: absolute; min-height: 200px; top: 200px; right: 100px;\">";
     toast += "<div class=\"toast-header\">";
     toast += "<strong class=\"mr-auto\">Language Change</strong>";
     toast += "<small>Working...</small>";
@@ -74,8 +91,8 @@ $(function () {
 
     $("body").append(toast);
 
-    $(langDropDownCtrl).on('show.bs.dropdown',
-        function () {
+    $(langDropDownCtrl).on("show.bs.dropdown",
+        function() {
             // do something…
             loadLangList();
         });
@@ -99,9 +116,9 @@ function langSelect(lang, lbl) {
     var t = $("#cms-lang-choice-toast");
     t.toast("show");
     if (lang.startsWith("en")) {
-        window.location.href = window.location.href.split('?')[0];
+        window.location.href = window.location.href.split("?")[0];
     } else {
-        window.location.href = window.location.href.split('?')[0] + "?lang=" + lang;
+        window.location.href = window.location.href.split("?")[0] + "?lang=" + lang;
     }
-     // Re-get this page with the new language cookie set.
+    // Re-get this page with the new language cookie set.
 }

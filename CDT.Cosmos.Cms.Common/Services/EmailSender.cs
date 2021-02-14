@@ -6,23 +6,51 @@ using SendGrid.Helpers.Mail;
 
 namespace CDT.Cosmos.Cms.Common.Services
 {
+    /// <summary>
+    /// SendGrid Email sender service
+    /// </summary>
     public class EmailSender : IEmailSender
     {
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="options"></param>
         public EmailSender(IOptions<AuthMessageSenderOptions> options)
         {
             Options = options.Value;
         }
 
-        public AuthMessageSenderOptions Options { get; } //set only via Secret Manager
+        /// <summary>
+        /// SendGrid configuration options
+        /// </summary>
+        private AuthMessageSenderOptions Options { get; } //set only via Secret Manager
 
+        /// <summary>
+        /// Email response from SendGrid
+        /// </summary>
         public Response Response { get; private set; }
 
+        /// <summary>
+        /// Send email method
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="subject"></param>
+        /// <param name="message"></param>
+        /// <returns></returns>
         public Task SendEmailAsync(string email, string subject, string message)
         {
             return Execute(subject, message, email);
         }
 
-        public Task Execute(string subject, string message, string email, string emailFrom = null)
+        /// <summary>
+        /// Execute send email method
+        /// </summary>
+        /// <param name="subject"></param>
+        /// <param name="message"></param>
+        /// <param name="email"></param>
+        /// <param name="emailFrom"></param>
+        /// <returns></returns>
+        private Task Execute(string subject, string message, string email, string emailFrom = null)
         {
             var client = new SendGridClient(Options.SendGridKey);
             var msg = new SendGridMessage

@@ -108,9 +108,13 @@
     }
     var ccmsLangDisplayName = "@(Model.LanguageName ?? "US English")";
 </script>
-@if (Model == null || Model.EditModeOn == false)
+@if (Model?.EditModeOn == false)
 {
-    <script src="~/js/Rosetta.js"></script>
+    <script src="~/ccms/js/GoogleTranslations.js"></script>
+}
+@if ((Model?.EditModeOn == false) && (bool)ViewData["UseGoogleTranslate"])
+{
+    <script src="~/ccms/js/GoogleTranslations.js" id="ccms-lang-script" data-lang="@Model.LanguageName"></script>
 }
 </body>
 </html>
