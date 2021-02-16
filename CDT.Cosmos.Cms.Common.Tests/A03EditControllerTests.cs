@@ -53,7 +53,7 @@ namespace CDT.Cosmos.Cms.Common.Tests
             // Test creating and saving a page
             //
             ArticleViewModel model;
-            ArticleViewModel savedModel;
+            //ArticleViewModel savedModel;
 
             using (var controller =
                 StaticUtilities.GetEditorController(await StaticUtilities.GetPrincipal(TestUsers.Foo)))
