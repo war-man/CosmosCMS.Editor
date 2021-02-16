@@ -159,7 +159,7 @@ namespace CDT.Cosmos.Cms.Controllers
             model.ReadWriteMode = false;
             model.PreviewMode = true;
 
-            return View("~/Views/Home/Index_standard1RO.cshtml", model);
+            return View("~/Views/Home/CosmosIndex.cshtml", model);
         }
 
         public async Task<IActionResult> PreviewEdit(int id)

@@ -9,8 +9,8 @@
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Version>20</Version>
     <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
-    <AssemblyVersion>2021.2.16.34231</AssemblyVersion>
-    <FileVersion>2021.2.16.34231</FileVersion>
+    <AssemblyVersion>2021.2.16.5</AssemblyVersion>
+    <FileVersion>2021.2.16.5</FileVersion>
     <Authors></Authors>
   </PropertyGroup>
 
@@ -57,10 +57,6 @@
   <ItemGroup>
     <ProjectReference Include="..\CDT.Akamai.EdgeAuth\CDT.Akamai.EdgeAuth.csproj" />
     <ProjectReference Include="..\CDT.Cosmos.Cms.Common\CDT.Cosmos.Cms.Common.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="wwwroot\fonts\" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties libman_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
