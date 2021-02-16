@@ -210,7 +210,7 @@ namespace CDT.Cosmos.Cms.Common.Tests
                 GetApplicationDbContext(),
                 siteOptions,
                 Options.Create(GetRedisContextConfig()),
-                GetArticleLogic()
+                GetArticleLogic(), Options.Create(new GoogleCloudAuthConfig())
             )
             {
                 ControllerContext = { HttpContext = GetMockContext(user) }
