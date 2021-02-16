@@ -1,0 +1,32 @@
+﻿@model CDT.Cosmos.Cms.Common.Models.ArticleViewModel
+<!DOCTYPE html>
+<html lang="@Model.LanguageCode">
+<head>
+    @Html.Raw(Model.Layout.Head)
+    <title>@Model.Title</title>
+    <script>
+    @Html.Raw(Model.HeaderJavaScript)
+    </script>
+</head>
+<body>
+    <header @Html.Raw(Model.Layout.BodyHeaderHtmlAttributes)>
+        @Html.Raw(Model.Layout.HtmlHeader)
+    </header>
+    <div id="main-content">
+        @RenderBody()
+    </div>
+    <footer @Html.Raw(Model.Layout.FooterHtmlAttributes)>
+        @Html.Raw(Model.Layout.FooterHtmlContent)
+    </footer>
+    @(await RenderSectionAsync("Scripts", false))
+    @Html.Raw(Model.Layout.PostFooterBlock)
+<script>
+@Html.Raw(Model.FooterJavaScript)
+</script>
+<!-- Comment out the following if not using Google Translate v3 -->
+@if (ViewData["UseGoogleTranslate"] != null && (bool)ViewData["UseGoogleTranslate"])
+{
+<script src="~/ccms/js/GoogleTranslations.js" id="ccms-lang-script" data-lang="@Model.LanguageName"></script>
+}
+</body>
+</html>
