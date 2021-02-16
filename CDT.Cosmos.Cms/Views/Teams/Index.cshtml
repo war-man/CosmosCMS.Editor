@@ -7,7 +7,7 @@
     .Name("Grid")
     .Columns(columns =>
     {
-        columns.Bound(p => p.Id).Hidden(true);
+        columns.Bound(p => p.Id).Title("Team #").Width(80);
         columns.Template($"<a class=\"btn btn-sm btn-secondary\" href=\"{Url.Action("Membership", "Teams")}/#: Id #\" title=\"Team Members\">Members</span></a>").Width(100);
         columns.Bound(p => p.TeamName);
         columns.Bound(p => p.TeamDescription);
