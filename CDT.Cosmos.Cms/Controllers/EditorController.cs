@@ -31,7 +31,6 @@ namespace CDT.Cosmos.Cms.Controllers
         private readonly IOptions<AkamaiContextConfig> _akamaiConfig;
         private readonly IOptions<AzureCdnConfig> _azureCdnConfig;
         private readonly string _blobEndpointUrl;
-        private readonly ILogger _logger;
 
         public EditorController(ILogger<EditorController> logger,
             ApplicationDbContext dbContext,
@@ -52,7 +51,6 @@ namespace CDT.Cosmos.Cms.Controllers
                 distributedCache,
                 redisOptions)
         {
-            _logger = logger;
             _azureCdnConfig = azureCdnService;
             _akamaiConfig = akamaiService;
             _blobEndpointUrl = blobConfig.Value.BlobServicePublicUrl.TrimEnd('/') + "/pub/";
@@ -916,6 +914,17 @@ namespace CDT.Cosmos.Cms.Controllers
                 }
 
             return Unauthorized();
+        }
+
+        public async Task<JsonResult> Get_PagesAndUrls(string text)
+        {
+            var pages = await ArticleLogic.GetArticleList();
+            var jsonResult = pages.Where(p => p.Title.Contains(text, StringComparison.CurrentCultureIgnoreCase)).Select(s => new
+            {
+                s.Title,
+                s.UrlPath
+            });
+            return Json(jsonResult.ToList());
         }
 
         #endregion
