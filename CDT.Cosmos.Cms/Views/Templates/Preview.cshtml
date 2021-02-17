@@ -1,0 +1,6 @@
+﻿@model CDT.Cosmos.Cms.Common.Models.ArticleViewModel
+@{
+    Layout = "_CosmosLayout";
+    ViewData["Title"] = Model.Title;
+}
+@Html.Raw(Model.Content)

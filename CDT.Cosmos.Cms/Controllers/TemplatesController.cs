@@ -156,10 +156,11 @@ namespace CDT.Cosmos.Cms.Controllers
             var model = await ArticleLogic.Create("Layout Preview");
             model.Content = template?.Content;
             model.EditModeOn = false;
-            model.ReadWriteMode = false;
+            model.ReadWriteMode = true;
             model.PreviewMode = true;
+            ViewData["UseGoogleTranslate"] = false;
 
-            return View("~/Views/Home/CosmosIndex.cshtml", model);
+            return View(model);
         }
 
         public async Task<IActionResult> PreviewEdit(int id)
@@ -177,27 +178,42 @@ namespace CDT.Cosmos.Cms.Controllers
         ///     Creates a new template
         /// </summary>
         /// <param name="request"></param>
-        /// <param name="template"></param>
+        /// <param name="templates"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> EditingInline_Create([DataSourceRequest] DataSourceRequest request,
-            TemplateIndexViewModel template)
+        public async Task<IActionResult> Templates_Create([DataSourceRequest] DataSourceRequest request,
+            [Bind(Prefix = "models")] IEnumerable<TemplateIndexViewModel> templates)
         {
-            if (template != null && ModelState.IsValid)
+            if (SiteOptions.Value.ReadWriteMode)
             {
-                var entity = new Template
+                var results = new List<Template>();
+
+                if (templates != null && ModelState.IsValid)
                 {
-                    Id = 0,
-                    Title = template.Title,
-                    Description = template.Description,
-                    Content = LoremIpsum.SubSection1
-                };
-                await DbContext.Templates.AddAsync(entity);
-                await DbContext.SaveChangesAsync();
-                template.Id = entity.Id;
+                    foreach (var template in templates)
+                    {
+                        var entity = new Template()
+                        {
+                            Id =0,
+                            Content = "",
+                            Description = template.Description,
+                            Title = template.Title
+                        };
+                        DbContext.Templates.Add(entity);
+                        await DbContext.SaveChangesAsync();
+                        results.Add(entity);
+                    }
+                }
+
+                return Json(await results.Select(s => new TemplateIndexViewModel()
+                {
+                    Description = s.Description,
+                    Id = s.Id,
+                    Title = s.Title
+                }).ToDataSourceResultAsync(request, ModelState));
             }
 
-            return Json(new[] {template}.ToDataSourceResult(request, ModelState));
+            return Unauthorized();
         }
 
         /// <summary>
