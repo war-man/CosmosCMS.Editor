@@ -47,7 +47,9 @@
             .FontSize()
             .ForeColor()
             .BackColor()
-            .Print())
+            .Print()
+            .CustomButton(x => x.Name("custom").ToolTip("Hyperlink Tool").Exec("hyperLinkTool"))
+        )
         .Tag("div")
         .Immutables(true)
         .Value(@<text>@Html.Raw(Model.Content)</text>)
@@ -61,6 +63,27 @@
             .Read("FileBrowserRead", "FileManager")
             .FileTypes(AllowedFileExtensions.GetFilterForViews(AllowedFileExtensions.ExtensionCollectionType.FileUploads))
         ))
+    <script>
+        function hyperLinkTool(e) {
+            var t = e;
+            var editor = $(this).data("kendoEditor");
+            //var n = e.sender.value();
+            var html = editor.selectedHtml();
+            //editor.exec("inserthtml", { value: "<hr />" });
+        }
+    </script>
+    <kendo-window name="window"
+                  title="Rams's Ten Principles of Good Design"
+                  draggable="true"
+                  resizable="true"
+                  width="600"
+                  on-close="onClose"
+                  actions="actions">
+        <content>
+            loading user info...
+        </content>
+        <popup-animation enabled="false" />
+    </kendo-window>
 }
 else
 {
