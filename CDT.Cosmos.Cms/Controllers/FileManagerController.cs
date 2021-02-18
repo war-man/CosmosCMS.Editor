@@ -1057,6 +1057,25 @@ namespace CDT.Cosmos.Cms.Controllers
                     {
                         await blobClient.DeleteIfExistsAsync(DeleteSnapshotsOption.IncludeSnapshots);
                         if (!await blobClient.ExistsAsync()) await blobClient.CreateIfNotExistsAsync();
+
+                        BlobProperties properties = await blobClient.GetPropertiesAsync();
+
+                        BlobHttpHeaders headers = new BlobHttpHeaders
+                        {
+                            // Set the MIME ContentType every time the properties 
+                            // are updated or the field will be cleared
+                            ContentType = fileMetaData.ContentType,
+                            ContentLanguage = "en-us",
+                            // Populate remaining headers with 
+                            // the pre-existing properties
+                            CacheControl = properties.CacheControl,
+                            ContentDisposition = properties.ContentDisposition,
+                            ContentEncoding = properties.ContentEncoding,
+                            ContentHash = properties.ContentHash
+                        };
+
+                        // Set the blob's properties.
+                        await blobClient.SetHttpHeadersAsync(headers);
                     }
                     catch (Exception e)
                     {
