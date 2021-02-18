@@ -1064,7 +1064,7 @@ namespace CDT.Cosmos.Cms.Controllers
                         {
                             // Set the MIME ContentType every time the properties 
                             // are updated or the field will be cleared
-                            ContentType = fileMetaData.ContentType,
+                            ContentType = GetContentType(fileMetaData),
                             ContentLanguage = "en-us",
                             // Populate remaining headers with 
                             // the pre-existing properties
@@ -1116,6 +1116,41 @@ namespace CDT.Cosmos.Cms.Controllers
             {
                 Logger.LogError(e.Message, e);
                 throw;
+            }
+        }
+
+        private string GetContentType(FileUploadMetaData fileMetaData)
+        {
+            if (!string.IsNullOrEmpty(fileMetaData.ContentType.Trim()) || string.IsNullOrEmpty(fileMetaData.FileName.Trim()))
+            {
+                return fileMetaData.ContentType;
+            }
+
+            var extension = Path.GetExtension(fileMetaData.FileName)?.ToLower();
+
+            if (string.IsNullOrEmpty(extension))
+            {
+                return "application/octet-stream";
+            }
+            //svg as "image/svg+xml"(W3C: August 2011)
+            switch (extension)
+            {
+                case ".ttf":
+                    return "application/x-font-ttf"; // (IANA: March 2013)
+                case ".woff":
+                    return "application/font-woff"; // (IANA: January 2013)
+                case ".woff2":
+                    return "application/font-woff2"; // (W3C W./ E.Draft: May 2014 / March 2016)
+                case ".or":
+                    return "application/x-font-truetype";
+                case ".otf":
+                    return "application/x-font-opentype"; // (IANA: March 2013)
+                case ".eot":
+                    return "application/vnd.ms-fontobject"; // (IANA: December 2005)
+                case ".sfnt":
+                    return "application/font-sfnt"; // (IANA: March 2013)
+                default:
+                    return "application/octet-stream";
             }
         }
 
