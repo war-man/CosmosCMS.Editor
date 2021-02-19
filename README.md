@@ -9,7 +9,9 @@ Each Cosmos CMS website is actually made up of two parts--and two repositories s
 * The "[Editor](https://github.com/StateOfCalifornia/CosmosCMS.Editor)" is the web application used to create content for a website.
 * The "[Publisher](https://github.com/StateOfCalifornia/CosmosCMS.Publisher)" application is used to publish web content on the web.
 
-This repository is for the _*Editor*_.
+Note: This repository is for the _*Editor*_.
+
+This dual system ensures that the publishing website is unhindered with the overhead of the publishing logic and infrastructure, and it allows the publisher site to almost any kind of funtionality included in it.  
 
 ## Cloud-first Design
 
