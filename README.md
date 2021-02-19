@@ -2,9 +2,11 @@
 
 [![License: State of California](https://img.shields.io/static/v1?label=License&message=Cosmos%20CMS%20(Editor)&color=brightgreen)](https://github.com/StateOfCalifornia/CosmosCMS.Editor/edit/main/LICENSE.md)
 
-_*Please Note:* Each C/CMS websites is actually made up of two parts--and two repositories. This repository is for the "Editor." This application is used to create and edit web content.  The other is the ["Publisher"](https://github.com/StateOfCalifornia/CosmosCMS.Publisher), and it is the forward-facing website that hosts the website that the public sees._
+_*Please Note:* Each Cosmos CMS website is actually made up of two parts--and two repositories. This repository is for the "Editor." This application is used to create and edit web content.  The other is the ["Publisher"](https://github.com/StateOfCalifornia/CosmosCMS.Publisher), and it is the forward-facing website that hosts the website that the public sees._
 
-Cosmos CMS is a [ASP.NET Core (v.5)](https://docs.microsoft.com/en-us/aspnet/core/release-notes/aspnetcore-5.0?view=aspnetcore-5.0) [Web Content Management System](https://en.wikipedia.org/wiki/Web_content_management_system) built with lessons-learned by the staff of the [California Department of Technology](https://cdt.ca.gov) with regards to building websites for state emergencies.
+Cosmos CMS (C/CMS) is a [ASP.NET Core (v.5)](https://docs.microsoft.com/en-us/aspnet/core/release-notes/aspnetcore-5.0?view=aspnetcore-5.0) hybrid Web Content Management System (CMS). It is a "hybrid" because of it's extremely open architecture allows for [mashups](https://en.wikipedia.org/wiki/Mashup_(web_application_hybrid)). Combine this CMS with your own functionality and integrations.
+
+## Cloud-first Design
 
 C/CMS is built for [the cloud](https://cosmos.azureedge.net/), and makes use of services such as:
 
@@ -20,4 +22,5 @@ C/CMS is built for [the cloud](https://cosmos.azureedge.net/), and makes use of 
   * Microsoft
 
 C/CMS also takes advantage of the cloud's ability to automatically scale, and, run simultaneously in multiple regions.
+
 
