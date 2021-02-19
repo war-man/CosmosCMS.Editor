@@ -2,9 +2,14 @@
 
 [![License: State of California](https://img.shields.io/static/v1?label=License&message=Cosmos%20CMS%20(Editor)&color=brightgreen)](https://github.com/StateOfCalifornia/CosmosCMS.Editor/edit/main/LICENSE.md) [![Build Status](https://dev.azure.com/CalEnterprise/CDT.Cosmos.Cms/_apis/build/status/Source-GitHub%20CosmosCMS.Editor?branchName=main)](https://dev.azure.com/CalEnterprise/CDT.Cosmos.Cms/_build/latest?definitionId=474&branchName=main) [![Board Status](https://dev.azure.com/CalEnterprise/a7ab809f-6843-401d-962e-130106405388/dcd608b7-7c08-4e48-8863-83d649e2e1df/_apis/work/boardbadge/82ea9a1e-2fcd-4973-8898-080c0556e997)](https://dev.azure.com/calenterprise/a7ab809f-6843-401d-962e-130106405388/_boards/board/t/dcd608b7-7c08-4e48-8863-83d649e2e1df/Microsoft.RequirementCategory/)
 
-_*Please Note:* Each Cosmos CMS website is actually made up of two parts--and two repositories. This repository is for the "Editor." This application is used to create and edit web content.  The other is the ["Publisher"](https://github.com/StateOfCalifornia/CosmosCMS.Publisher), and it is the forward-facing website that hosts the website that the public sees._
+Cosmos CMS (C/CMS) is a ASP.NET Core (v.5) hybrid [Web Content Management System](https://en.wikipedia.org/wiki/Web_content_management_system). It is a "[hybrid](https://en.wikipedia.org/wiki/Mashup_(web_application_hybrid))" because of it's extremely open architecture that allows for you to mashup this CMS with your own functionality and integrations.
 
-Cosmos CMS (C/CMS) is a ASP.NET Core (v.5) hybrid [Web Content Management System](https://docs.microsoft.com/en-us/aspnet/core/release-notes/aspnetcore-5.0?view=aspnetcore-5.0). It is a "hybrid" because of it's extremely open architecture that allows for you to [mashup](https://en.wikipedia.org/wiki/Mashup_(web_application_hybrid)) this CMS with your own functionality and integrations.
+Each Cosmos CMS website is actually made up of two parts--and two repositories stored in GitHub:
+
+* The "[Editor](https://github.com/StateOfCalifornia/CosmosCMS.Editor)" is the web application used to create content for a website.
+* The "[Publisher](https://github.com/StateOfCalifornia/CosmosCMS.Publisher)" application is used to publish web content on the web.
+
+This repository is for the _*Editor*_.
 
 ## Cloud-first Design
 
