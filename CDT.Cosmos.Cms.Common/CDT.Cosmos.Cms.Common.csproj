@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
-		<Version>2.0.9</Version>
+		<Version>2.0.10</Version>
 		<Authors>California Department of Technology</Authors>
 		<Company>State of California</Company>
 		<Product>Cosmos CMS</Product>
@@ -16,15 +16,15 @@
 		<AnalysisLevel>5.0</AnalysisLevel>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		<RepositoryUrl>https://github.com/StateOfCalifornia/CosmosCMS</RepositoryUrl>
-		<AssemblyVersion>2021.2.18.29674</AssemblyVersion>
-		<FileVersion>2021.2.18.29674</FileVersion>
+		<AssemblyVersion>2021.2.19.1309</AssemblyVersion>
+		<FileVersion>2021.2.19.1309</FileVersion>
 		<UserSecretsId>498e495c-d772-4d44-870d-92009f01de57</UserSecretsId>
 		<PackageProjectUrl>https://cosmos.azureedge.net</PackageProjectUrl>
 		<NeutralLanguage></NeutralLanguage>
 		<PackageTags>CCMS</PackageTags>
 		<Deterministic>true</Deterministic>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
-		<PackageReleaseNotes>Article logic now can be configured using injection.  Also, moved key unit test from Editor to common regarding ArticleLogic.</PackageReleaseNotes>
+		<PackageReleaseNotes>Create your own custom "Not Found" page (use that title).  When a page is not found, it will return your custom page.</PackageReleaseNotes>
 		<RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
 
 		<!-- Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
