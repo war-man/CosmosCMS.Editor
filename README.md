@@ -4,7 +4,7 @@
 
 _*Please Note:* Each Cosmos CMS website is actually made up of two parts--and two repositories. This repository is for the "Editor." This application is used to create and edit web content.  The other is the ["Publisher"](https://github.com/StateOfCalifornia/CosmosCMS.Publisher), and it is the forward-facing website that hosts the website that the public sees._
 
-Cosmos CMS (C/CMS) is a [ASP.NET Core (v.5)](https://docs.microsoft.com/en-us/aspnet/core/release-notes/aspnetcore-5.0?view=aspnetcore-5.0) hybrid Web Content Management System (CMS). It is a "hybrid" because of it's extremely open architecture that allows for you to [mashup](https://en.wikipedia.org/wiki/Mashup_(web_application_hybrid)) this CMS with your own functionality and integrations.
+Cosmos CMS (C/CMS) is a ASP.NET Core (v.5) hybrid [Web Content Management System](https://docs.microsoft.com/en-us/aspnet/core/release-notes/aspnetcore-5.0?view=aspnetcore-5.0). It is a "hybrid" because of it's extremely open architecture that allows for you to [mashup](https://en.wikipedia.org/wiki/Mashup_(web_application_hybrid)) this CMS with your own functionality and integrations.
 
 ## Cloud-first Design
 
