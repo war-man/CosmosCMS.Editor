@@ -23,4 +23,16 @@ C/CMS is built for [the cloud](https://cosmos.azureedge.net/), and makes use of 
 
 C/CMS also takes advantage of the cloud's ability to automatically scale, and, run simultaneously in multiple regions.
 
+## Getting Started
 
+This documentation is still under development, so check back for more topics as they become available.
+
+* [Main documentation page](https://cosmos.azureedge.net/documentation)
+* [Installation](https://cosmos.azureedge.net/installation)
+* [Configuration](https://cosmos.azureedge.net/configuration)
+* [Website Setup](https://cosmos.azureedge.net/website_setup)
+* [Create and edit web pages](https://cosmos.azureedge.net/edit_page)
+* [Web page versioning](https://cosmos.azureedge.net/page_versions)
+* [Scheduling page publishing](https://cosmos.azureedge.net/page_versions#ScheduleRelease)
+* [Product videos](https://cosmos.azureedge.net/video)
+* [File management](https://cosmos.azureedge.net/file_management)
