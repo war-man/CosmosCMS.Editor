@@ -58,7 +58,18 @@ namespace CDT.Cosmos.Cms.Common.Controllers
                 //
                 var article = await _articleLogic.GetByUrl(id, lang);
 
-                if (article == null) return new NotFoundResult();
+                if (article == null)
+                {
+                    //
+                    // Create your own not found page for a graceful page for users.
+                    //
+                    article = await _articleLogic.GetByUrl("/not_found", lang);
+
+                    HttpContext.Response.StatusCode = 404;
+
+                    if (article == null) return NotFound();
+
+                }
 
                 if (article.StatusCode == StatusCodeEnum.Redirect) return Redirect(article.Content);
 
