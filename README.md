@@ -1,4 +1,4 @@
-# Cosmos CMS (Editor)
+# [Cosmos CMS (Editor)](https://cosmos.azureedge.net)
 
 _*Please Note:* Each C/CMS websites is actually made up of two parts--and two repositories. This repository is for the "Editor." This application is used to create and edit web content.  The other is the ["Publisher"](https://github.com/StateOfCalifornia/CosmosCMS.Publisher), and it is the forward-facing website that hosts the website that the public sees._
 
