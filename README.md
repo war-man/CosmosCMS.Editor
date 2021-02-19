@@ -1,6 +1,7 @@
 # [Cosmos CMS (Editor)](https://cosmos.azureedge.net)
 
 [![License: State of California](https://img.shields.io/static/v1?label=License&message=Cosmos%20CMS%20(Editor)&color=brightgreen)](https://github.com/StateOfCalifornia/CosmosCMS.Editor/edit/main/LICENSE.md)
+[![Build Status](https://dev.azure.com/CalEnterprise/CDT.Cosmos.Cms/_apis/build/status/Source-GitHub%20CosmosCMS.Editor?branchName=main)](https://dev.azure.com/CalEnterprise/CDT.Cosmos.Cms/_build/latest?definitionId=474&branchName=main)
 
 _*Please Note:* Each Cosmos CMS website is actually made up of two parts--and two repositories. This repository is for the "Editor." This application is used to create and edit web content.  The other is the ["Publisher"](https://github.com/StateOfCalifornia/CosmosCMS.Publisher), and it is the forward-facing website that hosts the website that the public sees._
 
