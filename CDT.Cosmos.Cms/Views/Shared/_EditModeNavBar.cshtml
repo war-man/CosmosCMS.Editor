@@ -49,6 +49,7 @@
         <input type="hidden" asp-for="Content" />
         <input type="hidden" asp-for="HeaderJavaScript" />
         <input type="hidden" asp-for="FooterJavaScript" />
+        <input type="hidden" asp-for="Published" />
         <input type="hidden" id="userName" value="@User.Identity?.Name" />
     }
     @(Html.Kendo().ToolBar()
@@ -109,7 +110,12 @@
                 items.Add().Type(CommandType.ButtonGroup).Buttons(buttons =>
                 {
                     items.Add().Template("<span>Publish: </span>");
-                    items.Add().Template(Html.Kendo().DateTimePickerFor(m => m.Published).Enable(User.IsInRole("Editors") || User.IsInRole("Administrators")).Value(Model.Published).HtmlAttributes(new {@class = "form-control", style = "height: 28px;margin-top:1px; color:white;"}).ToHtmlString());
+                    items.Add().Template(Html.Kendo().DateTimePicker()
+                        .Name("dtPublished")
+                        .Enable(User.IsInRole("Editors") || User.IsInRole("Administrators"))
+                        .HtmlAttributes(new {@class = "form-control", style = "height: 28px;margin-top:1px; color:white;"})
+                        .ToHtmlString());
+                    items.Add().Template("<div id='timeZone' class='btn btn-sm btn-secondary'></div>");
                 });
             }
         }))
@@ -211,6 +217,10 @@
             handlePost(e);
         });
 
+    $(document).ready(function() {
+        setPublishLocalDateTime();
+    });
+
     // Handles button bar click - menu button.
     function bgCmsClick(e) {
         var command = e.target.text();
@@ -286,7 +296,7 @@
             window.open("@Url.Action("Preview", "Home", new {Model?.Id})");
             break;
         case "Help":
-                window.open("https://cosmos.azureedge.net/edit_page#HtmlEditor");
+            window.open("https://cosmos.azureedge.net/edit_page#HtmlEditor");
             break;
         }
     }
@@ -297,11 +307,21 @@
         var validator = $("#frmEdit").data("kendoValidator");
         $("#divErrorLog").html("");
 
+        // Save date/time
+        var dateTimePicker = $("#dtPublished").data("kendoDateTimePicker");
+        var dateTimeValue = dateTimePicker.value();
+
+        if (dateTimeValue !== null && dateTimeValue !== "null") {
+            $("#Published").val(dateTimeValue.toISOString());
+        } else {
+            $("#Published").val("");
+        }
+
+
         if (validator.validate()) {
 
             $("#saveChangesDialog").data("kendoDialog").open();
 
-            // If there is a template change, do a full post back.
             processKendoCtrls("editor", "kendoEditor");
             processKendoCtrls("listbox", "kendoDropDownList");
 
@@ -344,7 +364,8 @@
                     $("#versionLbl").text("Version: " + response.Model.VersionNumber);
 
                     // Published
-                    editorSave("Published", "kendoDateTimePicker", response.Model.Published);
+                    $("#Published").val(response.Model.Published); 
+                    setPublishLocalDateTime();
 
                     // Title
                     editorSave("eTitle", "kendoEditor", response.Model.Title);
@@ -432,6 +453,22 @@
 
     function closeEditor() {
         window.location.href = "@Url.Content($"~/{Model?.UrlPath.Replace("root", "")}")";
+    }
+    
+    function setPublishLocalDateTime() {
+        var published = $("#Published").val();
+        if (published !== null && typeof (published) !== "undefined") {
+            var localDateTime = new Date(published); // This will turn UTC to local time
+            var formattedLocalDateTime = kendo.toString(localDateTime, "G");
+            $("#Published").val(formattedLocalDateTime);
+            var dateTimePicker = $("#dtPublished").data("kendoDateTimePicker");
+            dateTimePicker.value(new Date(formattedLocalDateTime));
+        }
+
+        var datetime = new Date();
+        var dateTimeString = datetime.toString();
+        var timezone = dateTimeString.substring(dateTimeString.indexOf("(") - 1);
+        $("#timeZone").html(timezone);
     }
 
 </script>
