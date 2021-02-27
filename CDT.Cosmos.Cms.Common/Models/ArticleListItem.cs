@@ -64,12 +64,6 @@ namespace CDT.Cosmos.Cms.Common.Models
         public string UrlPath { get; set; }
 
         /// <summary>
-        ///     Status HTML badge used on the page list
-        /// </summary>
-        [Display(Name = "Status")]
-        public string StatusBadge { get; set; }
-
-        /// <summary>
         ///     If applicable, the team that manages this page
         /// </summary>
         [Display(Name = "Team Name")]

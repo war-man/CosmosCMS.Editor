@@ -856,15 +856,12 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
                 {
                     ArticleNumber = art.ArticleNumber,
                     Id = art.Id,
-                    LastPublished = item.LastPublished,
+                    LastPublished = item.LastPublished?.ToUniversalTime(),
                     Title = art.Title,
-                    Updated = art.Updated,
+                    Updated = art.Updated.ToUniversalTime(),
                     VersionNumber = art.VersionNumber,
                     Status = art.StatusCode == 0 ? "Active" : "Inactive",
-                    UrlPath = art.UrlPath,
-                    StatusBadge = "<div class='btn btn-light'>" + (item.LastPublished.HasValue
-                        ? $"<span class='badge badge-success'>{item.LastPublished}</span>"
-                        : "<span class='badge badge-warning'>Not Published</span>") + "</div>"
+                    UrlPath = art.UrlPath
                 });
             }
 
@@ -902,15 +899,12 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
                     ArticleNumber = art.ArticleNumber,
                     Id = art.Id,
                     IsDefault = art.UrlPath == "root",
-                    LastPublished = item.LastPublished,
+                    LastPublished = item.LastPublished?.ToUniversalTime(),
                     Title = art.Title,
-                    Updated = art.Updated,
+                    Updated = art.Updated.ToUniversalTime(),
                     VersionNumber = art.VersionNumber,
                     Status = art.StatusCode == 0 ? "Active" : "Inactive",
                     UrlPath = art.UrlPath,
-                    StatusBadge = "<div class='btn btn-light'>" + (item.LastPublished.HasValue
-                        ? $"<span class='badge badge-success'>{item.LastPublished}</span>"
-                        : "<span class='badge badge-warning'>Not Published</span>") + "</div>",
                     TeamName = art.Team == null ? "" : art.Team.TeamName
                 });
             }

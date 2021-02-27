@@ -6,7 +6,7 @@
     var versions = $"<a class=\"btn btn-sm btn-secondary\" href=\"{Url.Action("Versions", "Editor")}/#: ArticleNumber #\" title=\"Edit Article\"><span class='fa fa-edit'></span></a>";
     var copyUrl = "<button class=\"clipboard btn btn-sm btn-secondary\" data-clipboard-text=\"/#: UrlPath #\"  title='Click to copy url'><span class='fa fa-external-link'></span></button>";
     var btnGroup = "<div class=\"btn-group btn-group-sm\" role=\"group\" aria-label=\"Basic example\">#= getNewHomeButton(IsDefault, LastPublished, Id) #" +
-                   versions + copyUrl + "#= getStatusBadge(LastPublished) #</div>";
+                   versions + copyUrl + "#= getStatusBadge(LastPublished, ArticleNumber) #</div>";
 }
 <script src="~/js/clipboard.min.js"></script>
 <div id="main-content" class="main-content">
@@ -25,13 +25,16 @@
                         col.Bound(b => b.Id).Hidden(true);
 
                         col.Template(btnGroup).Title("Menu");
-
-                        col.Bound(b => b.Updated).Format("{0:MM/dd/yy H:mm:ss}").Title("Last Updated");
+                        col.Template("#= kendo.toString(resetAsUtc(Updated), 'G') #").Title("Last Updated");
                         col.Bound(b => b.Title).Width(260);
                         col.Bound(b => b.TeamName);
                         col.Command(com => com.Destroy().Text("Trash"));
                     })
-                    .ToolBar(t => t.Search())
+                    .ToolBar(t =>
+                    {
+                        t.Custom().Text("<span id='timeZone'></span>");
+                        t.Search();
+                    })
                     .Pageable()
                     .Sortable()
                     .Editable(editable => editable.Mode(GridEditMode.InLine).ConfirmDelete("Are you sure you want to trash this article?").CancelDelete("Do not trash article."))
@@ -58,11 +61,12 @@
                             e.clearSelection();
                         });
 
-                    function getStatusBadge(published) {
+                    function getStatusBadge(published, articleNumber) {
                         if (published === null) {
-                            return "<div class='btn btn-sm btn-secondary' style='width:78px'><span class='badge badge-light'>Not Published</span></div>";
+                            return "<div class='btn btn-sm btn-secondary' style='width:120px'><span class='badge badge-light'>Not Published</span></div>";
                         }
-                        return "<div class='btn btn-sm btn-primary' style='width:78px'><span class='badge badge-light'>" + kendo.toString(new Date(published), "d") + "</span></div>";
+                        var url = "@Url.Action("Versions", "Editor")/" + articleNumber;
+                        return "<a title=\"Open versions of this page.\" class='btn btn-sm btn-primary' href=\"" + url + "\" style=\"width:120px\"><span class=\"badge badge-light\">" + kendo.toString(resetAsUtc(published), "G") + "</span></a>";
                     }
 
                     function getNewHomeButton(isDefault, published, id) {
@@ -79,6 +83,18 @@
                         alert(msg);
                     }
 
+                    function resetAsUtc(inputDate) {
+                        var dateString = kendo.toString(inputDate, "G") + " UTC";
+                        var outputDate = new Date(dateString);
+                        return outputDate;
+                    }
+
+                    $(document).ready(function() {
+                        var datetime = new Date();
+                        var dateTimeString = datetime.toString();
+                        var timezone = dateTimeString.substring(dateTimeString.indexOf("(") - 1);
+                        $("#timeZone").html(timezone);
+                    });
                 </script>
             </div>
         </div>
