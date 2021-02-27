@@ -958,11 +958,6 @@
                 Url of this item
             </summary>
         </member>
-        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleListItem.StatusBadge">
-            <summary>
-                Status HTML badge used on the page list
-            </summary>
-        </member>
         <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleListItem.TeamName">
             <summary>
                 If applicable, the team that manages this page
