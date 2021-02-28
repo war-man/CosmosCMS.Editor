@@ -550,7 +550,7 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
                 };
 
                 // Force publishing of a NEW home page.
-                model.Published = isRoot ? DateTime.UtcNow : (DateTime?) null;
+                model.Published = isRoot ? DateTime.UtcNow : model.Published;
 
                 await _dbContext.Articles.AddAsync(article); // Set in an "add" state.
                 var articleCount = await _dbContext.Articles.CountAsync();
