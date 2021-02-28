@@ -396,7 +396,7 @@ namespace CDT.Cosmos.Cms.Common.Tests
             var logic = StaticUtilities.GetArticleLogic();
             var article = await logic.Create("Public Safety Power Shutoff (PSPS)" + Guid.NewGuid());
             article.ArticleNumber = 0;
-            article.Published = DateTime.Now.AddDays(-1);
+            article.Published = DateTime.Now.ToUniversalTime().AddDays(-1);
             article.Content = "Hello world!";
             var saved = await logic.UpdateOrInsert(article, _testUser.Id);
 
@@ -489,7 +489,7 @@ namespace CDT.Cosmos.Cms.Common.Tests
             article.Content =
                 "The other night 'bout two o'clock, or maybe it was three,\r\nAn elephant with shining tusks came chasing after me.\r\nHis trunk was wavin' in the air an'  spoutin' jets of steam\r\nAn' he was out to eat me up, but still I didn't scream\r\nOr let him see that I was scared - a better thought I had,\r\nI just escaped from where I was and crawled in bed with dad.\r\n\r\nSource: https://www.familyfriendpoems.com/poem/being-brave-at-night-by-edgar-albert-guest";
 
-            article.Published = DateTime.Now.AddDays(-1);
+            article.Published = DateTime.Now.ToUniversalTime().AddDays(-1);
 
             var result = await logic.UpdateOrInsert(article, _testUser.Id);
 
