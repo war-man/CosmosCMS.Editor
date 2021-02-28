@@ -534,6 +534,10 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
             //
             if (model.ArticleNumber == 0)
             {
+                //
+                // If the article number is 0, then this is a new article.
+                // The save action will give this a new unique article number.
+                //
                 var isRoot = !await _dbContext.Articles.AnyAsync();
 
                 article = new Article
@@ -546,7 +550,7 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
                 };
 
                 // Force publishing of a NEW home page.
-                model.Published = isRoot ? TimeZoneUtility.ConvertUtcDateTimeToPst(DateTime.UtcNow) : model.Published;
+                model.Published = isRoot ? DateTime.UtcNow : (DateTime?) null;
 
                 await _dbContext.Articles.AddAsync(article); // Set in an "add" state.
                 var articleCount = await _dbContext.Articles.CountAsync();
@@ -699,8 +703,11 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
             article.Content = model.Content.Replace(" contenteditable=\"", " crx=\"",
                 StringComparison.CurrentCultureIgnoreCase);
 
+            //
+            // Make sure everything server-side is saved in UTC time.
+            //
             article.Published = model.Published?.ToUniversalTime();
-            article.Updated = DateTime.Now;
+            article.Updated = DateTime.UtcNow;
 
             article.HeaderJavaScript = model.HeaderJavaScript;
             article.FooterJavaScript = model.FooterJavaScript;
@@ -717,16 +724,20 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
         }
 
         /// <summary>
-        ///     Updates the date/time stamp for all published articles.
+        ///     Updates the date/time stamp for all published articles to current UTC time.
         /// </summary>
         /// <returns>Number of articles updated with new date/time</returns>
         /// <remarks>This action is used only for "publishing" entire websites.</remarks>
-        public async Task<int> UpdateDateTimeStamp()
+        public async Task<int> UpdateDateTimeStamps()
         {
             var articleIds = (await PrivateGetArticleList(_dbContext.Articles.AsQueryable()))?.Select(s => s.Id)
                 .ToList();
             if (articleIds == null || articleIds.Any() == false) return 0;
 
+            // DateTime.Now uses DateTime.UtcNow internally and then applies localization.
+            // In short, use ToUniversalTime() if you already have DateTime.Now and
+            // to convert it to UTC, use DateTime.UtcNow if you just want to retrieve the
+            // current time in UTC.
             var now = DateTime.UtcNow;
             var count = await _dbContext.Articles.Where(a => articleIds.Contains(a.Id)).UpdateAsync(u => new Article
             {
@@ -899,9 +910,9 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
                     ArticleNumber = art.ArticleNumber,
                     Id = art.Id,
                     IsDefault = art.UrlPath == "root",
-                    LastPublished = item.LastPublished?.ToUniversalTime(),
+                    LastPublished = item.LastPublished.HasValue ? DateTime.SpecifyKind(item.LastPublished.Value, DateTimeKind.Utc) : (DateTime?) null,
                     Title = art.Title,
-                    Updated = art.Updated.ToUniversalTime(),
+                    Updated = DateTime.SpecifyKind(art.Updated, DateTimeKind.Utc),
                     VersionNumber = art.VersionNumber,
                     Status = art.StatusCode == 0 ? "Active" : "Inactive",
                     UrlPath = art.UrlPath,
@@ -968,12 +979,10 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
                 Content = article.Content,
                 StatusCode = (StatusCodeEnum) article.StatusCode,
                 Id = article.Id,
-                Published = article.Published == null
-                    ? (DateTime?) null
-                    : TimeZoneUtility.ConvertUtcDateTimeToPst(article.Published.Value),
+                Published = article.Published.HasValue ? DateTime.SpecifyKind(article.Published.Value, DateTimeKind.Utc) :(DateTime?)null,
                 Title = article.Title,
                 UrlPath = article.UrlPath,
-                Updated = article.Updated,
+                Updated = DateTime.SpecifyKind(article.Updated, DateTimeKind.Utc),
                 VersionNumber = article.VersionNumber,
                 HeaderJavaScript = article.HeaderJavaScript,
                 FooterJavaScript = article.FooterJavaScript,

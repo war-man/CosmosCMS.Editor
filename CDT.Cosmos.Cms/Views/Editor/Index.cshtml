@@ -25,14 +25,13 @@
                         col.Bound(b => b.Id).Hidden(true);
 
                         col.Template(btnGroup).Title("Menu");
-                        col.Template("#= kendo.toString(resetAsUtc(Updated), 'G') #").Title("Last Updated");
+                        col.Template("#= kendo.toString(Updated, 'G') #").Title("Last Updated");
                         col.Bound(b => b.Title).Width(260);
                         col.Bound(b => b.TeamName);
                         col.Command(com => com.Destroy().Text("Trash"));
                     })
                     .ToolBar(t =>
                     {
-                        t.Custom().Text("<span id='timeZone'></span>");
                         t.Search();
                     })
                     .Pageable()
@@ -48,7 +47,7 @@
                             .Destroy(trash => trash.Action("Trash_Article", "Editor"));
                     }))
                 <form>
-                    <input id="selected" type="hidden"/>
+                    <input id="selected" type="hidden" />
                 </form>
                 <script>
                     var clipboard = new ClipboardJS('.clipboard');
@@ -66,7 +65,7 @@
                             return "<div class='btn btn-sm btn-secondary' style='width:120px'><span class='badge badge-light'>Not Published</span></div>";
                         }
                         var url = "@Url.Action("Versions", "Editor")/" + articleNumber;
-                        return "<a title=\"Open versions of this page.\" class='btn btn-sm btn-primary' href=\"" + url + "\" style=\"width:120px\"><span class=\"badge badge-light\">" + kendo.toString(resetAsUtc(published), "G") + "</span></a>";
+                        return "<a title=\"Open versions of this page.\" class='btn btn-sm btn-primary' href=\"" + url + "\" style=\"width:120px\"><span class=\"badge badge-light\">" + kendo.toString(published, "G") + "</span></a>";
                     }
 
                     function getNewHomeButton(isDefault, published, id) {
@@ -83,18 +82,6 @@
                         alert(msg);
                     }
 
-                    function resetAsUtc(inputDate) {
-                        var dateString = kendo.toString(inputDate, "G") + " UTC";
-                        var outputDate = new Date(dateString);
-                        return outputDate;
-                    }
-
-                    $(document).ready(function() {
-                        var datetime = new Date();
-                        var dateTimeString = datetime.toString();
-                        var timezone = dateTimeString.substring(dateTimeString.indexOf("(") - 1);
-                        $("#timeZone").html(timezone);
-                    });
                 </script>
             </div>
         </div>

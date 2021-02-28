@@ -6,8 +6,8 @@
 @using CDT.Cosmos.Cms.Common.Services
 @model ArticleViewModel
 @{
-    var controllerName = (string)Context.GetRouteData().Values["controller"];
-    var actionName = (string)Context.GetRouteData().Values["action"];
+    var controllerName = (string) Context.GetRouteData().Values["controller"];
+    var actionName = (string) Context.GetRouteData().Values["action"];
 
     var isAuthor = false;
     var isEditor = false;
@@ -34,64 +34,28 @@
 *@
 <style>
     .fa.k-sprite,
-    .fa.k-sprite::before {
+    .fa.k-sprite:before {
         font-size: 16px;
         line-height: 16px;
     }
 </style>
-<form id="frmEdit" asp-action="Edit" method="post" kendo-validator="true">
-    @if (controllerName == "Editor" && (actionName == "Edit" || actionName == "Create"))
-    {
-        <input type="hidden" asp-for="Id" />
-        <input type="hidden" asp-for="ArticleNumber" />
-        <input type="hidden" asp-for="UrlPath" />
-        <input type="hidden" asp-for="VersionNumber" />
-        <input type="hidden" asp-for="Content" />
-        <input type="hidden" asp-for="HeaderJavaScript" />
-        <input type="hidden" asp-for="FooterJavaScript" />
-        <input type="hidden" asp-for="Published" />
-        <input type="hidden" id="userName" value="@User.Identity?.Name" />
-    }
-    @(Html.Kendo().ToolBar()
-        .Name("ToolBar")
-        .Items(items =>
-        {
-            if (Model == null || Model.EditModeOn == false)
-            {
-                items.Add().Type(CommandType.SplitButton).Text("Menu").ImageUrl("/images/CosmosBearIcon.png").MenuButtons(menuButtons =>
-                {
-                    menuButtons.Add().Text("Home Page").SpriteCssClass("fa fa-home");
-                    menuButtons.Add().Text("Help").SpriteCssClass("fa fa-info-circle");
-                    if (Model != null && controllerName == "Home" && actionName == "Index" && (isAuthor && Model?.Published == null || isEditor || isAdministrator))
-                    {
-                        menuButtons.Add().Text("Edit").SpriteCssClass("fa fa-edit");
-                    }
-                    menuButtons.Add().Text("Files").SpriteCssClass("fa fa-folder");
-                    menuButtons.Add().Text("Pages").SpriteCssClass("fa fa-file-text-o");
-                    menuButtons.Add().Text("Templates").SpriteCssClass("fa fa-building");
-                    if (isAdministrator || isEditor)
-                    {
-                        menuButtons.Add().Text("Publish").SpriteCssClass("fa fa-html5");
-                        menuButtons.Add().Text("Navigation").SpriteCssClass("fa fa-list");
-                        menuButtons.Add().Text("Layouts").SpriteCssClass("fa fa-wrench");
-                        menuButtons.Add().Text("Logs").SpriteCssClass("fa fa-pencil");
-                        menuButtons.Add().Text("Teams").SpriteCssClass("fa fa-flag");
-                    }
-                    if (isAdministrator)
-                    {
-                        menuButtons.Add().Text("Users").SpriteCssClass("fa fa-users");
-                        if (SiteOptions.Value.AllowReset)
-                        {
-                            menuButtons.Add().Text("Reset Site").SpriteCssClass("fa fa-power-off");
-                        }
-                    }
-                    menuButtons.Add().Text("User Account");
-                    menuButtons.Add().Text("Log Out");
-                }).Click("bgCmsClick");
+@if (controllerName == "Editor" && (actionName == "Edit" || actionName == "Create"))
+{
+    <form id="frmEdit" asp-action="Edit" method="post" kendo-validator="true">
+        <input type="hidden" asp-for="Id"/>
+        <input type="hidden" asp-for="ArticleNumber"/>
+        <input type="hidden" asp-for="UrlPath"/>
+        <input type="hidden" asp-for="VersionNumber"/>
+        <input type="hidden" asp-for="Content"/>
+        <input type="hidden" asp-for="HeaderJavaScript"/>
+        <input type="hidden" asp-for="FooterJavaScript"/>
+        <input type="hidden" asp-for="Published"/>
+        <input type="hidden" id="userName" value="@User.Identity?.Name"/>
 
-            }
-
-            if (Model != null && Model.EditModeOn)
+        @* EDITING TOOL BAR *@
+        @(Html.Kendo().ToolBar()
+            .Name("ToolBar")
+            .Items(items =>
             {
                 items.Add().Type(CommandType.SplitButton).Text("Menu").MenuButtons(menuButtons =>
                 {
@@ -115,360 +79,438 @@
                         .Enable(User.IsInRole("Editors") || User.IsInRole("Administrators"))
                         .HtmlAttributes(new {@class = "form-control", style = "height: 28px;margin-top:1px; color:white;"})
                         .ToHtmlString());
-                    items.Add().Template("<div id='timeZone' class='btn btn-sm btn-secondary'></div>");
+                    items.Add().Template("<a id='timeZone' title='Dates and times are in this time zone.' class='btn btn-sm btn-secondary'></a>");
                 });
-            }
-        }))
-</form>
-<div style="display: none">
-    <kendo-dialog name="saveChangesDialog" title="Please Wait" modal="true" visible="false" min-width="500">
-        <content>
-            <div>
-                <p>Saving changes...</p>
-            </div>
-        </content>
-        <popup-animation>
-            <open duration="500" effects="fade:in" />
-            <close duration="500" effects="fade:out" />
-        </popup-animation>
-    </kendo-dialog>
-    <kendo-dialog name="changesSavedDialog" title="Changes Saved" modal="true" visible="false" min-width="300">
-        <content>
-            <div>
-                <p>Your changes have been successfully save, and reloaded into this page.</p>
-                <div class="form-group">
-                    <span>Version saved:</span>
-                    <span id="savedVersionNo"></span>
-                </div>
-            </div>
-        </content>
-        <popup-animation>
-            <open duration="500" effects="fade:in" />
-            <close duration="500" effects="fade:out" />
-        </popup-animation>
-    </kendo-dialog>
-    <kendo-dialog name="versionsDialog" title="Page Versions" modal="true" visible="false" min-width="500">
-        <content>
-            <p>On your way to the version list for this page. This will save the current version before proceeding. Are you ready?</p>
-        </content>
-        <actions>
-            <action text="Cancel">
-            </action>
-            <action action="goVersions" primary="true" text="Yes" title="Confirm">
-            </action>
-        </actions>
-        <popup-animation>
-            <open duration="500" effects="fade:in" />
-            <close duration="500" effects="fade:out" />
-        </popup-animation>
-    </kendo-dialog>
-    <kendo-dialog name="editCodeDialog" title="Edit Code" modal="true" visible="false" min-width="500">
-        <content>
-            <p>You are about to edit code for this page. This will save the current version before proceeding. Are you ready?</p>
-        </content>
-        <actions>
-            <action text="Cancel">
-            </action>
-            <action action="editCode" primary="true" text="Yes" title="Confirm">
-            </action>
-        </actions>
-        <popup-animation>
-            <open duration="500" effects="fade:in" />
-            <close duration="500" effects="fade:out" />
-        </popup-animation>
-    </kendo-dialog>
-    <kendo-dialog name="saveErrorsDialog" title="Errors Log" modal="true" visible="false" min-width="500">
-        <content>
-            <div id="divErrorLog">
-            </div>
-        </content>
-        <popup-animation>
-            <open duration="500" effects="fade:in" />
-            <close duration="500" effects="fade:out" />
-        </popup-animation>
-    </kendo-dialog>
-    <kendo-dialog name="closeEditorDialog" title="Close Editor" modal="true" visible="false" min-width="500">
-        <content>
-            <p><span class="badge badge-warning">Warning:</span> Any unsaved changes will be lost!</p>
-        </content>
-        <popup-animation>
-            <open duration="500" effects="fade:in" />
-            <close duration="500" effects="fade:out" />
-        </popup-animation>
-        <actions>
-            <action text="Cancel">
-            </action>
-            <action action="closeEditor" primary="true" text="Close" title="Confirm">
-            </action>
-        </actions>
-    </kendo-dialog>
-    <form id="frmLogout" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new {area = ""})">
+            }))
     </form>
-</div>
+    <div style="display: none">
+        <kendo-dialog name="saveChangesDialog" title="Please Wait" modal="true" visible="false" min-width="500">
+            <content>
+                <div>
+                    <p>Saving changes...</p>
+                </div>
+            </content>
+            <popup-animation>
+                <open duration="500" effects="fade:in"/>
+                <close duration="500" effects="fade:out"/>
+            </popup-animation>
+        </kendo-dialog>
+        <kendo-dialog name="changesSavedDialog" title="Changes Saved" modal="true" visible="false" min-width="300">
+            <content>
+                <div>
+                    <p>Your changes have been successfully save, and reloaded into this page.</p>
+                    <div class="form-group">
+                        <span>Version saved:</span>
+                        <span id="savedVersionNo"></span>
+                    </div>
+                </div>
+            </content>
+            <popup-animation>
+                <open duration="500" effects="fade:in"/>
+                <close duration="500" effects="fade:out"/>
+            </popup-animation>
+        </kendo-dialog>
+        <kendo-dialog name="versionsDialog" title="Page Versions" modal="true" visible="false" min-width="500">
+            <content>
+                <p>On your way to the version list for this page. This will save the current version before proceeding. Are you ready?</p>
+            </content>
+            <actions>
+                <action text="Cancel">
+                </action>
+                <action action="goVersions" primary="true" text="Yes" title="Confirm">
+                </action>
+            </actions>
+            <popup-animation>
+                <open duration="500" effects="fade:in"/>
+                <close duration="500" effects="fade:out"/>
+            </popup-animation>
+        </kendo-dialog>
+        <kendo-dialog name="editCodeDialog" title="Edit Code" modal="true" visible="false" min-width="500">
+            <content>
+                <p>You are about to edit code for this page. This will save the current version before proceeding. Are you ready?</p>
+            </content>
+            <actions>
+                <action text="Cancel">
+                </action>
+                <action action="editCode" primary="true" text="Yes" title="Confirm">
+                </action>
+            </actions>
+            <popup-animation>
+                <open duration="500" effects="fade:in"/>
+                <close duration="500" effects="fade:out"/>
+            </popup-animation>
+        </kendo-dialog>
+        <kendo-dialog name="saveErrorsDialog" title="Errors Log" modal="true" visible="false" min-width="500">
+            <content>
+                <div id="divErrorLog">
+                </div>
+            </content>
+            <popup-animation>
+                <open duration="500" effects="fade:in"/>
+                <close duration="500" effects="fade:out"/>
+            </popup-animation>
+        </kendo-dialog>
+        <kendo-dialog name="closeEditorDialog" title="Close Editor" modal="true" visible="false" min-width="500">
+            <content>
+                <p><span class="badge badge-warning">Warning:</span> Any unsaved changes will be lost!</p>
+            </content>
+            <popup-animation>
+                <open duration="500" effects="fade:in"/>
+                <close duration="500" effects="fade:out"/>
+            </popup-animation>
+            <actions>
+                <action text="Cancel">
+                </action>
+                <action action="closeEditor" primary="true" text="Close" title="Confirm">
+                </action>
+            </actions>
+        </kendo-dialog>
+    </div>
 
-<script>
-    var cardEditor;
-    var cardHtml;
-    var validationSummary = $("#validation-summary");
-
-    $("#btnSave").on("click",
-        function (e) {
-            e.preventDefault();
-            handlePost(e);
+    <script>
+        var cardEditor;
+        var cardHtml;
+        var validationSummary = $("#validation-summary");
+        $(document).ready(function() {
+            setPublishLocalDateTime();
         });
 
-    $(document).ready(function() {
-        setPublishLocalDateTime();
-    });
-
-    // Handles button bar click - menu button.
-    function bgCmsClick(e) {
-        var command = e.target.text();
-        switch (command) {
-        case "Home Page":
-            window.location.href = "@Url.Content("~/")";
-            break;
-        case "Edit":
-            window.location.href = "@Url.Action("Versions", "Editor", new {Id = Model?.ArticleNumber})";
-            break;
-        case "Files":
-            window.location.href = "@Url.Action("Index", "FileManager")";
-            break;
-        case "Pages":
-            window.location.href = "@Url.Action("Index", "Editor")";
-            break;
-        case "Layouts":
-            window.location.href = "@Url.Action("Index", "Layouts")";
-            break;
-        case "Templates":
-            window.location.href = "@Url.Action("Index", "Templates")";
-            break;
-        case "Navigation":
-            window.location.href = "@Url.Action("Index", "Menu")";
-            break;
-        case "Logs":
-            window.location.href = "@Url.Action("Logs", "Editor")";
-            break;
-        case "Publish":
-            window.location.href = "@Url.Action("Publish", "Editor")";
-            break;
-        case "Users":
-            window.location.href = "@Url.Action("Index", "Users")";
-            break;
-        case "Reset Site":
-            window.location.href = "@Url.Action("TrainingReset", "Setup")";
-            break;
-        case "Teams":
-            window.location.href = "@Url.Action("Index", "Teams")";
-                break;
-        case "User Account":
-            window.location.href = "@Url.Page("/Account/Manage/Index", new {area = "Identity"})";
-            break;
-        case "Log Out":
-            $("#frmLogout").submit();
-                break;
-        case "Help":
-                window.open("https://cosmos.azureedge.net/documentation");
-            break;
+        function setPublishLocalDateTime() {
+            var published = $("#Published").val();
+            if (published !== null && typeof (published) !== "undefined") {
+                var localDateTime = convertUtcToLocalDateTime(published); // This will turn UTC to local time
+                var dateTimePicker = $("#dtPublished").data("kendoDateTimePicker");
+                dateTimePicker.value(localDateTime);
+            }
         }
-    }
 
-    // Handles button bar click - edit button.
-    function bgEditClick(e) {
-        var command = e.target.text();
-        switch (command) {
-        case "Save":
-            handlePost(e);
-            break;
-        case "Code":
-            $("#editCodeDialog").data("kendoDialog").open();
+        $("#btnSave").on("click",
+            function(e) {
+                e.preventDefault();
+                handlePost();
+            });
+
+
+        // Handles button bar click - edit button.
+        function bgEditClick(e) {
+            var command = e.target.text();
+            switch (command) {
+            case "Save":
+                handlePost();
                 break;
-        case "Files":
+            case "Code":
+                $("#editCodeDialog").data("kendoDialog").open();
+                break;
+            case "Files":
                 window.open("/FileManager", "_blank ");
-            break;
-        case "Versions":
-            openVersionsDialog();
-            break;
-        case "Close":
-            showCloseEditorDialog();
-            break;
-        case "Preview":
-            window.open("@Url.Action("Preview", "Home", new {Model?.Id})");
-            break;
-        case "Help":
-            window.open("https://cosmos.azureedge.net/edit_page#HtmlEditor");
-            break;
-        }
-    }
-
-    function handlePost(e) {
-        $("#saveChangesDialog").data("kendoDialog").open();
-
-        var validator = $("#frmEdit").data("kendoValidator");
-        $("#divErrorLog").html("");
-
-        // Save date/time
-        var dateTimePicker = $("#dtPublished").data("kendoDateTimePicker");
-        var dateTimeValue = dateTimePicker.value();
-
-        if (dateTimeValue !== null && dateTimeValue !== "null") {
-            $("#Published").val(dateTimeValue.toISOString());
-        } else {
-            $("#Published").val("");
+                break;
+            case "Versions":
+                openVersionsDialog();
+                break;
+            case "Close":
+                showCloseEditorDialog();
+                break;
+            case "Preview":
+                window.open("@Url.Action("Preview", "Home", new {Model?.Id})");
+                break;
+            case "Help":
+                window.open("https://cosmos.azureedge.net/edit_page#HtmlEditor");
+                break;
+            }
         }
 
-
-        if (validator.validate()) {
-
+        function handlePost() {
             $("#saveChangesDialog").data("kendoDialog").open();
 
-            processKendoCtrls("editor", "kendoEditor");
-            processKendoCtrls("listbox", "kendoDropDownList");
+            var validator = $("#frmEdit").data("kendoValidator");
+            $("#divErrorLog").html("");
 
-            // No template change, may do ajax post.
-            $.post("@Url.Action("SaveHtml", controllerName)",
-                $("#frmEdit").serialize(),
-                function(response) {
-                    if (response.IsValid) {
-                        $("#previewItem").show();
-                    } else {
-                        var errorMsg = "<h5>Error(s) detected while saving:</h5>";
-
-                        // Invalid response.
-                        $.each(response.Errors,
-                            function(index, error) {
-                                errorMsg = "<p>" + error.Key + "</p><ul>";
-                                $.each(error.Errors,
-                                    function(index, innerError) {
-                                        errorMsg = errorMsg + "<li>" + innerError.ErrorMessage + "</li>";
-                                    });
-                                errorMsg = errorMsg + "</ul>";
-                            });
-                        $("#divErrorLog").html(errorMsg);
-                        $("#saveErrorsDialog").data("kendoDialog").open();
-                    }
-                    //
-                    // Save the data that came back.
-                    //
-                    $("#Id").val(response.Model.Id);
-                    $("#btnPreview").attr("href", "@Url.Action("Preview", "Home")/" + response.Model.Id);
-                    $("#ArticleNumber").val(response.Model.ArticleNumber);
-
-                    // Template name
-                    editorSave("eTemplateName", "kendoDropDownList", response.Model.TemplateName);
-
-                    $("#UrlPath").val(response.Model.UrlPath);
-
-                    // Version
-                    $("#VersionNumber").val(response.Model.VersionNumber);
-                    $("#versionLbl").text("Version: " + response.Model.VersionNumber);
-
-                    // Published
-                    $("#Published").val(response.Model.Published); 
-                    setPublishLocalDateTime();
-
-                    // Title
-                    editorSave("eTitle", "kendoEditor", response.Model.Title);
-
-                    // Content
-                    editorSave("eContent", "kendoEditor", response.Model.Content);
-
-                    $("#savedVersionNo").text(response.Model.VersionNumber);
-
-                    $("#saveChangesDialog").data("kendoDialog").close();
-                    if (response.IsValid) {
-                        $("#changesSavedDialog").data("kendoDialog").open();
-                        setTimeout(function() {
-                                $("#changesSavedDialog").data("kendoDialog").close();
-                            },
-                            1000);
-                    }
-                });
-        } else {
-            validationSummary.html("<p>Cannot save because this page has errors.</p>");
-        }
-        return false;
-    }
-
-    function processKendoCtrls(roleName, dataName) {
-        $(document).find("[data-role=" + roleName + "]").each(function() {
-            var editor = $(this).data(dataName);
-            if (typeof editor !== 'undefined') {
-                // Kendo editor
-                var hid = editor.element.attr("id").substring(1, editor.element.attr("id").length);
-                var hidden = $("#" + hid);
-                if (hidden === null || hidden === "undefined") {
-                    alert("Could not find hidden field: " + hid);
-                } else {
-                    hidden.val(editor.value());
-                }
-            } else {
-                editor = $(this);
-                var hid = editor.attr("id").substring(1, editor.attr("id").length);
-                var hidden = $("#" + hid);
-                if (hidden === null || hidden === "undefined") {
-                    alert("Could not find hidden field: " + hid);
-                } else {
-                    hidden.val(editor.html());
-                }
-            }
-        });
-    }
-
-    function editorSave(id, type, value) {
-        // Find the editor
-        var editor = $("#" + id).data(type);
-        if (editor !== null && typeof(editor) !== "undefined") {
-            editor.value(value);
-        }
-    }
-
-    function openVersionsDialog() {
-        $("#versionsDialog").data("kendoDialog").open();
-    }
-
-    function goVersions() {
-        $("#btnSave").click();
-        window.location = "@Url.Action("Versions", "Editor")/" + $("#ArticleNumber").val();
-    }
-
-    function showDialog(name) {
-        $("#" + name).data("kendoDialog").open();
-    }
-
-    function editCode() {
-        $("#btnSave").click();
-        window.location = "@Url.Action("EditCode", "Editor")/" + $("#Id").val();
-    }
-
-    function showTemplateDialog() {
-        var dialog = $("#templateChoiceDialog").data("kendoDialog");
-        dialog.open();
-    }
-
-    function showCloseEditorDialog() {
-        var dialog = $("#closeEditorDialog").data("kendoDialog");
-        dialog.open();
-    }
-
-    function closeEditor() {
-        window.location.href = "@Url.Content($"~/{Model?.UrlPath.Replace("root", "")}")";
-    }
-    
-    function setPublishLocalDateTime() {
-        var published = $("#Published").val();
-        if (published !== null && typeof (published) !== "undefined") {
-            var localDateTime = new Date(published); // This will turn UTC to local time
-            var formattedLocalDateTime = kendo.toString(localDateTime, "G");
-            $("#Published").val(formattedLocalDateTime);
+            // Save date/time
             var dateTimePicker = $("#dtPublished").data("kendoDateTimePicker");
-            dateTimePicker.value(new Date(formattedLocalDateTime));
+            var dateTimeValue = dateTimePicker.value();
+
+            // Note, this saves the date/time using local time (of the user's computer).
+            // The server stores this as UTC time.
+            if (dateTimeValue !== null && dateTimeValue !== "null") {
+                var datetime = new Date(dateTimeValue);
+// ReSharper disable once QualifiedExpressionMaybeNull
+                var utcString = datetime.toUTCString();
+                $("#Published").val(utcString);
+            } else {
+                $("#Published").val("");
+            }
+
+            if (validator.validate()) {
+
+                $("#saveChangesDialog").data("kendoDialog").open();
+
+                processKendoCtrls("editor", "kendoEditor");
+                processKendoCtrls("listbox", "kendoDropDownList");
+
+                // No template change, may do ajax post.
+                $.post("@Url.Action("SaveHtml", controllerName)",
+                    $("#frmEdit").serialize(),
+                    function(response) {
+                        if (response.IsValid) {
+                            $("#previewItem").show();
+                        } else {
+                            var errorMsg = "<h5>Error(s) detected while saving:</h5>";
+
+                            // Invalid response.
+                            $.each(response.Errors,
+                                function(index, error) {
+                                    errorMsg = "<p>" + error.Key + "</p><ul>";
+                                    $.each(error.Errors,
+                                        function(index, innerError) {
+                                            errorMsg = errorMsg + "<li>" + innerError.ErrorMessage + "</li>";
+                                        });
+                                    errorMsg = errorMsg + "</ul>";
+                                });
+                            $("#divErrorLog").html(errorMsg);
+                            $("#saveErrorsDialog").data("kendoDialog").open();
+                        }
+                        //
+                        // Save the data that came back.
+                        //
+                        $("#Id").val(response.Model.Id);
+                        $("#btnPreview").attr("href", "@Url.Action("Preview", "Home")/" + response.Model.Id);
+                        $("#ArticleNumber").val(response.Model.ArticleNumber);
+
+                        // Template name
+                        editorSave("eTemplateName", "kendoDropDownList", response.Model.TemplateName);
+
+                        $("#UrlPath").val(response.Model.UrlPath);
+
+                        // Version
+                        $("#VersionNumber").val(response.Model.VersionNumber);
+                        $("#versionLbl").text("Version: " + response.Model.VersionNumber);
+
+                        // Published
+                        var pubUtc = kendo.toString(response.Model.Published, "G");
+                        $("#Published").val(response.Model.Published);
+                        setPublishLocalDateTime();
+
+                        // Title
+                        editorSave("eTitle", "kendoEditor", response.Model.Title);
+
+                        // Content
+                        editorSave("eContent", "kendoEditor", response.Model.Content);
+
+                        $("#savedVersionNo").text(response.Model.VersionNumber);
+
+                        $("#saveChangesDialog").data("kendoDialog").close();
+                        if (response.IsValid) {
+                            $("#changesSavedDialog").data("kendoDialog").open();
+                            setTimeout(function() {
+                                    $("#changesSavedDialog").data("kendoDialog").close();
+                                },
+                                1000);
+                        }
+                    });
+            } else {
+                validationSummary.html("<p>Cannot save because this page has errors.</p>");
+            }
+            return false;
         }
 
+        function processKendoCtrls(roleName, dataName) {
+            $(document).find("[data-role=" + roleName + "]").each(function() {
+                var editor = $(this).data(dataName);
+                var hid;
+                var hidden;
+                if (typeof editor !== 'undefined' && editor !== null) {
+                    // Kendo editor
+                    hid = editor.element.attr("id").substring(1, editor.element.attr("id").length);
+                    hidden = $("#" + hid);
+                    if (hidden === null || hidden === "undefined") {
+                        alert("Could not find hidden field: " + hid);
+                    } else {
+// ReSharper disable once QualifiedExpressionMaybeNull
+                        hidden.val(editor.value());
+                    }
+                } else {
+                    editor = $(this);
+                    hid = editor.attr("id").substring(1, editor.attr("id").length);
+                    hidden = $("#" + hid);
+                    if (hidden === null || hidden === "undefined") {
+                        alert("Could not find hidden field: " + hid);
+                    } else {
+// ReSharper disable once QualifiedExpressionMaybeNull
+                        hidden.val(editor.html());
+                    }
+                }
+            });
+        }
+
+        function editorSave(id, type, value) {
+            // Find the editor
+            var editor = $("#" + id).data(type);
+            if (editor !== null && typeof(editor) !== "undefined") {
+// ReSharper disable once QualifiedExpressionMaybeNull
+                editor.value(value);
+            }
+        }
+
+        function openVersionsDialog() {
+            $("#versionsDialog").data("kendoDialog").open();
+        }
+
+        function goVersions() {
+            $("#btnSave").click();
+            window.location = "@Url.Action("Versions", "Editor")/" + $("#ArticleNumber").val();
+        }
+
+        function showDialog(name) {
+            $("#" + name).data("kendoDialog").open();
+        }
+
+        function editCode() {
+            $("#btnSave").click();
+            window.location = "@Url.Action("EditCode", "Editor")/" + $("#Id").val();
+        }
+
+        function showTemplateDialog() {
+            var dialog = $("#templateChoiceDialog").data("kendoDialog");
+            dialog.open();
+        }
+
+        function showCloseEditorDialog() {
+            var dialog = $("#closeEditorDialog").data("kendoDialog");
+            dialog.open();
+        }
+
+        function closeEditor() {
+            window.location.href = "@Url.Content($"~/{Model?.UrlPath.Replace("root", "")}")";
+        }
+    </script>
+}
+else
+{
+    @* NOT EDITING TOOL BAR *@
+    @(Html.Kendo().ToolBar()
+        .Name("ToolBar")
+        .Items(items =>
+        {
+            items.Add().Type(CommandType.SplitButton).Text("Menu").ImageUrl("/images/CosmosBearIcon.png").MenuButtons(menuButtons =>
+            {
+                menuButtons.Add().Text("Home Page").SpriteCssClass("fa fa-home");
+                menuButtons.Add().Text("Help").SpriteCssClass("fa fa-info-circle");
+                if (Model != null && controllerName == "Home" && actionName == "Index" && (isAuthor && Model?.Published == null || isEditor || isAdministrator))
+                {
+                    menuButtons.Add().Text("Edit").SpriteCssClass("fa fa-edit");
+                }
+                menuButtons.Add().Text("Files").SpriteCssClass("fa fa-folder");
+                menuButtons.Add().Text("Pages").SpriteCssClass("fa fa-file-text-o");
+                menuButtons.Add().Text("Templates").SpriteCssClass("fa fa-building");
+                if (isAdministrator || isEditor)
+                {
+                    menuButtons.Add().Text("Publish").SpriteCssClass("fa fa-html5");
+                    menuButtons.Add().Text("Navigation").SpriteCssClass("fa fa-list");
+                    menuButtons.Add().Text("Layouts").SpriteCssClass("fa fa-wrench");
+                    menuButtons.Add().Text("Logs").SpriteCssClass("fa fa-pencil");
+                    menuButtons.Add().Text("Teams").SpriteCssClass("fa fa-flag");
+                }
+                if (isAdministrator)
+                {
+                    menuButtons.Add().Text("Users").SpriteCssClass("fa fa-users");
+                    if (SiteOptions.Value.AllowReset)
+                    {
+                        menuButtons.Add().Text("Reset Site").SpriteCssClass("fa fa-power-off");
+                    }
+                }
+                menuButtons.Add().Text("User Account");
+                menuButtons.Add().Text("Log Out");
+            }).Click("bgCmsClick");
+            items.Add().Template("<a id='timeZone' title='Dates and times are in this time zone.' class='btn btn-sm btn-secondary'></a>");
+        }))
+    <div style="display: none">
+        @* This is the hidden log out form executed by the log out drop down menu pick above*@
+        <form id="frmLogout" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new {area = ""})">
+        </form>
+    </div>
+    <script>
+        // Handles button bar click - menu button.
+        function bgCmsClick(e) {
+            var command = e.target.text();
+            switch (command) {
+            case "Home Page":
+                window.location.href = "@Url.Content("~/")";
+                break;
+            case "Edit":
+                window.location.href = "@Url.Action("Versions", "Editor", new {Id = Model?.ArticleNumber})";
+                break;
+            case "Files":
+                window.location.href = "@Url.Action("Index", "FileManager")";
+                break;
+            case "Pages":
+                window.location.href = "@Url.Action("Index", "Editor")";
+                break;
+            case "Layouts":
+                window.location.href = "@Url.Action("Index", "Layouts")";
+                break;
+            case "Templates":
+                window.location.href = "@Url.Action("Index", "Templates")";
+                break;
+            case "Navigation":
+                window.location.href = "@Url.Action("Index", "Menu")";
+                break;
+            case "Logs":
+                window.location.href = "@Url.Action("Logs", "Editor")";
+                break;
+            case "Publish":
+                window.location.href = "@Url.Action("Publish", "Editor")";
+                break;
+            case "Users":
+                window.location.href = "@Url.Action("Index", "Users")";
+                break;
+            case "Reset Site":
+                window.location.href = "@Url.Action("TrainingReset", "Setup")";
+                break;
+            case "Teams":
+                window.location.href = "@Url.Action("Index", "Teams")";
+                break;
+            case "User Account":
+                window.location.href = "@Url.Page("/Account/Manage/Index", new {area = "Identity"})";
+                break;
+            case "Log Out":
+                $("#frmLogout").submit();
+                break;
+            case "Help":
+                window.open("https://cosmos.azureedge.net/documentation");
+                break;
+            }
+        }
+    </script>
+}
+<script>
+    $(document).ready(function () {
+        var timeZoneElement = $("#timeZone");
+        timeZoneElement.html(getLocalTimeZone());
+    });
+
+    function getLocalTimeZone() {
         var datetime = new Date();
         var dateTimeString = datetime.toString();
         var timezone = dateTimeString.substring(dateTimeString.indexOf("(") - 1);
-        $("#timeZone").html(timezone);
+        return timezone;
     }
 
+    function convertUtcToLocalDateTime(utcDateTime) {
+
+        if (utcDateTime === null || typeof (utcDateTime) === "undefined" || utcDateTime === "") {
+            return "";
+        }
+
+        // ReSharper disable once QualifiedExpressionMaybeNull
+        if (utcDateTime instanceof Date || utcDateTime.endsWith("Z")) {
+            var localStateTime = new Date(utcDateTime);
+            return localStateTime;
+        }
+
+        // This will turn UTC to local time
+        // ReSharper disable once UseOfImplicitGlobalInFunctionScope
+        var datTimeString = kendo.toString(new Date(utcDateTime), "G");
+        var formattedLocalDateTime = datTimeString + " UTC";
+        return new Date(formattedLocalDateTime);
+    }
 </script>
