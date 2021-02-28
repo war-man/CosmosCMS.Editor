@@ -34,8 +34,8 @@
                 c.Template($"<a class=\"btn btn-sm btn-secondary\" href=\"{Url.Action("Edit", "Editor")}/#: Id #\" title=\"Edit Article\" #: visibleStyle('{isReviewer}', '{isAuthor}', Published) #>Edit HTML</a> <a class=\"btn btn-sm btn-secondary\" href=\"{Url.Action("EditCode", "Editor")}/#: Id #\" title=\"Edit Code\" #: visibleStyle('{isReviewer}', '{isAuthor}', Published) #>Edit Code</a> <a target=\"_blank\" class=\"btn btn-sm btn-secondary\" href=\"{Url.Action("Preview", "Home")}/#: Id #\" title=\"Open preview\">Preview</a>").Width(260);
                 c.Bound(b => b.VersionNumber).Title("Version");
                 c.Bound(b => b.Title).Width(260);
-                c.Bound(b => b.Updated).Title("Edited").Format("{0:MM/dd/yy H:mm:ss}");
-                c.Bound(b => b.Published).Title("Published").Format("{0:MM/dd/yy H:mm:ss}");
+                c.Template("#= kendo.toString(Updated, 'G') #").Title("Edited");
+                c.Template("#= kendo.toString(Published, 'G') #").Title("Published");
             })
             .Sortable()
             .Filterable()

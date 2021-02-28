@@ -11,7 +11,7 @@
                 @(Html.Kendo().Grid<ArticleLogJsonModel>().Name("grid")
                     .Columns(column =>
                     {
-                        column.Bound(b => b.DateTimeStamp);
+                        column.Template("#= kendo.toString(DateTimeStamp, 'G')#");
                         column.Bound(b => b.Title);
                         column.Bound(b => b.ActivityNotes);
                         column.Bound(b => b.Email);

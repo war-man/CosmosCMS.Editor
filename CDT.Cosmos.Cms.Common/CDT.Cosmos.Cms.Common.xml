@@ -545,9 +545,9 @@
             </remarks>
             <returns></returns>
         </member>
-        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.UpdateDateTimeStamp">
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.UpdateDateTimeStamps">
             <summary>
-                Updates the date/time stamp for all published articles.
+                Updates the date/time stamp for all published articles to current UTC time.
             </summary>
             <returns>Number of articles updated with new date/time</returns>
             <remarks>This action is used only for "publishing" entire websites.</remarks>

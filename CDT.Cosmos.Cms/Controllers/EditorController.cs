@@ -381,7 +381,7 @@ namespace CDT.Cosmos.Cms.Controllers
         {
             try
             {
-                var result = await ArticleLogic.UpdateDateTimeStamp();
+                var result = await ArticleLogic.UpdateDateTimeStamps();
                 return Json(result);
             }
             catch (Exception e)
@@ -485,19 +485,26 @@ namespace CDT.Cosmos.Cms.Controllers
         [Authorize(Roles = "Administrators, Editors")]
         public async Task<IActionResult> Read_Logs([DataSourceRequest] DataSourceRequest request)
         {
-            var query = DbContext.ArticleLogs
+            var data = await DbContext.ArticleLogs
                 .OrderByDescending(o => o.DateTimeStamp)
                 .Include(i => i.IdentityUser)
                 .Include(b => b.Article)
-                .Select(s => new ArticleLogJsonModel
+                .Select(s => new
                 {
-                    Id = s.Id,
-                    ActivityNotes = s.ActivityNotes,
-                    DateTimeStamp = s.DateTimeStamp,
-                    Title = s.Article.Title,
-                    Email = s.IdentityUser.Email
-                });
-            var result = await query.ToDataSourceResultAsync(request);
+                    s.Id,
+                    s.ActivityNotes,
+                    s.DateTimeStamp,
+                    s.Article.Title,
+                    s.IdentityUser.Email
+                }).ToListAsync();
+            var result = await data.Select(s => new ArticleLogJsonModel
+            {
+                Id = s.Id,
+                ActivityNotes = s.ActivityNotes,
+                DateTimeStamp = DateTime.SpecifyKind(s.DateTimeStamp, DateTimeKind.Utc),
+                Title = s.Title,
+                Email = s.Email
+            }).ToDataSourceResultAsync(request);
             return Json(result);
         }
 
@@ -898,16 +905,26 @@ namespace CDT.Cosmos.Cms.Controllers
             if (SiteOptions.Value.ReadWriteMode)
                 try
                 {
-                    var data = DbContext.Articles.OrderByDescending(o => o.VersionNumber)
-                        .Where(a => a.ArticleNumber == id).Select(s => new ArticleVersionInfo
+                    var data = await DbContext.Articles.OrderByDescending(o => o.VersionNumber)
+                        .Where(a => a.ArticleNumber == id).Select(s => new 
                         {
-                            Id = s.Id,
-                            Published = s.Published,
-                            Title = s.Title,
-                            Updated = s.Updated,
-                            VersionNumber = s.VersionNumber
+                            s.Id,
+                            s.Published,
+                            s.Title,
+                            s.Updated,
+                            s.VersionNumber
+                        }).ToListAsync();
+
+                    var model = data.Select(x =>
+                        new ArticleVersionInfo
+                        {
+                            Id = x.Id,
+                            VersionNumber = x.VersionNumber,
+                            Title = x.Title,
+                            Updated = DateTime.SpecifyKind(x.Updated, DateTimeKind.Utc),
+                            Published = x.Published.HasValue ? DateTime.SpecifyKind(x.Published.Value, DateTimeKind.Utc) : (DateTime?)null
                         });
-                    return Json(await data.ToDataSourceResultAsync(request));
+                    return Json(await model.ToDataSourceResultAsync(request));
                 }
                 catch (Exception e)
                 {
