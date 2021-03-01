@@ -11,6 +11,7 @@ namespace CDT.Cosmos.Cms.Models
         public int Id { get; set; }
         public string EditingField { get; set; }
         public string EditorTitle { get; set; }
+        public int Version { get; set; }
         public IEnumerable<EditorField> EditorFields { get; set; }
         public IEnumerable<string> CustomButtons { get; set; }
     }
