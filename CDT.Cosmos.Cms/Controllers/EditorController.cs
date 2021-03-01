@@ -31,7 +31,6 @@ namespace CDT.Cosmos.Cms.Controllers
         private readonly IOptions<AkamaiContextConfig> _akamaiConfig;
         private readonly IOptions<AzureCdnConfig> _azureCdnConfig;
         private readonly string _blobEndpointUrl;
-        private readonly ILogger _logger;
 
         public EditorController(ILogger<EditorController> logger,
             ApplicationDbContext dbContext,
@@ -52,7 +51,6 @@ namespace CDT.Cosmos.Cms.Controllers
                 distributedCache,
                 redisOptions)
         {
-            _logger = logger;
             _azureCdnConfig = azureCdnService;
             _akamaiConfig = akamaiService;
             _blobEndpointUrl = blobConfig.Value.BlobServicePublicUrl.TrimEnd('/') + "/pub/";
@@ -546,6 +544,7 @@ namespace CDT.Cosmos.Cms.Controllers
                     var user = await UserManager.GetUserAsync(User);
                     var teamMember = await DbContext.TeamMembers
                         .Where(t => t.UserId == user.Id &&
+                                    // ReSharper disable once AccessToModifiedClosure
                                     t.Team.Articles.Any(a => a.Id == model.Id))
                         .FirstOrDefaultAsync();
 
@@ -701,6 +700,7 @@ namespace CDT.Cosmos.Cms.Controllers
                         var user = await UserManager.GetUserAsync(User);
                         var teamMember = await DbContext.TeamMembers
                             .Where(t => t.UserId == user.Id &&
+                                        // ReSharper disable once AccessToModifiedClosure
                                         t.Team.Articles.Any(a => a.Id == article.Id))
                             .FirstOrDefaultAsync();
 
@@ -750,6 +750,7 @@ namespace CDT.Cosmos.Cms.Controllers
                         }
 
 
+                    // ReSharper disable once PossibleNullReferenceException
                     ViewData["Version"] = article.VersionNumber;
 
                     return View(new EditCodePostModel
@@ -840,7 +841,7 @@ namespace CDT.Cosmos.Cms.Controllers
                     {
                         var identityUser = await UserManager.GetUserAsync(User);
                         ViewData["TeamsLookup"] = await DbContext.Teams
-                            .Where(a => a.Members.Any(a => a.UserId == identityUser.Id))
+                            .Where(a => a.Members.Any(x => x.UserId == identityUser.Id))
                             .Select(s => new TeamViewModel
                             {
                                 Id = s.Id,
