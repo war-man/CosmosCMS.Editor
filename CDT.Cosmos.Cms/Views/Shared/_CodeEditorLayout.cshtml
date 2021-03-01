@@ -81,6 +81,7 @@
                         }).Click("btnHelpClick");
                         item.Add().Type(CommandType.Separator);
                         item.Add().Template(@"<div><strong>Editing:</strong> " + Model.EditorTitle + "</div>");
+                        item.Add().Template(@"<div><strong>Version:</strong> " + ViewData["Version"] + "</div>");
                         item.Add().Template("<span title=\"Edit sessions\" id=\"pubLbl\">Session info: </span><span id=\"articleChat\"></span>");
                     }))
                 @(Html.Kendo().TabStrip().Name("tabs")

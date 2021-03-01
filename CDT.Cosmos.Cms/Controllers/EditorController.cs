@@ -619,6 +619,8 @@ namespace CDT.Cosmos.Cms.Controllers
                             return Unauthorized();
                     }
 
+                    ViewData["Version"] = article.VersionNumber;
+
                     return View(new EditCodePostModel
                     {
                         Id = article.Id,
@@ -746,6 +748,9 @@ namespace CDT.Cosmos.Cms.Controllers
                             var provider = new EmptyModelMetadataProvider();
                             ModelState.AddModelError("Save", e, provider.GetMetadataForType(typeof(string)));
                         }
+
+
+                    ViewData["Version"] = article.VersionNumber;
 
                     return View(new EditCodePostModel
                     {

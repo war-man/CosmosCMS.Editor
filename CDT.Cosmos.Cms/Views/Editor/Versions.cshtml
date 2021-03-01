@@ -1,4 +1,5 @@
-﻿@using Kendo.Mvc.UI
+﻿@addTagHelper *, Kendo.Mvc
+@using Kendo.Mvc.UI
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Versions";
@@ -18,24 +19,25 @@
 {
     <div class="row">
         <div class="col-md-12">
-            <a class="btn btn-sm btn-primary" title="Creates a new version of this article using the last version, and puts it in edit mode." asp-action="CreateVersion" asp-route-id="@ViewData["ArticleId"]">Create New Version</a>
-            <br/><br/>
+            <a id="btnNewVersion" class="btn btn-sm btn-primary" title="Creates a new version of this article using the last version, and puts it in edit mode." asp-action="CreateVersion" asp-route-id="@ViewData["ArticleId"]">Create New Version</a>
+            <br /><br />
         </div>
     </div>
 }
 <div class="row">
     <div class="col-md-12">
         <p>Shown below are the list of version for this article.</p>
-        <br/>
+        <br />
         @(Html.Kendo().Grid<ArticleVersionInfo>().Name("grid")
             .Columns(c =>
             {
                 c.Bound(b => b.Id).Hidden(true);
-                c.Template($"<a class=\"btn btn-sm btn-secondary\" href=\"{Url.Action("Edit", "Editor")}/#: Id #\" title=\"Edit Article\" #: visibleStyle('{isReviewer}', '{isAuthor}', Published) #>Edit HTML</a> <a class=\"btn btn-sm btn-secondary\" href=\"{Url.Action("EditCode", "Editor")}/#: Id #\" title=\"Edit Code\" #: visibleStyle('{isReviewer}', '{isAuthor}', Published) #>Edit Code</a> <a target=\"_blank\" class=\"btn btn-sm btn-secondary\" href=\"{Url.Action("Preview", "Home")}/#: Id #\" title=\"Open preview\">Preview</a>").Width(260);
-                c.Bound(b => b.VersionNumber).Title("Version");
-                c.Bound(b => b.Title).Width(260);
+                c.Template($"<a target=\"_blank\" class=\"btn btn-sm btn-primary\" href=\"{Url.Action("Preview", "Home")}/#: Id #\" title=\"Open preview\"><span class=\"fa fa-search\"></span></a>").Width(40);
+                c.Template($"<a class=\"btn btn-sm btn-secondary\" href=\"javascript:showEditDialog('HTML', #: Id #, '#: Published #') \" title=\"Edit online with Kendo WSYWIG editor\" #: visibleStyle('{isReviewer}', '{isAuthor}', Published) #><span class=\"fa fa-font\"></span></a> <a class=\"btn btn-sm btn-secondary\" href=\"javascript:showEditDialog('CODE', #: Id #, '#: Published #')\" title=\"Edit online with VS Code Monaco editor\" #: visibleStyle('{isReviewer}', '{isAuthor}', Published) #><img src=\"{Url.Content("~/images/vscicon-120.png")}\" height=\"18\" width=\"18\" /></a>").Width(120).Title("Edit Tools");
+                c.Bound(b => b.VersionNumber).Width(86).Title("Version#");
+                c.Bound(b => b.Title);
                 c.Template("#= kendo.toString(Updated, 'G') #").Title("Edited");
-                c.Template("#= kendo.toString(Published, 'G') #").Title("Published");
+                c.Template("#= formatPublishedDate(Published) #").Title("Published");
             })
             .Sortable()
             .Filterable()
@@ -44,12 +46,105 @@
             )
     </div>
 </div>
-
+<img src="~/images/vscicon-120.png" height="26" width="26" />
+<div style="display: none">
+    <kendo-dialog name="editPublishedPageDialog" title="Editing Published Page" modal="true" visible="false" width="450">
+        <content>
+            <h4>Editing Published Page</h4>
+            <p><span class="badge badge-warning">Warning:</span> You are about to edit a page that already has been published.</p>
+            <hr class="text-light" />
+            <h4>Tip <span class="fa fa-lightbulb-o"></span></h4>
+            <p>
+                Rather than editing a <em>published</em> page, create a new version and
+                edit that. Then publish it when ready
+            </p>
+            <p>That way you can make changes and not affect what people see now.</p>
+            <p>It also lets you control when new content goes live.</p>
+        </content>
+        <popup-animation>
+            <open duration="500" effects="fade:in" />
+            <close duration="500" effects="fade:out" />
+        </popup-animation>
+        <actions>
+            <action text="Cancel">
+            </action>
+            <action action="editNewVersion" primary="true" text="New Version" title="Edit new version of page">
+            </action>
+            <action action="editPublishedVersion" text="Edit Published" title="Edit already published version of page">
+            </action>
+        </actions>
+    </kendo-dialog>
+</div>
 <script>
     function visibleStyle(isReviewer, isAuthor, isPublished) {
         if (isReviewer === "True" || (isAuthor === "True" && isPublished !== null)) {
             return "style=display:none";
         }
         return "";
+    }
+
+    var editHtmlUrl = "@Url.Action("Edit", "Editor")";
+    var editCodeUrl = "@Url.Action("EditCode", "Editor")";
+    var editorChoice; // HTML or CODE
+    var entityId; // Article id (entity id) being edited
+
+    //
+    // Opens the show edit dialog, if the user is about to edit a live page.
+    // This dialog suggests creating new versions of pages to edit, rather
+    // than editing the already published pages.
+    //
+    function showEditDialog(editor, id, isPublished) {
+
+        editorChoice = editor;
+        entityId = id;
+
+        //
+        // If article version is not published, then open editor strait away.
+        //
+        if (isPublished.trim() === "null") {
+            openEditor(false);
+        }
+        else {
+            //
+            // Otherwise, open dialog suggesting user not edit already published
+            // page, but, create a new version instead, and edit that.
+            //
+            var dialog = $("#editPublishedPageDialog").data("kendoDialog");
+            dialog.open();
+        }
+    }
+
+    function editNewVersion() {
+        openEditor(true);
+    }
+
+    function editPublishedVersion() {
+        openEditor(false);
+    }
+
+    function formatPublishedDate(published) {
+        if (published === null) {
+            return "Draft";
+        }
+        else {
+            return kendo.toString(published, 'G');
+        }
+    }
+
+    //
+    // Opens either the HTML or code editor.
+    //
+    function openEditor(newVersion) {
+        if (newVersion === true) {
+            window.location.href = "@Url.Action("CreateVersion", "Editor")/@ViewData["ArticleId"]";
+        }
+        else {
+            if (editorChoice === "HTML") {
+                window.location.href = editHtmlUrl + "/" + entityId;
+            }
+            else {
+                window.location.href = editCodeUrl + "/" + entityId;
+            }
+        }
     }
 </script>

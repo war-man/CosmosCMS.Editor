@@ -100,6 +100,7 @@ namespace CDT.Cosmos.Cms.Controllers
                     },
                     EditingField = "Content",
                     Content = entity.Content,
+                    Version = 0,
                     CustomButtons = new List<string>
                     {
                         "Preview"

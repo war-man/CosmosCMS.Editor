@@ -91,8 +91,8 @@
                 </div>
             </content>
             <popup-animation>
-                <open duration="500" effects="fade:in"/>
-                <close duration="500" effects="fade:out"/>
+                <open duration="500" effects="fade:in" />
+                <close duration="500" effects="fade:out" />
             </popup-animation>
         </kendo-dialog>
         <kendo-dialog name="changesSavedDialog" title="Changes Saved" modal="true" visible="false" min-width="300">
@@ -106,8 +106,8 @@
                 </div>
             </content>
             <popup-animation>
-                <open duration="500" effects="fade:in"/>
-                <close duration="500" effects="fade:out"/>
+                <open duration="500" effects="fade:in" />
+                <close duration="500" effects="fade:out" />
             </popup-animation>
         </kendo-dialog>
         <kendo-dialog name="versionsDialog" title="Page Versions" modal="true" visible="false" min-width="500">
@@ -121,8 +121,8 @@
                 </action>
             </actions>
             <popup-animation>
-                <open duration="500" effects="fade:in"/>
-                <close duration="500" effects="fade:out"/>
+                <open duration="500" effects="fade:in" />
+                <close duration="500" effects="fade:out" />
             </popup-animation>
         </kendo-dialog>
         <kendo-dialog name="editCodeDialog" title="Edit Code" modal="true" visible="false" min-width="500">
@@ -136,8 +136,8 @@
                 </action>
             </actions>
             <popup-animation>
-                <open duration="500" effects="fade:in"/>
-                <close duration="500" effects="fade:out"/>
+                <open duration="500" effects="fade:in" />
+                <close duration="500" effects="fade:out" />
             </popup-animation>
         </kendo-dialog>
         <kendo-dialog name="saveErrorsDialog" title="Errors Log" modal="true" visible="false" min-width="500">
@@ -146,8 +146,8 @@
                 </div>
             </content>
             <popup-animation>
-                <open duration="500" effects="fade:in"/>
-                <close duration="500" effects="fade:out"/>
+                <open duration="500" effects="fade:in" />
+                <close duration="500" effects="fade:out" />
             </popup-animation>
         </kendo-dialog>
         <kendo-dialog name="closeEditorDialog" title="Close Editor" modal="true" visible="false" min-width="500">
@@ -155,8 +155,8 @@
                 <p><span class="badge badge-warning">Warning:</span> Any unsaved changes will be lost!</p>
             </content>
             <popup-animation>
-                <open duration="500" effects="fade:in"/>
-                <close duration="500" effects="fade:out"/>
+                <open duration="500" effects="fade:in" />
+                <close duration="500" effects="fade:out" />
             </popup-animation>
             <actions>
                 <action text="Cancel">
@@ -168,8 +168,7 @@
     </div>
 
     <script>
-        var cardEditor;
-        var cardHtml;
+
         var validationSummary = $("#validation-summary");
         $(document).ready(function() {
             setPublishLocalDateTime();
@@ -378,7 +377,7 @@
             var dialog = $("#closeEditorDialog").data("kendoDialog");
             dialog.open();
         }
-
+        
         function closeEditor() {
             window.location.href = "@Url.Content($"~/{Model?.UrlPath.Replace("root", "")}")";
         }
