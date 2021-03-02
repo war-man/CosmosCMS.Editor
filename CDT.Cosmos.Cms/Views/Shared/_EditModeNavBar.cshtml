@@ -39,7 +39,7 @@
         line-height: 16px;
     }
 </style>
-@if (controllerName == "Editor" && (actionName == "Edit" || actionName == "Create"))
+@if (controllerName == "Editor" && actionName == "Edit" && Model != null)
 {
     <form id="frmEdit" asp-action="Edit" method="post" kendo-validator="true">
         <input type="hidden" asp-for="Id"/>
