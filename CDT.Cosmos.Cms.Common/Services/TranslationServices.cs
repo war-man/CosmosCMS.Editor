@@ -88,12 +88,28 @@ namespace CDT.Cosmos.Cms.Common.Services
         {
             var client = await GetTranslatorClient();
 
-            return await client.GetSupportedLanguagesAsync(new GetSupportedLanguagesRequest
+            var model = await client.GetSupportedLanguagesAsync(new GetSupportedLanguagesRequest
             {
                 DisplayLanguageCode = returnLanguage,
                 Parent = new ProjectName("translator-oet").ToString(),
                 ParentAsLocationName = new LocationName("translator-oet", "us-central1")
             });
+
+            //
+            // For convenience, if language is not en, the insert US English first on the list.
+            //
+            if (!returnLanguage.StartsWith("en"))
+            {
+                model.Languages.Insert(0, new SupportedLanguage()
+                {
+                    DisplayName = "US English",
+                    LanguageCode = "en-US",
+                    SupportSource = true,
+                    SupportTarget = true
+                });
+
+            }
+            return model;
         }
     }
 }
