@@ -83,25 +83,38 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
             if (layout != null)
                 _dbContext.Entry(layout).State = EntityState.Detached; // Prevents layout from being updated.
 
+            var defaultTemplate = string.Empty;
+
+            if (templateId.HasValue)
+            {
+                var template = await _dbContext.Templates.FindAsync(templateId.Value);
+
+                 defaultTemplate = template?.Content;
+                
+            }
+
+            if (string.IsNullOrEmpty(defaultTemplate))
+            {
+                defaultTemplate = "<div class=\"container m-y-lg\">" +
+                                  "<main class=\"main-primary\">" +
+                                  "<div class=\"row\">" +
+                                  "<div class=\"col-md-12\"><h1>Why Lorem Ipsum</h1><p>" +
+                                  LoremIpsum.WhyLoremIpsum + "</p></div>" +
+                                  "</div>" +
+                                  "<div class=\"row\">" +
+                                  "<div class=\"col-md-6\"><h2>Column 1</h2><p>" + LoremIpsum.SubSection1 + "</p></div>" +
+                                  "<div class=\"col-md-6\"><h2>Column 2</h2><p>" + LoremIpsum.SubSection2 + "</p></div>" +
+                                  "</div>" +
+                                  "</main>" +
+                                  "</div>";
+            }
+
             var article = new Article
             {
                 ArticleNumber = 0,
                 VersionNumber = 0,
                 Title = title,
-                Content = templateId == null
-                    ? "<div class=\"container m-y-lg\">" +
-                      "<main class=\"main-primary\">" +
-                      "<div class=\"row\">" +
-                      "<div class=\"col-md-12\"><h1>Why Lorem Ipsum</h1><p>" +
-                      LoremIpsum.WhyLoremIpsum + "</p></div>" +
-                      "</div>" +
-                      "<div class=\"row\">" +
-                      "<div class=\"col-md-6\"><h2>Column 1</h2><p>" + LoremIpsum.SubSection1 + "</p></div>" +
-                      "<div class=\"col-md-6\"><h2>Column 2</h2><p>" + LoremIpsum.SubSection2 + "</p></div>" +
-                      "</div>" +
-                      "</main>" +
-                      "</div>"
-                    : _dbContext.Templates.FindAsync(templateId.Value).Result.Content,
+                Content = defaultTemplate,
                 Updated = DateTime.Now,
                 UrlPath = "/" + HttpUtility.UrlEncode(title.Replace(" ", "_")),
                 ArticleLogs = new List<ArticleLog>(),
@@ -457,21 +470,26 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
                 return languages;
             }
 
-            var cachKey = RedisCacheService.GetPageCacheKey(_redisOptions.Value.CacheId, "en-US",
+            var cachKey = RedisCacheService.GetPageCacheKey(_redisOptions.Value.CacheId, lang,
                 RedisCacheService.CacheOptions.GoogleLanguages,
                 "GoogleLang");
 
             var bytes = await _distributedCache.GetAsync(cachKey);
 
+            //
+            // If the list was found in Redis, return it now straight away.
+            //
             if (bytes != null)
                 return Deserialize<SupportedLanguages>(bytes);
 
+            //
+            // Otherwise, get the list, and stash in Redis
+            //
             var model = await _translationServices.GetSupportedLanguages(lang);
             var cacheBytes = Serialize(model);
             var cacheOptions = new DistributedCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow =
-                    TimeSpan.FromSeconds(_redisOptions.Value.CacheDuration)
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(600) // 10 minutes
             };
             await _distributedCache.SetAsync(cachKey, cacheBytes, cacheOptions);
 
