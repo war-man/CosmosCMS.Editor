@@ -212,7 +212,7 @@ namespace CDT.Cosmos.Cms.Controllers
         /// <returns></returns>
         public async Task<JsonResult> GetSupportedLanguages(string lang = "en-US")
         {
-            var result = await _articleLogic.GetSupportedLanguages("en-US");
+            var result = await _articleLogic.GetSupportedLanguages(lang);
             return Json(result.Languages.Select(s => new LangItemViewModel
             {
                 DisplayName = s.DisplayName,

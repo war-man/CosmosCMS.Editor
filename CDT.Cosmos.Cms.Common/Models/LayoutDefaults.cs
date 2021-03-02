@@ -52,7 +52,7 @@ namespace CDT.Cosmos.Cms.Common.Models
                 Notes =
                     "This layout is based on the State of California Web Template, which <a href=\"https://beta.template.webstandards.ca.gov/\">can be found here</a>.",
                 Head =
-                    "<link href='https://fonts.googleapis.com/css?family=Asap+Condensed:400,600|Source+Sans+Pro:400,700' rel='stylesheet' type='text/css' />\r\n<link href=\"https://california.azureedge.net/cdt/statetemplate/6.0.2/css/cagov.core.css\" rel=\"stylesheet\" />\r\n<link href=\"https://california.azureedge.net/cdt/statetemplate/6.0.2/css/colorscheme-oceanside.css\" rel=\"stylesheet\" />\r\n<script src=\"https://kendo.cdn.telerik.com/2020.3.1118/js/jquery.min.js\"></script>\r\n<script src=\"https://code.jquery.com/jquery-migrate-3.0.1.min.js\"></script>\r\n",
+                    "<link href='https://fonts.googleapis.com/css?family=Asap+Condensed:400,600|Source+Sans+Pro:400,700' rel='stylesheet' type='text/css' />\r\n<link href=\"https://california.azureedge.net/cdt/statetemplate/6.0.2/css/cagov.core.css\" rel=\"stylesheet\" />\r\n<link href=\"https://california.azureedge.net/cdt/statetemplate/6.0.2/css/colorscheme-oceanside.css\" rel=\"stylesheet\" />\r\n<script src=\"https://kendo.cdn.telerik.com/2021.1.224/js/jquery.min.js\"></script>\r\n<script src=\"https://code.jquery.com/jquery-migrate-3.0.1.min.js\"></script>\r\n",
                 BodyHtmlAttributes = "",
                 BodyHeaderHtmlAttributes = "role=\"banner\" id=\"header\" class=\"global-header fixed\"",
                 HtmlHeader =
