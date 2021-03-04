@@ -13,7 +13,7 @@
             .Columns(col =>
             {
                 col.Bound(b => b.Id).Hidden();
-                col.Bound(b => b.Selected);
+                col.Bound(b => b.Selected).ClientTemplate("#= isMember(Selected) #");
                 col.Bound(b => b.Email);
                 col.Bound(b => b.EmailConfirmed);
                 col.Bound(b => b.PhoneNumber);
@@ -25,7 +25,6 @@
             .Pageable()
             .Navigatable()
             .Sortable()
-            .Scrollable()
             .Events(events => events.Sort("onSort"))
             .DataSource(dataSource => dataSource
                 .Ajax()
@@ -44,14 +43,22 @@
     </div>
 </main>
 <script type="text/javascript">
+
+    function isMember(selected) {
+        if (selected === true) {
+            return "<input type=\"checkbox\" checked>";
+        }
+        return "<input type=\"checkbox\">";
+    }
+
     function error_handler(e) {
         if (e.errors) {
             var message = "Errors:\n";
             $.each(e.errors,
-                function(key, value) {
+                function (key, value) {
                     if ('errors' in value) {
                         $.each(value.errors,
-                            function() {
+                            function () {
                                 message += this + "\n";
                             });
                     }
@@ -63,7 +70,7 @@
     // Prevent sorting when new record without Product Name is added
     function onSort(e) {
         var gridData = e.sender.dataSource.data();
-        gridData.forEach(function(element) {
+        gridData.forEach(function (element) {
             if (!element.Name) {
                 e.preventDefault();
             }

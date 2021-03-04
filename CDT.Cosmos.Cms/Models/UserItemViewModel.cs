@@ -34,7 +34,6 @@ namespace CDT.Cosmos.Cms.Models
         /// <summary>
         /// Indicates if the user is selected
         /// </summary>
-        [UIHint("CheckBox")]
         [Display(Name = "Select")]
         public bool Selected { get; set; } = false;
     }
