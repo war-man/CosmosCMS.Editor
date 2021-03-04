@@ -34,7 +34,7 @@ namespace CDT.Cosmos.Cms.Models
         /// <summary>
         /// Indicates if the user is selected
         /// </summary>
-        [Display(Name = "Select")]
+        [Display(Name = "Role Member")]
         public bool Selected { get; set; } = false;
     }
 }

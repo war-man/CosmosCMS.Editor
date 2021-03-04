@@ -24,7 +24,6 @@ namespace CDT.Cosmos.Cms.Controllers
     public class UsersController : BaseController
     {
         private readonly ApplicationDbContext _dbContext;
-        private readonly ILogger<UsersController> _logger;
         private readonly IOptions<SiteCustomizationsConfig> _options;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly SignInManager<IdentityUser> _signInManager;
@@ -47,7 +46,6 @@ namespace CDT.Cosmos.Cms.Controllers
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
-            _logger = logger;
             _options = options;
             _dbContext = dbContext;
         }
@@ -274,10 +272,10 @@ namespace CDT.Cosmos.Cms.Controllers
         }
 
         [HttpGet]
-        public IActionResult UsersAndRoles(string id)
+        public async Task<IActionResult> UsersAndRoles(string id)
         {
-            ViewData["RoleId"] = id;
-            return View("UsersAndRoles");
+            var identityRole = await _roleManager.FindByIdAsync(id);
+            return View("UsersAndRoles", identityRole);
         }
 
         [AllowAnonymous]
@@ -425,9 +423,9 @@ namespace CDT.Cosmos.Cms.Controllers
 
         #region USERS CRUD
         
-        public async Task<IActionResult> Read_Users([DataSourceRequest] DataSourceRequest request, string roleName = "")
+        public async Task<IActionResult> Read_Users([DataSourceRequest] DataSourceRequest request, string roleId = "")
         {
-            if (string.IsNullOrEmpty(roleName))
+            if (string.IsNullOrEmpty(roleId))
             {
                 var query = _userManager.Users.Select(s => new UserItemViewModel
                 {
@@ -450,7 +448,9 @@ namespace CDT.Cosmos.Cms.Controllers
                 Selected = false
             }).ToListAsync();
 
-            var usersInRole = await _userManager.GetUsersInRoleAsync(roleName);
+            var identityRole = await _roleManager.FindByIdAsync(roleId);
+
+            var usersInRole = await _userManager.GetUsersInRoleAsync(identityRole.Name);
 
             if (usersInRole.Any())
             {
@@ -466,50 +466,49 @@ namespace CDT.Cosmos.Cms.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Users_Update([DataSourceRequest] DataSourceRequest request, [Bind(Prefix = "models")] IEnumerable<UserItemViewModel> users, string roleName = "")
+        public async Task<ActionResult> Users_Update([DataSourceRequest] DataSourceRequest request, [Bind(Prefix = "models")] IEnumerable<UserItemViewModel> users, string roleId)
         {
             if (users != null && ModelState.IsValid)
             {
+                var identityRole = await _roleManager.FindByIdAsync(roleId);
+
                 foreach (var user in users)
                 {
                     var identityUser = await _userManager.FindByIdAsync(user.Id);
 
-                    if (!string.IsNullOrEmpty(roleName))
+                    if (identityRole.Name.ToLower() != "administrators")
                     {
-                        if (roleName.ToLower() != "administrators")
+                        //
+                        // If a role is given, add or remove people from that role
+                        //
+                        if (user.Selected)
                         {
                             //
-                            // If a role is given, add or remove people from that role
+                            // This person should be in the role.
                             //
-                            if (user.Selected)
+                            if (!await _userManager.IsInRoleAsync(identityUser, identityRole.Name))
                             {
                                 //
-                                // This person should be in the role.
-                                //
-                                if (!await _userManager.IsInRoleAsync(identityUser, roleName))
-                                {
-                                    //
-                                    // If the person is not, then add that person to the role.
-                                    await _userManager.AddToRoleAsync(identityUser, roleName);
-                                }
-                            }
-                            else
-                            {
-                                //
-                                // This person should NOT be in the role anymore.
-                                //
-                                if (!await _userManager.IsInRoleAsync(identityUser, roleName))
-                                {
-                                    //
-                                    // If the person is in the role, then remove that person.
-                                    await _userManager.RemoveFromRoleAsync(identityUser, roleName);
-                                }
+                                // If the person is not, then add that person to the role.
+                                await _userManager.AddToRoleAsync(identityUser, identityRole.Name);
                             }
                         }
                         else
                         {
-                            ModelState.AddModelError("", "Cannot manage the administrator role from here.");
+                            //
+                            // This person should NOT be in the role anymore.
+                            //
+                            if (!await _userManager.IsInRoleAsync(identityUser, identityRole.Name))
+                            {
+                                //
+                                // If the person is in the role, then remove that person.
+                                await _userManager.RemoveFromRoleAsync(identityUser, identityRole.Name);
+                            }
                         }
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "Cannot manage the administrator role from here.");
                     }
 
                     //

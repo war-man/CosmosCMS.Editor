@@ -1,21 +1,22 @@
 ﻿@using Kendo.Mvc.UI
 @using Microsoft.AspNetCore.Identity
-@model List<UserItemViewModel>
+@model IdentityRole
 @{
     ViewData["Title"] = "Index";
 }
 
 <main class="main-primary">
     <div class="container">
-        <a class="btn btn-sm btn-primary" asp-action="Index">User List</a>
+        <h2>Role: @Model.Name</h2>
+        <p>Use this list to add or remove people from this role.</p>
+        <a class="btn btn-sm btn-primary" asp-action="Roles">Role List</a>
         @(Html.Kendo().Grid<UserItemViewModel>().Name("grid")
-            .BindTo(Model)
             .Columns(col =>
             {
                 col.Bound(b => b.Id).Hidden();
-                col.Bound(b => b.Selected).ClientTemplate("#= isMember(Selected) #");
+                col.Bound(b => b.Selected).ClientTemplate("#= isChecked(Selected) #").Width(90);
                 col.Bound(b => b.Email);
-                col.Bound(b => b.EmailConfirmed);
+                col.Bound(b => b.EmailConfirmed).ClientTemplate("#= isChecked(EmailConfirmed) #");
                 col.Bound(b => b.PhoneNumber);
             })
             .ToolBar(toolbar => {
@@ -37,14 +38,14 @@
                     model.Id(p => p.Id);
                     model.Field(f => f.Email).Editable(false);
                 })
-                .Read("Read_Users", "Users", new { IroleNamed = ViewData["RoleId"] })
-                .Update("Users_Update", "Users", new { roleName = ViewData["RoleId"] })
+                .Read("Read_Users", "Users", new { roleId = Model.Id})
+                .Update("Users_Update", "Users", new { roleId = Model.Id})
             ))
     </div>
 </main>
 <script type="text/javascript">
 
-    function isMember(selected) {
+    function isChecked(selected) {
         if (selected === true) {
             return "<input type=\"checkbox\" checked>";
         }
