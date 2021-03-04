@@ -7,6 +7,8 @@ using CDT.Cosmos.Cms.Common.Data;
 using CDT.Cosmos.Cms.Common.Data.Logic;
 using CDT.Cosmos.Cms.Common.Services;
 using CDT.Cosmos.Cms.Models;
+using Kendo.Mvc.Extensions;
+using Kendo.Mvc.UI;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +29,11 @@ namespace CDT.Cosmos.Cms.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
+        /// <summary>
+        /// These roles are hard-wired, and cannot be altered here.
+        /// </summary>
+        private static string[] RestrictedRoles = 
+            {"reviewers", "administrators", "editors", "team members", "authors"};
 
         public UsersController(UserManager<IdentityUser> userManager,
             SignInManager<IdentityUser> signInManager,
@@ -258,11 +265,19 @@ namespace CDT.Cosmos.Cms.Controllers
             return Unauthorized();
         }
 
-        public async Task<IActionResult> Roles()
+        public IActionResult Roles()
         {
-            if (_options.Value.ReadWriteMode) return View(await _roleManager.Roles.OrderBy(o => o.Name).ToListAsync());
+            if (_options.Value.ReadWriteMode)
+                return View();
 
             return Unauthorized();
+        }
+
+        [HttpGet]
+        public IActionResult UsersAndRoles(string id)
+        {
+            ViewData["RoleId"] = id;
+            return View("UsersAndRoles");
         }
 
         [AllowAnonymous]
@@ -271,5 +286,249 @@ namespace CDT.Cosmos.Cms.Controllers
             await _signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
+
+        #region DATA FOR ROLE BASED ACCESS CONTROLL
+
+        #region ROLE CRUD
+
+        /// <summary>
+        /// Gets a list of roles
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> Read_Roles([DataSourceRequest] DataSourceRequest request)
+        {
+            var query = _roleManager.Roles.Select(s => new RoleItemViewModel
+            {
+                Id = s.Id,
+                RoleName = s.Name,
+                RoleNormalizedName = s.NormalizedName
+            }).Where(w => w.RoleName.ToLower() != "administrators").OrderBy(r => r.RoleName);
+
+            return Json(await query.ToDataSourceResultAsync(request));
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Roles_Create([DataSourceRequest] DataSourceRequest request, [Bind(Prefix = "models")] IEnumerable<RoleItemViewModel> roles)
+        {
+            var results = new List<RoleItemViewModel>();
+
+            if (roles != null && ModelState.IsValid)
+            {
+                foreach (var role in roles)
+                {
+                    if (RestrictedRoles.Contains(role.RoleName.ToLower()))
+                    {
+                        ModelState.AddModelError("", $"{role.RoleName} is a reserved role, and cannot be altered.");
+                    }
+                    else
+                    {
+                        var result = await _roleManager.CreateAsync(new IdentityRole(role.RoleName));
+                        if (result.Succeeded)
+                        {
+                            var newRole = await _roleManager.FindByNameAsync(role.RoleName);
+                            role.Id = newRole.Id;
+                            role.RoleNormalizedName = newRole.NormalizedName;
+                            results.Add(role);
+                        }
+                        else
+                        {
+                            foreach (var identityError in result.Errors)
+                            {
+                                ModelState.AddModelError("", $"Code: {identityError.Code} | {identityError.Description}");
+                            }
+                        }
+                    }
+                }
+            }
+
+            return Json(await results.ToDataSourceResultAsync(request, ModelState));
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Roles_Update([DataSourceRequest] DataSourceRequest request, [Bind(Prefix = "models")] IEnumerable<RoleItemViewModel> roles)
+        {
+            if (roles != null && ModelState.IsValid)
+            {
+
+                foreach (var role in roles)
+                {
+                    if (RestrictedRoles.Contains(role.RoleNormalizedName.ToLower()))
+                    {
+                        ModelState.AddModelError("", $"{role.RoleName} is a reserved role, and cannot be altered.");
+                    }
+                    else
+                    {
+                        var identityRole = await _roleManager.FindByIdAsync(role.Id);
+                        identityRole.Name = role.RoleName;
+
+                        var result = await _roleManager.UpdateAsync(identityRole);
+
+                        if (result.Succeeded)
+                        {
+                            var updatedRole = await _roleManager.FindByIdAsync(role.Id);
+                            role.RoleName = updatedRole.Name;
+                            role.RoleNormalizedName = updatedRole.NormalizedName;
+                        }
+                        else
+                        {
+                            foreach (var identityError in result.Errors)
+                            {
+                                ModelState.AddModelError("", $"Code: {identityError.Code} | {identityError.Description}");
+                            }
+                        }
+                    }
+
+                }
+            }
+
+            return Json(await roles.ToDataSourceResultAsync(request, ModelState));
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Roles_Destroy([DataSourceRequest] DataSourceRequest request, [Bind(Prefix = "models")] IEnumerable<RoleItemViewModel> roles)
+        {
+            var results = new List<RoleItemViewModel>();
+
+            if (roles != null && ModelState.IsValid)
+            {
+                foreach (var role in roles)
+                {
+                    if (RestrictedRoles.Contains(role.RoleNormalizedName.ToLower()))
+                    {
+                        ModelState.AddModelError("", $"{role.RoleName} is a reserved role, and cannot be altered.");
+                    }
+                    else
+                    {
+                        var doomedRole = await _roleManager.FindByIdAsync(role.Id);
+                        var result = await _roleManager.DeleteAsync(doomedRole);
+
+                        if (result.Succeeded)
+                        {
+                            results.Add(role);
+                        }
+                        else
+                        {
+                            foreach (var identityError in result.Errors)
+                            {
+                                ModelState.AddModelError("", $"Code: {identityError.Code} | {identityError.Description}");
+                            }
+                        }
+                    }
+                }
+            }
+
+            return Json(await results.ToDataSourceResultAsync(request, ModelState));
+        }
+
+        #endregion
+
+        #region USERS CRUD
+        
+        public async Task<IActionResult> Read_Users([DataSourceRequest] DataSourceRequest request, string roleName = "")
+        {
+            if (string.IsNullOrEmpty(roleName))
+            {
+                var query = _userManager.Users.Select(s => new UserItemViewModel
+                {
+                    Id = s.Id,
+                    Email = s.Email,
+                    EmailConfirmed = s.EmailConfirmed,
+                    PhoneNumber = s.PhoneNumber,
+                    Selected = false
+                }).OrderBy(o => o.Email);
+
+                return Json(await query.ToDataSourceResultAsync(request));
+            }
+
+            var users = await _userManager.Users.Select(s => new UserItemViewModel
+            {
+                Id = s.Id,
+                Email = s.Email,
+                EmailConfirmed = s.EmailConfirmed,
+                PhoneNumber = s.PhoneNumber,
+                Selected = false
+            }).ToListAsync();
+
+            var usersInRole = await _userManager.GetUsersInRoleAsync(roleName);
+
+            if (usersInRole.Any())
+            {
+                var userIds = usersInRole.Select(s => s.Id).ToList();
+
+                foreach (var user in users)
+                {
+                    user.Selected = userIds.Contains(user.Id);
+                }
+            }
+
+            return Json(await users.ToDataSourceResultAsync(request));
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Users_Update([DataSourceRequest] DataSourceRequest request, [Bind(Prefix = "models")] IEnumerable<UserItemViewModel> users, string roleName = "")
+        {
+            if (users != null && ModelState.IsValid)
+            {
+                foreach (var user in users)
+                {
+                    var identityUser = await _userManager.FindByIdAsync(user.Id);
+
+                    if (!string.IsNullOrEmpty(roleName))
+                    {
+                        if (roleName.ToLower() != "administrators")
+                        {
+                            //
+                            // If a role is given, add or remove people from that role
+                            //
+                            if (user.Selected)
+                            {
+                                //
+                                // This person should be in the role.
+                                //
+                                if (!await _userManager.IsInRoleAsync(identityUser, roleName))
+                                {
+                                    //
+                                    // If the person is not, then add that person to the role.
+                                    await _userManager.AddToRoleAsync(identityUser, roleName);
+                                }
+                            }
+                            else
+                            {
+                                //
+                                // This person should NOT be in the role anymore.
+                                //
+                                if (!await _userManager.IsInRoleAsync(identityUser, roleName))
+                                {
+                                    //
+                                    // If the person is in the role, then remove that person.
+                                    await _userManager.RemoveFromRoleAsync(identityUser, roleName);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            ModelState.AddModelError("", "Cannot manage the administrator role from here.");
+                        }
+                    }
+
+                    //
+                    // Allow a user, who's email isn't confirmed, to be "manually" confirmed here.
+                    //
+                    if (user.EmailConfirmed && identityUser.EmailConfirmed == false)
+                    {
+                        var token = await _userManager.GenerateEmailConfirmationTokenAsync(identityUser);
+                        await _userManager.ConfirmEmailAsync(identityUser, token);
+                    }
+                }
+            }
+
+            return Json(await users.ToDataSourceResultAsync(request, ModelState));
+        }
+
+        #endregion
+
+
+        #endregion
     }
 }

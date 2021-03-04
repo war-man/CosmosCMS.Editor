@@ -131,6 +131,12 @@ namespace CDT.Cosmos.Cms.Common.Data
         [ForeignKey("TeamId")]
         public Team Team { get; set; }
 
+        /// <summary>
+        /// A comma delimited list of roles that can access this article. If blank the assumption is anonymous access.
+        /// </summary>
+        [MaxLength(512)]
+        public string RoleList { get; set; } = string.Empty;
+
         #endregion
     }
 }

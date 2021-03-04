@@ -1,12 +1,12 @@
 ﻿@using Kendo.Mvc.UI
 @model List<UsersIndexViewModel>
 @{
-    Html.ViewContext.ViewBag.BrowserTitle = "Users";
     ViewData["Title"] = "User Accounts";
 }
 
 <main class="main-primary">
     <div class="container">
+        <a class="btn btn-sm btn-primary" asp-action="Roles">Role List</a>
         @(Html.Kendo().Grid<UsersIndexViewModel>
             ().Name("grid")
             .BindTo(Model)
