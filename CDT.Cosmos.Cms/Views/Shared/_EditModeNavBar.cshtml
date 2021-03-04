@@ -41,19 +41,20 @@
 </style>
 @if (controllerName == "Editor" && actionName == "Edit" && Model != null)
 {
-    <form id="frmEdit" asp-action="Edit" method="post" kendo-validator="true">
-        <input type="hidden" asp-for="Id"/>
-        <input type="hidden" asp-for="ArticleNumber"/>
-        <input type="hidden" asp-for="UrlPath"/>
-        <input type="hidden" asp-for="VersionNumber"/>
-        <input type="hidden" asp-for="Content"/>
-        <input type="hidden" asp-for="HeaderJavaScript"/>
-        <input type="hidden" asp-for="FooterJavaScript"/>
-        <input type="hidden" asp-for="Published"/>
-        <input type="hidden" id="userName" value="@User.Identity?.Name"/>
+<form id="frmEdit" asp-action="Edit" method="post" kendo-validator="true">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="ArticleNumber" />
+    <input type="hidden" asp-for="UrlPath" />
+    <input type="hidden" asp-for="VersionNumber" />
+    <input type="hidden" asp-for="Content" />
+    <input type="hidden" asp-for="HeaderJavaScript" />
+    <input type="hidden" asp-for="FooterJavaScript" />
+    <input type="hidden" asp-for="Published" />
+    <input type="hidden" asp-for="RoleList" />
+    <input type="hidden" id="userName" value="@User.Identity?.Name" />
 
-        @* EDITING TOOL BAR *@
-        @(Html.Kendo().ToolBar()
+    @* EDITING TOOL BAR *@
+    @(Html.Kendo().ToolBar()
             .Name("ToolBar")
             .Items(items =>
             {
@@ -82,7 +83,7 @@
                     items.Add().Template("<a id='timeZone' title='Dates and times are in this time zone.' class='btn btn-sm btn-secondary'></a>");
                 });
             }))
-    </form>
+</form>
     <div style="display: none">
         <kendo-dialog name="saveChangesDialog" title="Please Wait" modal="true" visible="false" min-width="500">
             <content>

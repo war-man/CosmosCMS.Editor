@@ -906,6 +906,12 @@ namespace CDT.Cosmos.Cms.Controllers
             return Unauthorized();
         }
 
+        /// <summary>
+        /// Get all the versions of an article by article number.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<IActionResult> Get_Versions([DataSourceRequest] DataSourceRequest request, int id)
         {
             if (SiteOptions.Value.ReadWriteMode)
@@ -939,6 +945,23 @@ namespace CDT.Cosmos.Cms.Controllers
                 }
 
             return Unauthorized();
+        }
+
+        /// <summary>
+        /// Gets a role list, and allows for filtering
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> Get_RoleList(string text)
+        {
+            var query = DbContext.Roles.Select(s => new RoleItemViewModel
+            {
+                Id = s.Id,
+                RoleName = s.Name,
+                RoleNormalizedName = s.NormalizedName
+            }).Where(w => w.RoleName.Contains(text, StringComparison.CurrentCultureIgnoreCase)).OrderBy(r => r.RoleName);
+
+            return Json(await query.ToListAsync());
         }
 
         #endregion

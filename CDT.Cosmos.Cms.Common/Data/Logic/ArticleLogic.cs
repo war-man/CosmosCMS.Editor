@@ -443,59 +443,7 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
 
             await _dbContext.SaveChangesAsync();
         }
-
-        //public async Task<ArticleViewModel> GetLatestPublishedByArticleNumber(int articleNumber)
-        //{
-        //    var activeStatusCodes = new[] { 0, 1 };
-        //    var article = await __dbContext.Articles
-        //        .Where(a => a.ArticleNumber == articleNumber && a.Published <= DateTime.Now &&
-        //                    activeStatusCodes.Contains(a.StatusCode)).OrderByDescending(o => o.VersionNumber)
-        //        .FirstOrDefaultAsync();
-
-        //    return await ReturnArticleEditViewModel(article);
-        //}
-
-        /// <summary>
-        ///     Get the list of languages supported for translation by Google.
-        /// </summary>
-        /// <param name="lang"></param>
-        /// <returns></returns>
-        public async Task<SupportedLanguages> GetSupportedLanguages(string lang)
-        {
-            if (_translationServices == null) return new SupportedLanguages();
-
-            if (_config.ReadWriteMode || _distributedCache == null)
-            {
-                var languages = await _translationServices.GetSupportedLanguages(lang);
-                return languages;
-            }
-
-            var cachKey = RedisCacheService.GetPageCacheKey(_redisOptions.Value.CacheId, lang,
-                RedisCacheService.CacheOptions.GoogleLanguages,
-                "GoogleLang");
-
-            var bytes = await _distributedCache.GetAsync(cachKey);
-
-            //
-            // If the list was found in Redis, return it now straight away.
-            //
-            if (bytes != null)
-                return Deserialize<SupportedLanguages>(bytes);
-
-            //
-            // Otherwise, get the list, and stash in Redis
-            //
-            var model = await _translationServices.GetSupportedLanguages(lang);
-            var cacheBytes = Serialize(model);
-            var cacheOptions = new DistributedCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(600) // 10 minutes
-            };
-            await _distributedCache.SetAsync(cachKey, cacheBytes, cacheOptions);
-
-            return model;
-        }
-
+        
         #endregion
 
         #region SAVE ARTICLE METHODS
@@ -564,7 +512,8 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
                     VersionNumber = 1,
                     UrlPath = isRoot ? "root" : HandleUrlEncodeTitle(model.Title.Trim()),
                     ArticleLogs = new List<ArticleLog>(),
-                    Updated = DateTime.UtcNow
+                    Updated = DateTime.UtcNow,
+                    RoleList = model.RoleList
                 };
 
                 // Force publishing of a NEW home page.
@@ -708,6 +657,28 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
 
                     _dbContext.Articles.UpdateRange(oldArticles);
                 }
+
+                //
+                // Is the role list changing?
+                //
+                if (!string.Equals(article.RoleList, model.RoleList, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    // get all prior article versions, changing security now.
+                    var oldArticles = _dbContext.Articles.Where(w => w.ArticleNumber == article.ArticleNumber)
+                        .ToListAsync().Result;
+
+                    HandleLogEntry(article, $"Changing role access from '{article.RoleList}' to '{model.RoleList}'.", userId);
+
+                    //
+                    // Update the path 
+                    //
+                    article.UrlPath = HandleUrlEncodeTitle(model.Title);
+
+                    //
+                    // We have to change the title and paths for all versions now.
+                    //
+                    foreach (var oldArticle in oldArticles) oldArticle.RoleList = model.RoleList;
+                }
             }
 
             //
@@ -729,6 +700,8 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
 
             article.HeaderJavaScript = model.HeaderJavaScript;
             article.FooterJavaScript = model.FooterJavaScript;
+
+            article.RoleList = model.RoleList;
 
             // Save changes to database.
             await _dbContext.SaveChangesAsync();
@@ -1005,7 +978,8 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
                 HeaderJavaScript = article.HeaderJavaScript,
                 FooterJavaScript = article.FooterJavaScript,
                 Layout = await BuildDefaultLayout(lang),
-                ReadWriteMode = _config.ReadWriteMode
+                ReadWriteMode = _config.ReadWriteMode,
+                RoleList = article.RoleList
             };
         }
 
@@ -1111,6 +1085,48 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
                 return await _dbContext.Articles.MaxAsync(m => m.ArticleNumber) + 1;
 
             return 1;
+        }
+
+
+        /// <summary>
+        ///     Get the list of languages supported for translation by Google.
+        /// </summary>
+        /// <param name="lang"></param>
+        /// <returns></returns>
+        public async Task<SupportedLanguages> GetSupportedLanguages(string lang)
+        {
+            if (_translationServices == null) return new SupportedLanguages();
+
+            if (_config.ReadWriteMode || _distributedCache == null)
+            {
+                var languages = await _translationServices.GetSupportedLanguages(lang);
+                return languages;
+            }
+
+            var cachKey = RedisCacheService.GetPageCacheKey(_redisOptions.Value.CacheId, lang,
+                RedisCacheService.CacheOptions.GoogleLanguages,
+                "GoogleLang");
+
+            var bytes = await _distributedCache.GetAsync(cachKey);
+
+            //
+            // If the list was found in Redis, return it now straight away.
+            //
+            if (bytes != null)
+                return Deserialize<SupportedLanguages>(bytes);
+
+            //
+            // Otherwise, get the list, and stash in Redis
+            //
+            var model = await _translationServices.GetSupportedLanguages(lang);
+            var cacheBytes = Serialize(model);
+            var cacheOptions = new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(600) // 10 minutes
+            };
+            await _distributedCache.SetAsync(cachKey, cacheBytes, cacheOptions);
+
+            return model;
         }
 
         /// <summary>

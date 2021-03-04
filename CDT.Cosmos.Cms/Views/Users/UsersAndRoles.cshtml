@@ -22,6 +22,7 @@
             .ToolBar(toolbar => {
                 toolbar.Save();
             })
+            .Search(t => t.Field("Email"))
             .Editable(editable => editable.Mode(GridEditMode.InCell))
             .Pageable()
             .Navigatable()
@@ -37,6 +38,7 @@
                 {
                     model.Id(p => p.Id);
                     model.Field(f => f.Email).Editable(false);
+                    model.Field(f => f.EmailConfirmed).Editable(false);
                 })
                 .Read("Read_Users", "Users", new { roleId = Model.Id})
                 .Update("Users_Update", "Users", new { roleId = Model.Id})

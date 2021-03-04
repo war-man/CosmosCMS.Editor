@@ -9,7 +9,6 @@
         <a class="btn btn-sm btn-primary" asp-action="Roles">Role List</a>
         @(Html.Kendo().Grid<UsersIndexViewModel>
             ().Name("grid")
-            .BindTo(Model)
             .Columns(col =>
             {
                 col.Bound(b => b.UserId).Hidden();

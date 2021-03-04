@@ -99,6 +99,12 @@ namespace CDT.Cosmos.Cms.Common.Models
         /// </summary>
         public LayoutViewModel Layout { get; set; }
 
+        /// <summary>
+        /// Roles allowed to view this page.
+        /// </summary>
+        /// <remarks>If this value is null, it assumes page can be viewed anonymously.</remarks>
+        public string RoleList { get; set; }
+
         #region MODE SPECIFIC
 
         /// <summary>
