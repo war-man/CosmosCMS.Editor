@@ -49,6 +49,7 @@
             .BackColor()
             .Print())
         .Tag("div")
+        .Events(eve => eve.Change("editorChangeDetected"))
         .Immutables(true)
         .Value(@<text>@Html.Raw(Model.Content)</text>)
         .ImageBrowser(imageBrowser => imageBrowser

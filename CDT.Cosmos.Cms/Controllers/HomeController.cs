@@ -115,7 +115,7 @@ namespace CDT.Cosmos.Cms.Controllers
                     article.EditModeOn = false;
                     article.ReadWriteMode = true;
 
-                    return View("Index_standard1", article);
+                    return View("Index", article);
                 }
 
                 //

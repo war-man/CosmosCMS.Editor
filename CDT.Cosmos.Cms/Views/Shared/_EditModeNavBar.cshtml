@@ -4,10 +4,11 @@
 @using Microsoft.Extensions.Options
 @using Kendo.Mvc.UI
 @using CDT.Cosmos.Cms.Common.Services
+@using Google.Apis.Util
 @model ArticleViewModel
 @{
-    var controllerName = (string) Context.GetRouteData().Values["controller"];
-    var actionName = (string) Context.GetRouteData().Values["action"];
+    var controllerName = (string)Context.GetRouteData().Values["controller"];
+    var actionName = (string)Context.GetRouteData().Values["action"];
 
     var isAuthor = false;
     var isEditor = false;
@@ -41,20 +42,20 @@
 </style>
 @if (controllerName == "Editor" && actionName == "Edit" && Model != null)
 {
-<form id="frmEdit" asp-action="Edit" method="post" kendo-validator="true">
-    <input type="hidden" asp-for="Id" />
-    <input type="hidden" asp-for="ArticleNumber" />
-    <input type="hidden" asp-for="UrlPath" />
-    <input type="hidden" asp-for="VersionNumber" />
-    <input type="hidden" asp-for="Content" />
-    <input type="hidden" asp-for="HeaderJavaScript" />
-    <input type="hidden" asp-for="FooterJavaScript" />
-    <input type="hidden" asp-for="Published" />
-    <input type="hidden" asp-for="RoleList" />
-    <input type="hidden" id="userName" value="@User.Identity?.Name" />
+    <form id="frmEdit" asp-action="Edit" method="post" kendo-validator="true">
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="ArticleNumber" />
+        <input type="hidden" asp-for="UrlPath" />
+        <input type="hidden" asp-for="VersionNumber" />
+        <input type="hidden" asp-for="Content" />
+        <input type="hidden" asp-for="HeaderJavaScript" />
+        <input type="hidden" asp-for="FooterJavaScript" />
+        <input type="hidden" asp-for="Published" />
+        <input type="hidden" asp-for="RoleList" />
+        <input type="hidden" id="userName" value="@User.Identity?.Name" />
 
-    @* EDITING TOOL BAR *@
-    @(Html.Kendo().ToolBar()
+        @* EDITING TOOL BAR *@
+        @(Html.Kendo().ToolBar()
             .Name("ToolBar")
             .Items(items =>
             {
@@ -65,25 +66,17 @@
                     menuButtons.Add().Text("Files").SpriteCssClass("fa fa-folder");
                     menuButtons.Add().Text("Preview").SpriteCssClass("fa fa-folder-open");
                     menuButtons.Add().Text("Versions").SpriteCssClass("fa fa-github");
-                    menuButtons.Add().Text("Close").SpriteCssClass("fa fa fa-times-circle");
+                    menuButtons.Add().Text("Close").SpriteCssClass("fa fa-times-circle");
+                    menuButtons.Add().Text("Permissions").SpriteCssClass("fa fa-shield");
                     menuButtons.Add().Text("Help").SpriteCssClass("fa fa-info-circle");
                 }).Click("bgEditClick").Hidden(controllerName == "Templates");
                 items.Add().Template($"<span>Title: </span>");
                 items.Add().Template(Html.Kendo().TextBoxFor(m => m.Title).HtmlAttributes(new {style = "width: 265px;"}).ToHtmlString());
                 items.Add().Template($"(v.<span for='versionLbl'>{Model.VersionNumber}</span>)");
-                items.Add().Type(CommandType.Separator);
-                items.Add().Type(CommandType.ButtonGroup).Buttons(buttons =>
-                {
-                    items.Add().Template("<span>Publish: </span>");
-                    items.Add().Template(Html.Kendo().DateTimePicker()
-                        .Name("dtPublished")
-                        .Enable(User.IsInRole("Editors") || User.IsInRole("Administrators"))
-                        .HtmlAttributes(new {@class = "form-control", style = "height: 28px;margin-top:1px; color:white;"})
-                        .ToHtmlString());
-                    items.Add().Template("<a id='timeZone' title='Dates and times are in this time zone.' class='btn btn-sm btn-secondary'></a>");
-                });
+                items.Add().Type(CommandType.Button).Template($"<div onclick='openSchedulerDialog()' id='btnPublish'></div>").Enable(User.IsInRole("Editors") || User.IsInRole("Administrators"));
+                items.Add().Template($"<div id='pendingChangesBadge' class='badge badge-warning' style='display:none'>Changes Pending Save</div>");
             }))
-</form>
+    </form>
     <div style="display: none">
         <kendo-dialog name="saveChangesDialog" title="Please Wait" modal="true" visible="false" min-width="500">
             <content>
@@ -96,7 +89,7 @@
                 <close duration="500" effects="fade:out" />
             </popup-animation>
         </kendo-dialog>
-        <kendo-dialog name="changesSavedDialog" title="Changes Saved" modal="true" visible="false" min-width="300">
+        <kendo-dialog name="changesSavedDialog" title="Changes Saved" modal="true" visible="false" min-width="700">
             <content>
                 <div>
                     <p>Your changes have been successfully save, and reloaded into this page.</p>
@@ -111,7 +104,7 @@
                 <close duration="500" effects="fade:out" />
             </popup-animation>
         </kendo-dialog>
-        <kendo-dialog name="versionsDialog" title="Page Versions" modal="true" visible="false" min-width="500">
+        <kendo-dialog name="versionsDialog" title="Page Versions" modal="true" visible="false" min-width="700">
             <content>
                 <p>On your way to the version list for this page. This will save the current version before proceeding. Are you ready?</p>
             </content>
@@ -126,7 +119,7 @@
                 <close duration="500" effects="fade:out" />
             </popup-animation>
         </kendo-dialog>
-        <kendo-dialog name="editCodeDialog" title="Edit Code" modal="true" visible="false" min-width="500">
+        <kendo-dialog name="editCodeDialog" title="Edit Code" modal="true" visible="false" min-width="700">
             <content>
                 <p>You are about to edit code for this page. This will save the current version before proceeding. Are you ready?</p>
             </content>
@@ -141,7 +134,7 @@
                 <close duration="500" effects="fade:out" />
             </popup-animation>
         </kendo-dialog>
-        <kendo-dialog name="saveErrorsDialog" title="Errors Log" modal="true" visible="false" min-width="500">
+        <kendo-dialog name="saveErrorsDialog" title="Errors Log" modal="true" visible="false" min-width="700">
             <content>
                 <div id="divErrorLog">
                 </div>
@@ -151,7 +144,7 @@
                 <close duration="500" effects="fade:out" />
             </popup-animation>
         </kendo-dialog>
-        <kendo-dialog name="closeEditorDialog" title="Close Editor" modal="true" visible="false" min-width="500">
+        <kendo-dialog name="closeEditorDialog" title="Close Editor" modal="true" visible="false" min-width="700">
             <content>
                 <p><span class="badge badge-warning">Warning:</span> Any unsaved changes will be lost!</p>
             </content>
@@ -166,30 +159,186 @@
                 </action>
             </actions>
         </kendo-dialog>
+        <kendo-dialog name="permissionsDialog" title="Permissions Editor" modal="true" visible="false" min-width="700">
+            <content>
+                <h4><span class="fa fa-shield"></span> Page View Permissions</h4>
+                <hr />
+                <p></p>
+                <p>Use this tool to set which user role(s) can see this page.</p>
+                @(Html.Kendo().MultiSelect()
+                    .Name("roleListMS")
+                    .DataTextField("RoleName")
+                    .DataValueField("RoleName")
+                    .Placeholder("Select roles...")
+                    .AutoBind(false)
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("Get_RoleList", "Editor");
+                        })
+                            .ServerFiltering(true);
+                    })
+                    )
+                <p></p>
+                <p><span class="badge badge-warning">Note: </span> This will immediately set permissions for all versions of this page.</p>
+            </content>
+            <popup-animation>
+                <open duration="500" effects="fade:in" />
+                <close duration="500" effects="fade:out" />
+            </popup-animation>
+            <actions>
+                <action text="Cancel">
+                </action>
+                <action action="saveRoleListMultiSelect"  text="Set Permissions" title="Save Permissions">
+                </action>
+            </actions>
+        </kendo-dialog>
+        <kendo-dialog name="schedulingDialog" title="Publishing Scheduler" modal="true" visible="false" min-width="700">
+            <content>
+                <h4><span class="fa fa-calendar"></span> Publishing Scheduler</h4>
+                <hr />
+                <p></p>
+                <p>Use this tool to set when this version will become live on the web.</p>
+                <p>Tips:</p>
+                <ul>
+                    <li>Pick now or a date/time in the past to publish right away.</li>
+                    <li>Pick a date/time later on to schedule publishing in the future.</li>
+                    <li>
+                        Removing or clearing out the date/time will &quot;un-publish&quot; this version.
+                        <ul>
+                            <li>If no prior version exists, this page will not appear on the web.</li>
+                            <li>Otherwise, the prior <em>published</em> version will appear instead.</li>
+                        </ul>
+                    </li>
+                </ul>
+                <div class="form-row">
+                    <div class="col">
+                        @(Html.Kendo().DateTimePicker().Name("dtPublished").Enable(User.IsInRole("Editors") || User.IsInRole("Administrators")))
+                    </div>
+                    <div class="col">
+                        <a id="timeZone" class="btn btn-sm btn-secondary" title="Dates and times are in this time zone."> (Pacific Standard Time)</a>
+                    </div>
+                </div>
+                <p></p>
+                <div class="form-row">
+                    <div class="col">
+                        <div class="btn btn-sm btn-secondary" onclick="cancelPublish()">Clear Date/Time</div>
+                    </div>
+                </div>
+                <p></p>
+                <p><span class="badge badge-warning">Note: </span> This will immediately set permissions for all versions of this page.</p>
+            </content>
+            <popup-animation>
+                <open duration="500" effects="fade:in" />
+                <close duration="500" effects="fade:out" />
+            </popup-animation>
+            <actions>
+                <action action="cancelPublishDateTime" text="Cancel">
+                </action>
+                <action action="savePublishDateTime" text="Set Date/Time" title="Save Date/Time">
+                </action>
+            </actions>
+        </kendo-dialog>
     </div>
 
     <script>
 
         var validationSummary = $("#validation-summary");
         $(document).ready(function() {
-            setPublishLocalDateTime();
+            loadPublishLocalDateTime();
+            loadRoleListMultiSelect();
         });
 
-        function setPublishLocalDateTime() {
-            var published = $("#Published").val();
-            if (published !== null && typeof (published) !== "undefined") {
-                var localDateTime = convertUtcToLocalDateTime(published); // This will turn UTC to local time
-                var dateTimePicker = $("#dtPublished").data("kendoDateTimePicker");
-                dateTimePicker.value(localDateTime);
-            }
-        }
-
         $("#btnSave").on("click",
-            function(e) {
+            function (e) {
                 e.preventDefault();
                 handlePost();
             });
 
+        function loadPublishLocalDateTime() {
+            var published = $("#Published").val();
+            var publishButton = $("#btnPublish");
+            if (published !== null && typeof (published) !== "undefined" && published.trim() !== "") {
+                var localDateTime = convertUtcToLocalDateTime(published); // This will turn UTC to local time
+                var dateTimePicker = $("#dtPublished").data("kendoDateTimePicker");
+                dateTimePicker.value(localDateTime);
+                var now = new Date();
+
+                if (now < localDateTime) {
+                    publishButton.attr("class", "btn btn-sm btn-primary");
+                    publishButton.html("Future Publishing Date");
+                } else {
+                    publishButton.attr("class", "btn btn-sm btn-success");
+                    publishButton.html("Version Published");
+                }
+            } else {
+                publishButton.attr("class", "btn btn-sm btn-warning");
+                publishButton.html("Not Scheduled");
+            }
+        }
+
+        function loadRoleListMultiSelect() {
+            var roleListMs = $("#roleListMS").data("kendoMultiSelect");
+            var roles = $("#RoleList").val().split(",");
+            roleListMs.value(roles);
+        }
+
+        function saveRoleListMultiSelect() {
+
+            var roleListMs = $("#roleListMS").data("kendoMultiSelect");
+            var roleList = roleListMs.dataItems().map(x => x.RoleName).join(",");
+
+            if ($("#RoleList").val() !== roleList) {
+                $("#pendingChangesBadge").show();
+            }
+
+            $("#RoleList").val(roleList);
+
+            $("#pendingChangesBadge").show();
+
+        }
+
+        function openSchedulerDialog() {
+            $("#schedulingDialog").data("kendoDialog").open();
+        }
+
+        function cancelPublish() {
+            var dateTimePicker = $("#dtPublished").data("kendoDateTimePicker");
+            dateTimePicker.value("");
+        }
+
+        function editorChangeDetected(e) {
+            $("#pendingChangesBadge").show();
+        }
+
+        function savePublishDateTime() {
+            // Save date/time
+            var dateTimePicker = $("#dtPublished").data("kendoDateTimePicker");
+            var dateTimeValue = dateTimePicker.value();
+
+            if ($("#Published").val() !== dateTimeValue) {
+                $("#pendingChangesBadge").show();
+            }
+
+            // Note, this saves the date/time using local time (of the user's computer).
+            // The server stores this as UTC time.
+            if (dateTimeValue !== null && dateTimeValue !== "null" && dateTimeValue !== "") {
+                var datetime = new Date(dateTimeValue);
+// ReSharper disable once QualifiedExpressionMaybeNull
+                var utcString = datetime.toUTCString();
+                $("#Published").val(utcString);
+            } else {
+                $("#Published").val("");
+            }
+
+            loadPublishLocalDateTime();
+        }
+
+        function cancelPublishDateTime() {
+            loadPublishLocalDateTime();
+            $("#schedulingDialog").data("kendoDialog").close();
+        };
 
         // Handles button bar click - edit button.
         function bgEditClick(e) {
@@ -212,6 +361,9 @@
                 break;
             case "Preview":
                 window.open("@Url.Action("Preview", "Home", new {Model?.Id})");
+                break;
+            case "Permissions":
+                $("#permissionsDialog").data("kendoDialog").open();
                 break;
             case "Help":
                 window.open("https://cosmos.azureedge.net/edit_page#HtmlEditor");
@@ -250,7 +402,8 @@
                 // No template change, may do ajax post.
                 $.post("@Url.Action("SaveHtml", controllerName)",
                     $("#frmEdit").serialize(),
-                    function(response) {
+                    function (response) {
+                        $("#pendingChangesBadge").hide();
                         if (response.IsValid) {
                             $("#previewItem").show();
                         } else {
@@ -288,7 +441,11 @@
                         // Published
                         var pubUtc = kendo.toString(response.Model.Published, "G");
                         $("#Published").val(response.Model.Published);
-                        setPublishLocalDateTime();
+                        loadPublishLocalDateTime();
+
+                        // Role list
+                        $("RoleList").val(response.Model.RoleList);
+                        loadRoleListMultiSelect();
 
                         // Title
                         editorSave("eTitle", "kendoEditor", response.Model.Title);
@@ -378,7 +535,7 @@
             var dialog = $("#closeEditorDialog").data("kendoDialog");
             dialog.open();
         }
-        
+
         function closeEditor() {
             window.location.href = "@Url.Content($"~/{Model?.UrlPath.Replace("root", "")}")";
         }

@@ -3,7 +3,7 @@
     Layout = "_Layout";
     ViewData["Title"] = "Page List";
 
-    var versions = $"<a class=\"btn btn-sm btn-secondary\" href=\"{Url.Action("Versions", "Editor")}/#: ArticleNumber #\" title=\"Edit Article\"><span class='fa fa-edit'></span></a>";
+    var versions = $"<a class=\"btn btn-sm btn-secondary\" href=\"{Url.Action("Versions", "Editor")}/#: ArticleNumber #\" title=\"Edit Article\"><span class='fa fa-font'></span></a>";
     var copyUrl = "<button class=\"clipboard btn btn-sm btn-secondary\" data-clipboard-text=\"/#: UrlPath #\"  title='Click to copy url'><span class='fa fa-external-link'></span></button>";
     var btnGroup = "<div class=\"btn-group btn-group-sm\" role=\"group\" aria-label=\"Basic example\">#= getNewHomeButton(IsDefault, LastPublished, Id) #" +
                    versions + copyUrl + "#= getStatusBadge(LastPublished, ArticleNumber) #</div>";

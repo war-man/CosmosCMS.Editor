@@ -364,7 +364,7 @@ namespace CDT.Cosmos.Cms.Controllers
             model.EditModeOn = true;
             model.ReadWriteMode = true;
             model.PreviewMode = true;
-            return View("~/Views/Home/Index_standard1.cshtml", model);
+            return View("~/Views/Home/Index.cshtml", model);
         }
 
         [HttpGet]

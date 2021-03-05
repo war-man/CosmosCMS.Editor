@@ -129,7 +129,7 @@ namespace CDT.Cosmos.Cms.Controllers
 
                     if (defaultView) return View(model);
 
-                    return View("~/Views/Home/Index_standard1.cshtml", model);
+                    return View("~/Views/Home/Index.cshtml", model);
                 }
                 catch (Exception e)
                 {
@@ -204,7 +204,7 @@ namespace CDT.Cosmos.Cms.Controllers
                     }).ToList();
                 ViewData["PageUrls"] = pageModel;
 
-                return View("~/Views/Home/Index_standard1.cshtml", model);
+                return View("~/Views/Home/Index.cshtml", model);
             }
             catch (Exception e)
             {

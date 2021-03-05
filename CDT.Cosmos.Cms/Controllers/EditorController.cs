@@ -952,6 +952,7 @@ namespace CDT.Cosmos.Cms.Controllers
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
+        [HttpGet]
         public async Task<IActionResult> Get_RoleList(string text)
         {
             var query = DbContext.Roles.Select(s => new RoleItemViewModel
@@ -959,9 +960,14 @@ namespace CDT.Cosmos.Cms.Controllers
                 Id = s.Id,
                 RoleName = s.Name,
                 RoleNormalizedName = s.NormalizedName
-            }).Where(w => w.RoleName.Contains(text, StringComparison.CurrentCultureIgnoreCase)).OrderBy(r => r.RoleName);
+            });
 
-            return Json(await query.ToListAsync());
+            if (!string.IsNullOrEmpty(text))
+            {
+                query = query.Where(w => w.RoleName.StartsWith(text));
+            }
+
+            return Json(await query.OrderBy(r => r.RoleName).ToListAsync());
         }
 
         #endregion
