@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using CDT.Cosmos.Cms.Common.Data.Logic;
 using CDT.Cosmos.Cms.Common.Models;
 using CDT.Cosmos.Cms.Common.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -37,6 +38,7 @@ namespace CDT.Cosmos.Cms.Common.Controllers
             _redisOptions = redisOptions;
             _gglConfig = gglConfig;
             _articleLogic = articleLogic;
+
         }
 
         /// <summary>
@@ -72,6 +74,18 @@ namespace CDT.Cosmos.Cms.Common.Controllers
                 }
 
                 if (article.StatusCode == StatusCodeEnum.Redirect) return Redirect(article.Content);
+
+                //
+                // Check Role Based Access Control (RBAC)
+                //
+                if (!string.IsNullOrEmpty(article.RoleList))
+                {
+                    var roles = article.RoleList.Split(',');
+                    if (User.Identity == null || User.Identity.IsAuthenticated == false || roles.Any(r => User.IsInRole(r))  == false)
+                    {
+                        return Unauthorized();
+                    }
+                }
 
                 // Convert PST to GMT for both Updated and Published  =
                 // Azure documentation regarding cache-control header use and CDN:
