@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using CDT.Cosmos.Cms.Common.Data;
 using CDT.Cosmos.Cms.Common.Data.Logic;
 using CDT.Cosmos.Cms.Common.Models;
 using CDT.Cosmos.Cms.Common.Services;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
+using Newtonsoft.Json;
 
 namespace CDT.Cosmos.Cms.Common.Controllers
 {
@@ -38,7 +40,6 @@ namespace CDT.Cosmos.Cms.Common.Controllers
             _redisOptions = redisOptions;
             _gglConfig = gglConfig;
             _articleLogic = articleLogic;
-
         }
 
         /// <summary>
@@ -78,15 +79,18 @@ namespace CDT.Cosmos.Cms.Common.Controllers
                 //
                 // Check Role Based Access Control (RBAC)
                 //
+                ViewData["RBAC"] = GetUserIdentityInfo();
+
                 if (!string.IsNullOrEmpty(article.RoleList))
                 {
                     var roles = article.RoleList.Split(',');
                     if (User.Identity == null || User.Identity.IsAuthenticated == false || roles.Any(r => User.IsInRole(r))  == false)
                     {
-                        return Unauthorized();
+                        HttpContext.Response.StatusCode = 401;
+                        return Redirect("~/Identity/Account/Login");
                     }
                 }
-
+                
                 // Convert PST to GMT for both Updated and Published  =
                 // Azure documentation regarding cache-control header use and CDN:
                 // https://docs.microsoft.com/en-us/azure/cdn/cdn-how-caching-works#cache-directive-headers
@@ -114,6 +118,24 @@ namespace CDT.Cosmos.Cms.Common.Controllers
                 _logger.LogError(e, e.Message);
                 throw;
             }
+        }
+
+        private string GetUserIdentityInfo()
+        {
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                // http://schemas.microsoft.com/ws/2008/06/identity/claims/role
+                var userInfo = new UserIdentityInfo
+                {
+                    EmailAddress = User.Identity.Name,
+                    RoleMembership = string.Join(',', User.Claims
+                        .Where(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")
+                        .Select(s => s.Value).ToList())
+                };
+                return JsonConvert.SerializeObject(userInfo, Formatting.None);
+            }
+
+            return string.Empty;
         }
 
         /// <summary>

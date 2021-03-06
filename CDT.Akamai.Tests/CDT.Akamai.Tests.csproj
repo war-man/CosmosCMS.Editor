@@ -7,9 +7,9 @@
 
 		<UserSecretsId>fe977e78-b037-4b95-bbda-4f68db48c420</UserSecretsId>
 
-		<AssemblyVersion>2021.3.5.0</AssemblyVersion>
+		<AssemblyVersion>2021.3.5.3</AssemblyVersion>
 
-		<FileVersion>2021.3.5.0</FileVersion>
+		<FileVersion>2021.3.5.3</FileVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
