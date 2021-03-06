@@ -1,4 +1,4 @@
-﻿namespace CDT.Cosmos.Cms.Services
+﻿namespace CDT.Cosmos.Cms.Common.Services
 {
     public class AuthenticationConfig
     {
