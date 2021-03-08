@@ -6,21 +6,53 @@
 
 <main class="main-primary">
     <div class="container">
-        <a class="btn btn-sm btn-primary" asp-action="Roles">Role List</a>
+        <h2>User Account List</h2>
+        <p>
+            Click the &quot;Editor Role&quot; button for a user to update that person's access to the editor website.
+            Manage user access to published pages using &quot;Publisher Roles.&quot;
+        </p>
+        <a class="btn btn-sm btn-primary" asp-action="Roles" title="Manage roles created to limit access to specific web pages here.">Publisher Roles</a>
         @(Html.Kendo().Grid<UsersIndexViewModel>
             ().Name("grid")
             .Columns(col =>
             {
                 col.Bound(b => b.UserId).Hidden();
                 col.Bound(b => b.EmailAddress);
-                col.Bound(b => b.EmailConfirmed).Hidden();
+                col.Bound(b => b.EmailConfirmed);
                 col.Bound(b => b.PhoneNumber);
                 col.Bound(b => b.Role);
                 col.Bound(b => b.LoginProvider);
-                col.Command(command => command.Custom("Manage").Click("manageRoles"));
+                col.Command(command => {
+                    command.Custom("Editor Role").Click("manageRoles");
+                });
             })
-            .Search(t => t.Field("EmailAddress"))
-            .ToolBar(s => s.Search())
+            .ToolBar(toolbar =>
+            {
+                toolbar.Save();
+            })
+            .Search(t => t.Field("Email"))
+            .Editable(editable => editable.Mode(GridEditMode.InCell))
+            .Pageable()
+            .Navigatable()
+            .Sortable()
+            .DataSource(dataSource => dataSource
+                .Ajax()
+                .Batch(true)
+                .PageSize(20)
+                .ServerOperation(false)
+                .Events(events => events.Error("error_handler"))
+                .Model(model =>
+                {
+                    model.Id(p => p.UserId);
+                    model.Field(f => f.EmailAddress).Editable(false);
+                    model.Field(f => f.PhoneNumber).Editable(false);
+                    model.Field(f => f.EmailConfirmed).Editable(true); // Only thing that can be edited here.
+                    model.Field(f => f.Role).Editable(false);
+                    model.Field(f => f.LoginProvider).Editable(false);
+                })
+                .Read("Read_UsersIndexViewModel", "Users")
+                .Update("Update_UsersIndexViewModel", "Users")
+            )
             )
     </div>
 </main>
@@ -29,5 +61,21 @@
     function manageRoles(e) {
         var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
         window.location = "@Url.Action("RoleMembership")/" + dataItem.UserId;
+    }
+
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors,
+                function (key, value) {
+                    if ('errors' in value) {
+                        $.each(value.errors,
+                            function () {
+                                message += this + "\n";
+                            });
+                    }
+                });
+            alert(message);
+        }
     }
 </script>

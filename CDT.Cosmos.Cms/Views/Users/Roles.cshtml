@@ -6,6 +6,9 @@
 
 <main class="main-primary">
     <div class="container">
+        <h2>Publisher Roles</h2>
+        <p>The roles listed here are used by the &quot;Publisher&quot; to limit access to one or more pages.  Add or remove users 
+        to these roles by clicking the &quot;Users&quot; button.</p>
         <a class="btn btn-sm btn-primary" asp-action="Index">User List</a>
         @(Html.Kendo().Grid<RoleItemViewModel>().Name("grid")
             .BindTo(Model)

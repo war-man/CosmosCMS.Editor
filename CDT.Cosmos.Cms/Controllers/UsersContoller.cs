@@ -31,7 +31,7 @@ namespace CDT.Cosmos.Cms.Controllers
         /// <summary>
         /// These roles are hard-wired, and cannot be altered here.
         /// </summary>
-        private static string[] RestrictedRoles = 
+        private static string[] RestrictedRoles =
             {"reviewers", "administrators", "editors", "team members", "authors"};
 
         public UsersController(UserManager<IdentityUser> userManager,
@@ -83,38 +83,9 @@ namespace CDT.Cosmos.Cms.Controllers
                     }
                 }
 
-                var roles = await _dbContext.Roles.ToListAsync();
-                var usersAndRoles = await _dbContext.UserRoles.ToListAsync();
-                var users = await _dbContext.Users.ToListAsync();
-                var userLogins = await _dbContext.UserLogins.ToListAsync();
 
-                var queryUsersAndRoles = (from ur in usersAndRoles
-                    join r in roles on ur.RoleId equals r.Id
-                    select new
-                    {
-                        ur.UserId,
-                        RoleName = r.Name
-                    }).ToList();
 
-                var model = new List<UsersIndexViewModel>();
-
-                foreach (var user in users)
-                {
-                    var role = queryUsersAndRoles.FirstOrDefault(f => f.UserId == user.Id);
-                    var login = userLogins.FirstOrDefault(f => f.UserId == user.Id);
-
-                    model.Add(new UsersIndexViewModel
-                    {
-                        UserId = user.Id,
-                        EmailConfirmed = user.EmailConfirmed,
-                        EmailAddress = user.Email,
-                        PhoneNumber = user.PhoneNumber,
-                        Role = role == null ? "No Role" : role.RoleName,
-                        LoginProvider = login == null ? "Local Acct." : login.ProviderDisplayName
-                    });
-                }
-
-                return View(model.ToList());
+                return View();
             }
 
             return Unauthorized();
@@ -301,7 +272,7 @@ namespace CDT.Cosmos.Cms.Controllers
                 Id = s.Id,
                 RoleName = s.Name,
                 RoleNormalizedName = s.NormalizedName
-            }).Where(w => w.RoleName.ToLower() != "administrators").OrderBy(r => r.RoleName);
+            }).Where(w => RestrictedRoles.Contains(w.RoleName.ToLower()) == false).OrderBy(r => r.RoleName);
 
             return Json(await query.ToDataSourceResultAsync(request));
         }
@@ -422,7 +393,65 @@ namespace CDT.Cosmos.Cms.Controllers
         #endregion
 
         #region USERS CRUD
-        
+
+        public async Task<IActionResult> Read_UsersIndexViewModel([DataSourceRequest] DataSourceRequest request)
+        {
+            //UsersIndexViewModel
+            var roles = await _dbContext.Roles.ToListAsync();
+            var usersAndRoles = await _dbContext.UserRoles.ToListAsync();
+            var users = await _dbContext.Users.ToListAsync();
+            var userLogins = await _dbContext.UserLogins.ToListAsync();
+
+            var queryUsersAndRoles = (from ur in usersAndRoles
+                                      join r in roles on ur.RoleId equals r.Id
+                                      select new
+                                      {
+                                          ur.UserId,
+                                          RoleName = r.Name
+                                      }).ToList();
+
+            var model = new List<UsersIndexViewModel>();
+
+            foreach (var user in users)
+            {
+                var userRoles = queryUsersAndRoles.Where(f => f.UserId == user.Id).ToList();
+                var login = userLogins.FirstOrDefault(f => f.UserId == user.Id);
+
+                model.Add(new UsersIndexViewModel
+                {
+                    UserId = user.Id,
+                    EmailConfirmed = user.EmailConfirmed,
+                    EmailAddress = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    Role = userRoles.Count == 0 ? "No Role" : string.Join(", ", userRoles.Select(s => s.RoleName)),
+                    LoginProvider = login == null ? "Local Acct." : login.ProviderDisplayName
+                });
+            }
+            return Json(await model.ToDataSourceResultAsync(request));
+        }
+
+        public async Task<ActionResult> Update_UsersIndexViewModel([DataSourceRequest] DataSourceRequest request, [Bind(Prefix = "models")] IEnumerable<UsersIndexViewModel> users)
+        {
+            if (users != null && ModelState.IsValid)
+            {
+                foreach (var user in users)
+                {
+                    var identityUser = await _userManager.FindByIdAsync(user.UserId);
+
+                    //
+                    // The following fields are updateable
+                    //
+
+                    identityUser.EmailConfirmed = user.EmailConfirmed;
+
+                    await _userManager.UpdateAsync(identityUser);
+                }
+
+            }
+
+            return Json(await users.ToDataSourceResultAsync(request, ModelState));
+        }
+
         public async Task<IActionResult> Read_Users([DataSourceRequest] DataSourceRequest request, string roleId = "")
         {
             if (string.IsNullOrEmpty(roleId))
@@ -461,7 +490,6 @@ namespace CDT.Cosmos.Cms.Controllers
                     user.Selected = userIds.Contains(user.Id);
                 }
             }
-
             return Json(await users.ToDataSourceResultAsync(request));
         }
 

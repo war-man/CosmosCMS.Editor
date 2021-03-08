@@ -10,7 +10,7 @@ namespace CDT.Cosmos.Cms.Models
         [EmailAddress]
         public string EmailAddress { get; set; }
 
-        [Display(Name = "Role")] public string Role { get; set; }
+        [Display(Name = "Role(s)")] public string Role { get; set; }
 
         [Display(Name = "Telephone #")]
         [Phone]
