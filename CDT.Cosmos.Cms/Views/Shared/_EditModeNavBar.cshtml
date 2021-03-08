@@ -537,7 +537,7 @@
         }
 
         function closeEditor() {
-            window.location.href = "@Url.Content($"~/{Model?.UrlPath.Replace("root", "")}")";
+           window.location.href = "@Url.Action("Versions", "Editor", new {Id = Model.ArticleNumber})";
         }
     </script>
 }
