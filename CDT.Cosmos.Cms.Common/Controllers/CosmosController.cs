@@ -1,16 +1,15 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using CDT.Cosmos.Cms.Common.Data;
-using CDT.Cosmos.Cms.Common.Data.Logic;
+﻿using CDT.Cosmos.Cms.Common.Data.Logic;
 using CDT.Cosmos.Cms.Common.Models;
 using CDT.Cosmos.Cms.Common.Services;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
+using System;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace CDT.Cosmos.Cms.Common.Controllers
 {
@@ -79,7 +78,7 @@ namespace CDT.Cosmos.Cms.Common.Controllers
                 //
                 // Check Role Based Access Control (RBAC)
                 //
-                ViewData["RBAC"] = GetUserIdentityInfo();
+                ViewData["CCMS-RBAC"] = GetUserIdentityInfo();
 
                 if (!string.IsNullOrEmpty(article.RoleList))
                 {
@@ -122,20 +121,29 @@ namespace CDT.Cosmos.Cms.Common.Controllers
 
         private string GetUserIdentityInfo()
         {
+            UserIdentityInfo identity;
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
-                // http://schemas.microsoft.com/ws/2008/06/identity/claims/role
-                var userInfo = new UserIdentityInfo
+                identity = new UserIdentityInfo
                 {
-                    EmailAddress = User.Identity.Name,
-                    RoleMembership = string.Join(',', User.Claims
-                        .Where(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")
-                        .Select(s => s.Value).ToList())
+                    IsAuthenticated = User.Identity.IsAuthenticated,
+                    RoleMembership = ((ClaimsIdentity)User.Identity).Claims
+                        .Where(c => c.Type == ClaimTypes.Role)
+                        .Select(c => c.Value),
+                    UserName = User.Identity.Name
                 };
-                return JsonConvert.SerializeObject(userInfo, Formatting.None);
+            }
+            else
+            {
+                identity = new UserIdentityInfo
+                {
+                    IsAuthenticated = false,
+                    RoleMembership = new string[] { },
+                    UserName = string.Empty
+                };
             }
 
-            return string.Empty;
+            return JsonConvert.SerializeObject(identity);
         }
 
         /// <summary>
