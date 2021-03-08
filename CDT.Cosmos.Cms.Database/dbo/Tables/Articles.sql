@@ -13,11 +13,14 @@
     [HeaderJavaScript] NVARCHAR (MAX) NULL,
     [LayoutId]         INT            NULL,
     [TeamId]           INT            NULL,
+    [RoleList]         NVARCHAR (512) NULL,
     CONSTRAINT [PK_Articles] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_Articles_FontIcons_FontIconId] FOREIGN KEY ([FontIconId]) REFERENCES [dbo].[FontIcons] ([Id]),
     CONSTRAINT [FK_Articles_Layouts_LayoutId] FOREIGN KEY ([LayoutId]) REFERENCES [dbo].[Layouts] ([Id]),
     CONSTRAINT [FK_Articles_Teams_TeamId] FOREIGN KEY ([TeamId]) REFERENCES [dbo].[Teams] ([Id])
 );
+
+
 
 
 
