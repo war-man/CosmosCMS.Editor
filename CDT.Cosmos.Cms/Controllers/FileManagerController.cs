@@ -27,7 +27,7 @@ using Newtonsoft.Json;
 
 namespace CDT.Cosmos.Cms.Controllers
 {
-    [Authorize(Roles = "Administrators, Editors, Team Members")]
+    [Authorize(Roles = "Administrators, Editors, Authors, Team Members")]
     public class FileManagerController : BaseController
     {
         public FileManagerController(ILogger<FileManagerController> logger,
