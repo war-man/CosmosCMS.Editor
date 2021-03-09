@@ -5,63 +5,73 @@
 @{
     Layout = "_DynamicLayout";
     ViewData["Title"] = Model.Title;
-    var blobUrl = (string) ViewData["BlobEndpointUrl"];
+    var blobUrl = (string)ViewData["BlobEndpointUrl"];
 }
 @if (Model.EditModeOn)
 {
-    <style>
-        .k-window.k-editor-widget {
-            top: 50px !important;
-            position: fixed;
-        }
+<style>
+    .k-window.k-editor-widget {
+        top: 50px !important;
+        position: fixed;
+    }
 
-        .main-content > .k-state-active {
-            background-color: inherit;
-            color: inherit;
-        }
+    .main-content > .k-state-active {
+        background-color: inherit;
+        color: inherit;
+    }
 
-        .main-content > .k-editor-inline {
-            background-color: inherit;
-            color: inherit;
-        }
-    </style>
-    @(Html.Kendo()
-        .Editor().Name("eContent")
-        .PasteCleanup(a => a.All(true))
-        .Tools(tools => tools
-            .Clear()
-            .Bold().Italic().Underline().Strikethrough()
-            .JustifyLeft().JustifyCenter().JustifyRight().JustifyFull()
-            .InsertUnorderedList().InsertOrderedList()
-            .Outdent().Indent()
-            .CreateLink().Unlink()
-            .SubScript()
-            .SuperScript()
-            .TableEditing()
-            .Formatting()
-            .InsertImage()
-            .InsertFile()
-            .CleanFormatting()
-            .FormatPainter()
-            .FontName()
-            .FontSize()
-            .ForeColor()
-            .BackColor()
-            .Print())
-        .Tag("div")
-        .Events(eve => eve.Change("editorChangeDetected"))
-        .Immutables(true)
-        .Value(@<text>@Html.Raw(Model.Content)</text>)
-        .ImageBrowser(imageBrowser => imageBrowser
-            .Image(blobUrl + "{0}")
-            .Read("FileBrowserRead", "FileManager")
-            .FileTypes(AllowedFileExtensions.GetFilterForViews(AllowedFileExtensions.ExtensionCollectionType.ImageUploads))
-        )
-        .FileBrowser(fileBrowser => fileBrowser
-            .File(blobUrl + "{0}")
-            .Read("FileBrowserRead", "FileManager")
-            .FileTypes(AllowedFileExtensions.GetFilterForViews(AllowedFileExtensions.ExtensionCollectionType.FileUploads))
-        ))
+    .main-content > .k-editor-inline {
+        background-color: inherit;
+        color: inherit;
+    }
+</style>
+@if (Model.Content.Contains(" contenteditable="))
+{
+<div data-role="editor" id="eContent">
+@Html.Raw(Model.Content)
+</div>
+}
+else
+{
+@(Html.Kendo()
+.Editor().Name("eContent")
+.PasteCleanup(a => a.All(true))
+.Tools(tools => tools
+    .Clear()
+    .Bold().Italic().Underline().Strikethrough()
+    .JustifyLeft().JustifyCenter().JustifyRight().JustifyFull()
+    .InsertUnorderedList().InsertOrderedList()
+    .Outdent().Indent()
+    .CreateLink().Unlink()
+    .SubScript()
+    .SuperScript()
+    .TableEditing()
+    .Formatting()
+    .InsertImage()
+    .InsertFile()
+    .CleanFormatting()
+    .FormatPainter()
+    .FontName()
+    .FontSize()
+    .ForeColor()
+    .BackColor()
+    .Print())
+.Tag("div")
+.Events(eve => eve.Change("editorChangeDetected"))
+.Immutables(true)
+.Value(@<text>@Html.Raw(Model.Content)</text>)
+.ImageBrowser(imageBrowser => imageBrowser
+    .Image(blobUrl + "{0}")
+    .Read("FileBrowserRead", "FileManager")
+    .FileTypes(AllowedFileExtensions.GetFilterForViews(AllowedFileExtensions.ExtensionCollectionType.ImageUploads))
+)
+.FileBrowser(fileBrowser => fileBrowser
+    .File(blobUrl + "{0}")
+    .Read("FileBrowserRead", "FileManager")
+    .FileTypes(AllowedFileExtensions.GetFilterForViews(AllowedFileExtensions.ExtensionCollectionType.FileUploads))
+
+))
+}
 }
 else
 {
