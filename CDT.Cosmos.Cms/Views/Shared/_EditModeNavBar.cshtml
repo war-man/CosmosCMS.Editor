@@ -54,6 +54,7 @@
         <input type="hidden" asp-for="RoleList" />
         <input type="hidden" id="userName" value="@User.Identity?.Name" />
 
+
         @* EDITING TOOL BAR *@
         @(Html.Kendo().ToolBar()
             .Name("ToolBar")
@@ -396,7 +397,9 @@
 
                 $("#saveChangesDialog").data("kendoDialog").open();
 
-                processKendoCtrls("editor", "kendoEditor");
+                // save the page content.
+                saveContent();
+
                 processKendoCtrls("listbox", "kendoDropDownList");
 
                 // No template change, may do ajax post.
@@ -470,13 +473,26 @@
             return false;
         }
 
+        function saveContent() {
+            var editor = $("#eContent").data("kendoEditor"); // Div editor
+            var hiddenField = $("#Content"); // Corresponding hidden field.
+            if (typeof editor !== 'undefined' && editor !== null) {
+                // Object is a Kendo Editor
+                hiddenField.val(editor.value());
+            } else {
+                editor = $("#eContent");
+                hiddenField.val(editor.html());
+            }
+        }
+
         function processKendoCtrls(roleName, dataName) {
             $(document).find("[data-role=" + roleName + "]").each(function() {
                 var editor = $(this).data(dataName);
                 var hid;
                 var hidden;
                 if (typeof editor !== 'undefined' && editor !== null) {
-                    // Kendo editor
+                    // Is a Kendo control
+                    var elementId = editor.element.attr("id");
                     hid = editor.element.attr("id").substring(1, editor.element.attr("id").length);
                     hidden = $("#" + hid);
                     if (hidden === null || hidden === "undefined") {
@@ -502,9 +518,12 @@
         function editorSave(id, type, value) {
             // Find the editor
             var editor = $("#" + id).data(type);
-            if (editor !== null && typeof(editor) !== "undefined") {
-// ReSharper disable once QualifiedExpressionMaybeNull
+            if (editor !== null && typeof (editor) !== "undefined") {
+                // ReSharper disable once QualifiedExpressionMaybeNull
                 editor.value(value);
+            } else {
+                editor = $("#" + id);
+                editor.html(value);
             }
         }
 

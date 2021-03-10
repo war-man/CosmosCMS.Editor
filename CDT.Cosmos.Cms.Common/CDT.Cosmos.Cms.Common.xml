@@ -220,6 +220,11 @@
                 (optional) Team that manages this page.
             </summary>
         </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Data.Article.RoleList">
+            <summary>
+            A comma delimited list of roles that can access this article. If blank the assumption is anonymous access.
+            </summary>
+        </member>
         <member name="T:CDT.Cosmos.Cms.Common.Data.ArticleLog">
             <summary>
                 Article activity log entry
@@ -502,13 +507,6 @@
                 </list>
             </remarks>
         </member>
-        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetSupportedLanguages(System.String)">
-            <summary>
-                Get the list of languages supported for translation by Google.
-            </summary>
-            <param name="lang"></param>
-            <returns></returns>
-        </member>
         <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.UpdateOrInsert(CDT.Cosmos.Cms.Common.Models.ArticleViewModel,System.String,System.Nullable{System.Int32})">
             <summary>
                 Updates an existing article, or inserts a new one.
@@ -637,6 +635,13 @@
                 If the menu can't be pulled from <see cref="T:Microsoft.Extensions.Caching.Distributed.IDistributedCache" />, this method creates a fresh copy of
                 content using <see cref="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.InternalBuildMenu" />.
             </remarks>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetSupportedLanguages(System.String)">
+            <summary>
+                Get the list of languages supported for translation by Google.
+            </summary>
+            <param name="lang"></param>
+            <returns></returns>
         </member>
         <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.HandleUrlEncodeTitle(System.String)">
             <summary>
@@ -1037,6 +1042,12 @@
             <summary>
                 Layout used by this page.
             </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.RoleList">
+            <summary>
+            Roles allowed to view this page.
+            </summary>
+            <remarks>If this value is null, it assumes page can be viewed anonymously.</remarks>
         </member>
         <member name="P:CDT.Cosmos.Cms.Common.Models.ArticleViewModel.ReadWriteMode">
             <summary>
@@ -1672,6 +1683,26 @@
             </summary>
             <param name="returnLanguage"></param>
             <returns></returns>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Services.UserIdentityInfo">
+            <summary>
+            User identity information
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.UserIdentityInfo.IsAuthenticated">
+            <summary>
+            User is authenticated
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.UserIdentityInfo.UserName">
+            <summary>
+            User email address
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.UserIdentityInfo.RoleMembership">
+            <summary>
+            Role membership
+            </summary>
         </member>
     </members>
 </doc>
