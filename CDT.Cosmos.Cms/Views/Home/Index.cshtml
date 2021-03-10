@@ -60,21 +60,7 @@
                         }
 
                         $(this).kendoEditor({
-                            tools: toolList,
-                            imageBrowser: {
-                                fileTypes: "@AllowedFileExtensions.GetFilterForViews(AllowedFileExtensions.ExtensionCollectionType.ImageUploads)",
-                                transport: {
-                                    read: "@Url.Action("FileBrowserRead", "FileManager")",
-                                    imageUrl: blobUrl + "{0}"
-                                }
-                            },
-                            fileBrowser: {
-                                fileTypes: "@AllowedFileExtensions.GetFilterForViews(AllowedFileExtensions.ExtensionCollectionType.FileUploads)",
-                                transport: {
-                                    read: "@Url.Action("FileBrowserRead", "FileManager")",
-                                    fileUrl: blobUrl + "{0}"
-                                }
-                            }
+                            tools: toolList
                         });
                     }
                 });
