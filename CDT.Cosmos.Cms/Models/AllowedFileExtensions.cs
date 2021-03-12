@@ -16,7 +16,7 @@ namespace CDT.Cosmos.Cms.Models
         public static string FileUploadsFilter =>
             "*.txt, *.doc, *.docx, *.xls, *.xlsx, *.ppt, *.pptx, *.zip, *.rar, *.pdf";
 
-        public static string ImageUploadsFilter => "*.png, *.gif, *.jpg, *.jpeg";
+        public static string ImageUploadsFilter => "*.png, *.gif, *.jpg, *.jpeg, *.svg";
 
         public static string DeveloperUploadsFilter => "*.js, *.css, *.json, *.ts, *.md";
 

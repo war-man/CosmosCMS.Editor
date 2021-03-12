@@ -60,7 +60,22 @@
                         }
 
                         $(this).kendoEditor({
-                            tools: toolList
+                            tools: toolList,
+                            imageBrowser: {
+                                fileTypes: "@AllowedFileExtensions.ImageUploadsFilter",
+                                transport: {
+                                    read: "@Url.Action("FileBrowserRead", "FileManager")?teamId=&kendoJs=true&fileType=i",
+                                    imageUrl: blobUrl + "{0}",
+                                    thumbnailUrl: "@Url.Action("CreateThumbnail", "FileManager")"
+                                }
+                            },
+                            fileBrowser: {
+                                fileTypes: "@AllowedFileExtensions.FileUploadsFilter",
+                                transport: {
+                                    read: "@Url.Action("FileBrowserRead", "FileManager")?teamId=&kendoJs=true&fileType=f",
+                                    fileUrl: blobUrl + "{0}"
+                                }
+                            }
                         });
                     }
                 });

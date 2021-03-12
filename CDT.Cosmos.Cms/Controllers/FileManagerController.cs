@@ -15,6 +15,7 @@ using CDT.Cosmos.Cms.Models;
 using CDT.Cosmos.Cms.Services;
 using Kendo.Mvc.UI;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -38,7 +39,8 @@ namespace CDT.Cosmos.Cms.Controllers
             ArticleLogic articleLogic,
             IOptions<AzureBlobServiceConfig> blobConfig,
             IOptions<RedisContextConfig> redisOptions,
-            AzureBlobService blobService) : base(options,
+            AzureBlobService blobService,
+            IWebHostEnvironment hostEnvironment) : base(options,
             dbContext,
             logger,
             userManager,
@@ -50,6 +52,7 @@ namespace CDT.Cosmos.Cms.Controllers
             _blobConfig = blobConfig;
             _options = options;
             _logger = logger;
+            _hostEnvironment = hostEnvironment;
         }
 
         public async Task<IActionResult> Index()
@@ -168,6 +171,7 @@ namespace CDT.Cosmos.Cms.Controllers
         private readonly IOptions<SiteCustomizationsConfig> _options;
         private readonly ILogger<FileManagerController> _logger;
         private readonly AzureBlobService _blobService;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
         #endregion
 
@@ -186,7 +190,7 @@ namespace CDT.Cosmos.Cms.Controllers
                 foreach (var teamId in teamIds)
                     await _blobService.CreateFolder(GetAbsolutePath(teamId));
         }
-        
+
         /// <summary>
         ///     Encodes a URL
         /// </summary>
@@ -335,7 +339,7 @@ namespace CDT.Cosmos.Cms.Controllers
             return NotFound();
         }
 
-        public async Task<IActionResult> FileBrowserRead(string path, int? teamId = null)
+        public async Task<IActionResult> FileBrowserRead(string path, int? teamId = null, bool kendojs = false, string fileType = "")
         {
             path = string.IsNullOrEmpty(path) ? "" : HttpUtility.UrlDecode(path);
 
@@ -344,22 +348,90 @@ namespace CDT.Cosmos.Cms.Controllers
 
                 var model = await GetFiles(path, teamId);
 
+                string[] fileExtensions = null;
+                switch (fileType)
+                {
+                    case "f":
+                        fileExtensions = AllowedFileExtensions.GetFilterForViews(AllowedFileExtensions.ExtensionCollectionType.FileUploads).Split(',').Select(s => s.Trim().ToLower()).ToArray();
+                        break;
+                    case "i":
+                        fileExtensions = AllowedFileExtensions.GetFilterForViews(AllowedFileExtensions.ExtensionCollectionType.ImageUploads).Split(',').Select(s => s.Trim().ToLower()).ToArray();
+                        break;
+                }
+
                 var jsonModel = new List<FileBrowserEntry>();
 
                 foreach (var entry in model)
                 {
-                    jsonModel.Add(new FileBrowserEntry()
+                    if (entry.IsDirectory || fileExtensions == null)
                     {
-                        EntryType = entry.IsDirectory ? FileBrowserEntryType.Directory : FileBrowserEntryType.File,
-                        Name = $"{entry.Name}{entry.Extension}",
-                        Size = entry.Size
-                    });
+                        jsonModel.Add(new FileBrowserEntry()
+                        {
+                            EntryType = entry.IsDirectory ? FileBrowserEntryType.Directory : FileBrowserEntryType.File,
+                            Name = $"{entry.Name}{entry.Extension}",
+                            Size = entry.Size
+                        });
+                    }
+                    else if (fileExtensions.Contains(entry.Extension.TrimStart('.')))
+                    {
+                        jsonModel.Add(new FileBrowserEntry()
+                        {
+                            EntryType = entry.IsDirectory ? FileBrowserEntryType.Directory : FileBrowserEntryType.File,
+                            Name = $"{entry.Name}{entry.Extension}",
+                            Size = entry.Size
+                        });
+                    }
+                }
+
+                if (kendojs)
+                {
+                    return Json(jsonModel.Select(s => new KendoFileBrowserEntry(s)).ToList());
                 }
 
                 return Json(jsonModel);
             }
 
             return NotFound();
+        }
+
+        [ResponseCache(Duration = 30, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new [] { "path" })]
+        public async Task<IActionResult> CreateThumbnail(string path)
+        {
+            path = string.IsNullOrEmpty(path) ? "" : HttpUtility.UrlDecode(path);
+
+            var searchPath = GetAbsolutePath(null, path);
+
+            var blobClient = _blobService.GetBlobClient(searchPath);
+
+            try
+            {
+                using (var fileStream = await blobClient.OpenReadAsync())
+                {
+                    // 80 x 80
+                    var desiredSize = new ImageSizeModel();
+
+                    const string contentType = "image/png";
+
+                    var thumbnailCreator = new ThumbnailCreator();
+
+                    return File(thumbnailCreator.Create(fileStream, desiredSize, contentType), contentType);
+                }
+            }
+            catch
+            {
+                string filePath = Path.Combine(_hostEnvironment.WebRootPath, "images\\ImageIcon.png");
+                using (var fileStream = System.IO.File.OpenRead(filePath))
+                {
+                    // 80 x 80
+                    var desiredSize = new ImageSizeModel();
+
+                    const string contentType = "image/png";
+
+                    var thumbnailCreator = new ThumbnailCreator();
+
+                    return File(thumbnailCreator.Create(fileStream, desiredSize, contentType), contentType);
+                }
+            }
         }
 
         /// <summary>
