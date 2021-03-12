@@ -341,7 +341,7 @@
             }
 
             // Get parent CSS
-            var color = $(element).closest("div").css("background");
+            var color = $(element).closest("div").css("color");
             var bgcolor = $(element).closest("div").css("background-color");
 
             $(element).kendoEditor({
@@ -363,7 +363,7 @@
                 }
             });
 
-            //$(element).css("background", color);
+            $(element).css("color", color + " !important");
             $(element).css("background-color", bgcolor + " !important");
 
             editors.push(element);
