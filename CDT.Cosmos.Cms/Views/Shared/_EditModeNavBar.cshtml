@@ -4,7 +4,6 @@
 @using Microsoft.Extensions.Options
 @using Kendo.Mvc.UI
 @using CDT.Cosmos.Cms.Common.Services
-@using Google.Apis.Util
 @model ArticleViewModel
 @{
     var controllerName = (string)Context.GetRouteData().Values["controller"];
@@ -42,6 +41,32 @@
 </style>
 @if (controllerName == "Editor" && actionName == "Edit" && Model != null)
 {
+    <style>
+        .k-window.k-editor-widget {
+            top: 50px !important;
+            position: fixed;
+        }
+
+        .main-content > .k-widget {
+            background-color: inherit;
+            color: inherit;
+        }
+
+        .main-content > .k-editor {
+            background-color: inherit;
+            color: inherit;
+        }
+
+        .main-content > .k-state-active {
+            background-color: inherit;
+            color: inherit;
+        }
+
+        .main-content > .k-editor-inline {
+            background-color: inherit;
+            color: inherit;
+        }
+    </style>
     <form id="frmEdit" asp-action="Edit" method="post" kendo-validator="true">
         <input type="hidden" asp-for="Id" />
         <input type="hidden" asp-for="ArticleNumber" />
@@ -191,7 +216,7 @@
             <actions>
                 <action text="Cancel">
                 </action>
-                <action action="saveRoleListMultiSelect"  text="Set Permissions" title="Save Permissions">
+                <action action="saveRoleListMultiSelect" text="Set Permissions" title="Save Permissions">
                 </action>
             </actions>
         </kendo-dialog>
@@ -245,10 +270,13 @@
 
     <script>
 
+        var editors = [];
+
         var validationSummary = $("#validation-summary");
         $(document).ready(function() {
             loadPublishLocalDateTime();
             loadRoleListMultiSelect();
+            loadEditors();
         });
 
         $("#btnSave").on("click",
@@ -283,6 +311,81 @@
             var roleListMs = $("#roleListMS").data("kendoMultiSelect");
             var roles = $("#RoleList").val().split(",");
             roleListMs.value(roles);
+        }
+
+
+        function removeEditors() {
+            $(editors).each(function () {
+                var editor = $(this).data("kendoEditor");
+                //editor.close();
+                editor.destroy();
+            });
+            editors = [];
+        }
+
+        function loadEditors() {
+            var mode = "@(Model.Content.ToLower().Contains(" contenteditable=") ? "multi" : "single")";
+            if (mode === "single") {
+                deployEditor($("#eContent"));
+            } else {
+                $("[contenteditable='true']").each(function () {
+                    var editortype = $(this).attr("ccms-editor-type");
+                    if (editortype !== null && editortype !== "" && typeof editortype !== "undefined" && editortype.toLowerCase() === "wysiwyg") {
+                        deployEditor(this);
+                    }
+                });
+            }
+        }
+
+        function deployEditor(element) {
+
+            var blobUrl = "@((string)ViewData["BlobEndpointUrl"])";
+
+            var toolList = [
+                "bold",
+                "italic",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "underline",
+                "createLink",
+                "unlink",
+                "indent",
+                "cleanFormatting",
+                "insertImage",
+                "insertFile"
+            ];
+
+            var tools = $(element).attr("ccms-editor-tools");
+            if (tools !== null && tools !== "" && typeof tools !== "undefined") {
+                toolList = tools.split(",");
+            }
+
+            $(element).kendoEditor({
+                tools: toolList,
+                imageBrowser: {
+                    fileTypes: "@AllowedFileExtensions.ImageUploadsFilter",
+                    transport: {
+                        read: "@Url.Action("ImageBrowserRead", "FileManager")",
+                        imageUrl: blobUrl + "{0}",
+                        thumbnailUrl: "@Url.Action("CreateThumbnail", "FileManager")"
+                    }
+                },
+                fileBrowser: {
+                    fileTypes: "@AllowedFileExtensions.FileUploadsFilter",
+                    transport: {
+                        read: "@Url.Action("FileBrowserRead", "FileManager")",
+                        fileUrl: blobUrl + "{0}"
+                    }
+                }
+            });
+
+            editors.push(element);
         }
 
         function saveRoleListMultiSelect() {
@@ -400,6 +503,9 @@
                 // save the page content.
                 saveContent();
 
+                // Close and remove editors
+                removeEditors();
+
                 processKendoCtrls("listbox", "kendoDropDownList");
 
                 // No template change, may do ajax post.
@@ -457,6 +563,8 @@
                         editorSave("eContent", "kendoEditor", response.Model.Content);
 
                         $("#savedVersionNo").text(response.Model.VersionNumber);
+
+                        loadEditors();
 
                         $("#saveChangesDialog").data("kendoDialog").close();
                         if (response.IsValid) {

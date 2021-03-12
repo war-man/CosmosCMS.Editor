@@ -339,14 +339,19 @@ namespace CDT.Cosmos.Cms.Controllers
             return NotFound();
         }
 
-        public async Task<IActionResult> FileBrowserRead(string path, int? teamId = null, bool kendojs = false, string fileType = "")
+        public async Task<IActionResult> ImageBrowserRead(string path)
+        {
+            return await FileBrowserRead(path, "i");
+        }
+
+        public async Task<IActionResult> FileBrowserRead(string path, string fileType = "f")
         {
             path = string.IsNullOrEmpty(path) ? "" : HttpUtility.UrlDecode(path);
 
             if (_options.Value.ReadWriteMode)
             {
 
-                var model = await GetFiles(path, teamId);
+                var model = await GetFiles(path, null);
 
                 string[] fileExtensions = null;
                 switch (fileType)
@@ -383,12 +388,7 @@ namespace CDT.Cosmos.Cms.Controllers
                     }
                 }
 
-                if (kendojs)
-                {
-                    return Json(jsonModel.Select(s => new KendoFileBrowserEntry(s)).ToList());
-                }
-
-                return Json(jsonModel);
+                return Json(jsonModel.Select(s => new KendoFileBrowserEntry(s)).ToList());
             }
 
             return NotFound();

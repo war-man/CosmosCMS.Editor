@@ -1,133 +1,14 @@
-﻿@using Kendo.Mvc.UI
-@model ArticleViewModel
+﻿@model ArticleViewModel
 @removeTagHelper "*, Microsoft.AspNet.Mvc.Razor"
 @removeTagHelper "*, Microsoft.AspNetCore.Mvc.Razor"
 @{
     Layout = "_DynamicLayout";
     ViewData["Title"] = Model.Title;
-    var blobUrl = (string)ViewData["BlobEndpointUrl"];
 }
-@if (Model.EditModeOn)
-{
-    <style>
-        .k-window.k-editor-widget {
-            top: 50px !important;
-            position: fixed;
-        }
+<div id="eContent">
+ @Html.Raw(Model.Content)
+</div>
 
-        .k-state-active {
-            background-color: inherit;
-            color: inherit;
-        }
-
-        .k-editor-inline {
-            background-color: inherit;
-            color: inherit;
-        }
-    </style>
-    @if (Model.Content.ToLower().Contains(" contenteditable="))
-    {
-        <div id="eContent">
-            @Html.Raw(Model.Content)
-        </div>
-        <script>
-            var blobUrl = "@blobUrl";
-
-            $(document).ready(function () {
-                $("[contenteditable='true']").each(function () {
-                    var editortype = $(this).attr("ccms-editor-type");
-                    if (editortype !== null && editortype !== "" && typeof editortype !== "undefined" && editortype.toLowerCase() === "wysiwyg") {
-                        var tools = $(this).attr("ccms-editor-tools");
-                        var toolList = ["bold",
-                            "italic",
-                            "justifyLeft",
-                            "justifyCenter",
-                            "justifyRight",
-                            "justifyFull",
-                            "insertUnorderedList",
-                            "insertOrderedList",
-                            "indent",
-                            "outdent",
-                            "underline",
-                            "createLink",
-                            "unlink",
-                            "indent",
-                            "cleanFormatting",
-                            "insertImage",
-                            "insertFile"];
-                        if (tools !== null && tools !== "" && typeof tools !== "undefined") {
-                            toolList = tools.split(",");
-                        }
-
-                        $(this).kendoEditor({
-                            tools: toolList,
-                            imageBrowser: {
-                                fileTypes: "@AllowedFileExtensions.ImageUploadsFilter",
-                                transport: {
-                                    read: "@Url.Action("FileBrowserRead", "FileManager")?teamId=&kendoJs=true&fileType=i",
-                                    imageUrl: blobUrl + "{0}",
-                                    thumbnailUrl: "@Url.Action("CreateThumbnail", "FileManager")"
-                                }
-                            },
-                            fileBrowser: {
-                                fileTypes: "@AllowedFileExtensions.FileUploadsFilter",
-                                transport: {
-                                    read: "@Url.Action("FileBrowserRead", "FileManager")?teamId=&kendoJs=true&fileType=f",
-                                    fileUrl: blobUrl + "{0}"
-                                }
-                            }
-                        });
-                    }
-                });
-            });
-        </script>
-    }
-    else
-    {
-        @(Html.Kendo()
-        .Editor().Name("eContent")
-        .PasteCleanup(a => a.All(true))
-        .Tools(tools => tools
-            .Clear()
-            .Bold().Italic().Underline().Strikethrough()
-            .JustifyLeft().JustifyCenter().JustifyRight().JustifyFull()
-            .InsertUnorderedList().InsertOrderedList()
-            .Outdent().Indent()
-            .CreateLink().Unlink()
-            .SubScript()
-            .SuperScript()
-            .TableEditing()
-            .Formatting()
-            .InsertImage()
-            .InsertFile()
-            .CleanFormatting()
-            .FormatPainter()
-            .FontName()
-            .FontSize()
-            .ForeColor()
-            .BackColor()
-            .Print())
-        .Tag("div")
-        .Events(eve => eve.Change("editorChangeDetected"))
-        .Immutables(true)
-        .Value(@<text>@Html.Raw(Model.Content)</text>)
-        .ImageBrowser(imageBrowser => imageBrowser
-            .Image(blobUrl + "{0}")
-            .Read("FileBrowserRead", "FileManager")
-            .FileTypes(AllowedFileExtensions.GetFilterForViews(AllowedFileExtensions.ExtensionCollectionType.ImageUploads))
-        )
-        .FileBrowser(fileBrowser => fileBrowser
-            .File(blobUrl + "{0}")
-            .Read("FileBrowserRead", "FileManager")
-            .FileTypes(AllowedFileExtensions.GetFilterForViews(AllowedFileExtensions.ExtensionCollectionType.FileUploads))
-
-        ))
-    }
-}
-else
-{
-    @Html.Raw(Model.Content)
-}
 @section Scripts {
     @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 }
