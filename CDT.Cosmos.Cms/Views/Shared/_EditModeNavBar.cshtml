@@ -41,32 +41,6 @@
 </style>
 @if (controllerName == "Editor" && actionName == "Edit" && Model != null)
 {
-    <style>
-        .k-window.k-editor-widget {
-            top: 50px !important;
-            position: fixed;
-        }
-
-        .main-content > .k-widget {
-            background-color: inherit;
-            color: inherit;
-        }
-
-        .main-content > .k-editor {
-            background-color: inherit;
-            color: inherit;
-        }
-
-        .main-content > .k-state-active {
-            background-color: inherit;
-            color: inherit;
-        }
-
-        .main-content > .k-editor-inline {
-            background-color: inherit;
-            color: inherit;
-        }
-    </style>
     <form id="frmEdit" asp-action="Edit" method="post" kendo-validator="true">
         <input type="hidden" asp-for="Id" />
         <input type="hidden" asp-for="ArticleNumber" />
@@ -366,6 +340,10 @@
                 toolList = tools.split(",");
             }
 
+            // Get parent CSS
+            var color = $(element).closest("div").css("background");
+            var bgcolor = $(element).closest("div").css("background-color");
+
             $(element).kendoEditor({
                 tools: toolList,
                 imageBrowser: {
@@ -384,6 +362,9 @@
                     }
                 }
             });
+
+            //$(element).css("background", color);
+            $(element).css("background-color", bgcolor + " !important");
 
             editors.push(element);
         }
