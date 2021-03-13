@@ -340,7 +340,9 @@
                 toolList = tools.split(",");
             }
 
-            // Get parent CSS
+            // The Kendo style may override that of the page.
+            // To fix, grab the inherited CSS from the parent
+            // div and after the editor is built, reapply.
             var color = $(element).closest("div").css("color");
             var bgcolor = $(element).closest("div").css("background-color");
 
@@ -363,6 +365,9 @@
                 }
             });
 
+            //
+            // Override the Kendo .k-widget class here.
+            //
             $(element).css("color", color + " !important");
             $(element).css("background-color", bgcolor + " !important");
 
