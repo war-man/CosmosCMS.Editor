@@ -142,7 +142,8 @@ namespace CDT.Cosmos.Cms.Controllers
                     CustomButtons = new List<string>
                     {
                         "Preview"
-                    }
+                    },
+                    IsValid = true
                 };
                 return View(model);
             }

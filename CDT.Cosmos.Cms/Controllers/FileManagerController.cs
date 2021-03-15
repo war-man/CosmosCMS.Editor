@@ -1018,6 +1018,7 @@ namespace CDT.Cosmos.Cms.Controllers
 
                     model.EditorFields = new List<EditorField> {editorField};
                     model.CustomButtons = new List<string> {"Close"};
+                    model.IsValid = ModelState.IsValid;
                     return View(model);
                 }
                 catch (Exception e)

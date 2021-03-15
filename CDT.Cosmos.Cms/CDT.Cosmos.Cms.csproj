@@ -9,8 +9,8 @@
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Version>20</Version>
     <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
-    <AssemblyVersion>2021.3.15.8</AssemblyVersion>
-    <FileVersion>2021.3.15.8</FileVersion>
+    <AssemblyVersion>2021.3.15.10</AssemblyVersion>
+    <FileVersion>2021.3.15.10</FileVersion>
     <Authors></Authors>
   </PropertyGroup>
 

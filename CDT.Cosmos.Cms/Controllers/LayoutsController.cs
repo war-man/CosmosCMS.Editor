@@ -323,7 +323,8 @@ namespace CDT.Cosmos.Cms.Controllers
                                 FooterHtmlAttributes = layout.FooterHtmlAttributes,
                                 FooterHtmlContent = layout.FooterHtmlContent,
                                 PostFooterBlock = layout.PostFooterBlock,
-                                EditingField = layout.EditingField
+                                EditingField = layout.EditingField,
+                                IsValid = ModelState.IsValid
                             };
                             return View(model);
                         }

@@ -14,5 +14,6 @@ namespace CDT.Cosmos.Cms.Models
         public int Version { get; set; }
         public IEnumerable<EditorField> EditorFields { get; set; }
         public IEnumerable<string> CustomButtons { get; set; }
+        public bool IsValid { get; set; }
     }
 }

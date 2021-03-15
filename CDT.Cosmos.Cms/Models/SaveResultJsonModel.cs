@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 namespace CDT.Cosmos.Cms.Models
 {
 
-    public class SaveResultJsonModel : ISaveResultJsonModel
+    public class SaveResultJsonModel
     {
         public bool IsValid { get; set; }
         public int ErrorCount { get; set; }
