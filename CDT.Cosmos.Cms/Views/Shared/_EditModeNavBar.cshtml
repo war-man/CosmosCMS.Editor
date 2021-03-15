@@ -67,13 +67,14 @@
                     menuButtons.Add().Text("Preview").SpriteCssClass("fa fa-folder-open");
                     menuButtons.Add().Text("Versions").SpriteCssClass("fa fa-github");
                     menuButtons.Add().Text("Close").SpriteCssClass("fa fa-times-circle");
-                    menuButtons.Add().Text("Permissions").SpriteCssClass("fa fa-shield");
+                    menuButtons.Add().Text("Permissions").SpriteCssClass("fa fa-shield").Hidden(!User.IsInRole("Editors") && !User.IsInRole("Administrators"));
                     menuButtons.Add().Text("Help").SpriteCssClass("fa fa-info-circle");
                 }).Click("bgEditClick").Hidden(controllerName == "Templates");
                 items.Add().Template($"<span>Title: </span>");
                 items.Add().Template(Html.Kendo().TextBoxFor(m => m.Title).HtmlAttributes(new {style = "width: 265px;"}).ToHtmlString());
                 items.Add().Template($"(v.<span for='versionLbl'>{Model.VersionNumber}</span>)");
                 items.Add().Type(CommandType.Button).Template($"<div onclick='openSchedulerDialog()' id='btnPublish'></div>").Enable(User.IsInRole("Editors") || User.IsInRole("Administrators"));
+                items.Add().Type(CommandType.Button).Template("<div class='badge badge-secondary' onclick='openPermissionsDialog()' id='btnPermissions'><span class='fa fa-shield'></span></div>").Enable(User.IsInRole("Editors") || User.IsInRole("Administrators"));
                 items.Add().Template($"<div id='pendingChangesBadge' class='badge badge-warning' style='display:none'>Changes Pending Save</div>");
             }))
     </form>
@@ -106,7 +107,7 @@
         </kendo-dialog>
         <kendo-dialog name="versionsDialog" title="Page Versions" modal="true" visible="false" min-width="700">
             <content>
-                <p>On your way to the version list for this page. This will save the current version before proceeding. Are you ready?</p>
+                <p>This will case this version to be saved. Continue?</p>
             </content>
             <actions>
                 <action text="Cancel">
@@ -181,7 +182,7 @@
                     })
                     )
                 <p></p>
-                <p><span class="badge badge-warning">Note: </span> This will immediately set permissions for all versions of this page.</p>
+                <p><span class="badge badge-danger">WARNING: </span> This will immediately set permissions for all versions of this page.</p>
             </content>
             <popup-animation>
                 <open duration="500" effects="fade:in" />
@@ -271,13 +272,22 @@
                 if (now < localDateTime) {
                     publishButton.attr("class", "btn btn-sm btn-primary");
                     publishButton.html("Future Publishing Date");
+                    $(publishButton).kendoTooltip({
+                        content: "This version is set to be published in the future."
+                    });
                 } else {
                     publishButton.attr("class", "btn btn-sm btn-success");
                     publishButton.html("Version Published");
+                    $(publishButton).kendoTooltip({
+                        content: "This version is now published and available on the web."
+                    });
                 }
             } else {
                 publishButton.attr("class", "btn btn-sm btn-warning");
                 publishButton.html("Not Scheduled");
+                $(publishButton).kendoTooltip({
+                    content: "This version is not yet published."
+                });
             }
         }
 
@@ -285,8 +295,26 @@
             var roleListMs = $("#roleListMS").data("kendoMultiSelect");
             var roles = $("#RoleList").val().split(",");
             roleListMs.value(roles);
+            updatePermissionsBtn();
         }
 
+        function updatePermissionsBtn() {
+            var roles = $("#RoleList").val().split(",");
+            var btnPermissions = $("#btnPermissions");
+            btnPermissions.removeClass();
+            if (typeof roles === "undefined" || roles === null || roles.length < 1 || (roles.length === 1 && roles[0] === "")) {
+                btnPermissions.addClass("btn btn-sm btn-secondary");
+                $(btnPermissions).kendoTooltip({
+                    content: "No permissions set."
+                });
+            } else {
+                btnPermissions.addClass("btn btn-sm btn-warning");
+                $(btnPermissions).kendoTooltip({
+                    content: "Allowed roles: " + $("#RoleList").val() + "."
+                });
+            }
+
+        }
 
         function removeEditors() {
             $(editors).each(function () {
@@ -318,21 +346,49 @@
             var toolList = [
                 "bold",
                 "italic",
+                "underline",
+                "strikethrough",
                 "justifyLeft",
                 "justifyCenter",
                 "justifyRight",
                 "justifyFull",
                 "insertUnorderedList",
                 "insertOrderedList",
+                "insertUpperRomanList",
+                "insertLowerRomanList",
                 "indent",
                 "outdent",
-                "underline",
                 "createLink",
                 "unlink",
-                "indent",
-                "cleanFormatting",
                 "insertImage",
-                "insertFile"
+                "insertFile",
+                "subscript",
+                "superscript",
+                "tableWizard",
+                "createTable",
+                "addRowAbove",
+                "addRowBelow",
+                "addColumnLeft",
+                "addColumnRight",
+                "deleteRow",
+                "deleteColumn",
+                "mergeCellsHorizontally",
+                "mergeCellsVertically",
+                "splitCellHorizontally",
+                "splitCellVertically",
+                "tableAlignLeft",
+                "tableAlignCenter",
+                "tableAlignRight",
+                "viewHtml",
+                "formatting",
+                "cleanFormatting",
+                "copyFormat",
+                "applyFormat",
+                "fontName",
+                "fontSize",
+                "foreColor",
+                "backColor",
+                "print"
             ];
 
             var tools = $(element).attr("ccms-editor-tools");
@@ -385,12 +441,16 @@
 
             $("#RoleList").val(roleList);
 
-            $("#pendingChangesBadge").show();
+            updatePermissionsBtn();
 
         }
 
         function openSchedulerDialog() {
             $("#schedulingDialog").data("kendoDialog").open();
+        }
+
+        function openPermissionsDialog() {
+            $("#permissionsDialog").data("kendoDialog").open();
         }
 
         function cancelPublish() {
@@ -453,7 +513,7 @@
                 window.open("@Url.Action("Preview", "Home", new {Model?.Id})");
                 break;
             case "Permissions":
-                $("#permissionsDialog").data("kendoDialog").open();
+                openPermissionsDialog();
                 break;
             case "Help":
                 window.open("https://cosmos.azureedge.net/edit_page#HtmlEditor");
@@ -486,11 +546,11 @@
 
                 $("#saveChangesDialog").data("kendoDialog").open();
 
-                // save the page content.
-                saveContent();
-
                 // Close and remove editors
                 removeEditors();
+
+                // save the page content.
+                saveContent();
 
                 processKendoCtrls("listbox", "kendoDropDownList");
 
@@ -541,6 +601,7 @@
                         // Role list
                         $("RoleList").val(response.Model.RoleList);
                         loadRoleListMultiSelect();
+                        updatePermissionsBtn();
 
                         // Title
                         editorSave("eTitle", "kendoEditor", response.Model.Title);
