@@ -260,42 +260,27 @@
                 handlePost();
             });
 
-        function loadPublishLocalDateTime() {
-            var published = $("#Published").val();
-            var publishButton = $("#btnPublish");
-            if (published !== null && typeof (published) !== "undefined" && published.trim() !== "") {
-                var localDateTime = convertUtcToLocalDateTime(published); // This will turn UTC to local time
-                var dateTimePicker = $("#dtPublished").data("kendoDateTimePicker");
-                dateTimePicker.value(localDateTime);
-                var now = new Date();
-
-                if (now < localDateTime) {
-                    publishButton.attr("class", "btn btn-sm btn-primary");
-                    publishButton.html("Future Publishing Date");
-                    $(publishButton).kendoTooltip({
-                        content: "This version is set to be published in the future."
-                    });
-                } else {
-                    publishButton.attr("class", "btn btn-sm btn-success");
-                    publishButton.html("Version Published");
-                    $(publishButton).kendoTooltip({
-                        content: "This version is now published and available on the web."
-                    });
-                }
-            } else {
-                publishButton.attr("class", "btn btn-sm btn-warning");
-                publishButton.html("Not Scheduled");
-                $(publishButton).kendoTooltip({
-                    content: "This version is not yet published."
-                });
-            }
-        }
-
+        // PERMISSIONS FUNCTIONS
         function loadRoleListMultiSelect() {
             var roleListMs = $("#roleListMS").data("kendoMultiSelect");
             var roles = $("#RoleList").val().split(",");
             roleListMs.value(roles);
             updatePermissionsBtn();
+        }
+
+        function saveRoleListMultiSelect() {
+
+            var roleListMs = $("#roleListMS").data("kendoMultiSelect");
+            var roleList = roleListMs.dataItems().map(x => x.RoleName).join(",");
+
+            if ($("#RoleList").val() !== roleList) {
+                $("#pendingChangesBadge").show();
+            }
+
+            $("#RoleList").val(roleList);
+
+            updatePermissionsBtn();
+
         }
 
         function updatePermissionsBtn() {
@@ -316,15 +301,11 @@
 
         }
 
-        function removeEditors() {
-            $(editors).each(function () {
-                var editor = $(this).data("kendoEditor");
-                //editor.close();
-                editor.destroy();
-            });
-            editors = [];
+        function openPermissionsDialog() {
+            $("#permissionsDialog").data("kendoDialog").open();
         }
 
+        // EDITOR UTILITIES
         function loadEditors() {
             var mode = "@(Model.Content.ToLower().Contains(" contenteditable=") ? "multi" : "single")";
             if (mode === "single") {
@@ -430,27 +411,70 @@
             editors.push(element);
         }
 
-        function saveRoleListMultiSelect() {
+        function removeEditors() {
+            $(editors).each(function () {
+                var element = $(this);
+                var editor = $(this).data("kendoEditor");
+                //editor.close();
+                editor.destroy();
+                $(["k-widget", "k-editor", "k-editor-inline"]).each(function (i, css) {
+                    element.removeClass(css);
+                });
 
-            var roleListMs = $("#roleListMS").data("kendoMultiSelect");
-            var roleList = roleListMs.dataItems().map(x => x.RoleName).join(",");
+            });
+            editors = [];
+        }
 
-            if ($("#RoleList").val() !== roleList) {
-                $("#pendingChangesBadge").show();
+        function editorSave(id, type, value) {
+            // Find the editor
+            var editor = $("#" + id).data(type);
+            if (editor !== null && typeof (editor) !== "undefined") {
+                // ReSharper disable once QualifiedExpressionMaybeNull
+                editor.value(value);
+            } else {
+                editor = $("#" + id);
+                editor.html(value);
             }
+        }
 
-            $("#RoleList").val(roleList);
+        function closeEditor() {
+           window.location.href = "@Url.Action("Versions", "Editor", new {Id = Model.ArticleNumber})";
+        }
 
-            updatePermissionsBtn();
+        // SCHEDULING PUBLISHING UTILITIES
+        function loadPublishLocalDateTime() {
+            var published = $("#Published").val();
+            var publishButton = $("#btnPublish");
+            if (published !== null && typeof (published) !== "undefined" && published.trim() !== "") {
+                var localDateTime = convertUtcToLocalDateTime(published); // This will turn UTC to local time
+                var dateTimePicker = $("#dtPublished").data("kendoDateTimePicker");
+                dateTimePicker.value(localDateTime);
+                var now = new Date();
 
+                if (now < localDateTime) {
+                    publishButton.attr("class", "btn btn-sm btn-primary");
+                    publishButton.html("Future Publishing Date");
+                    $(publishButton).kendoTooltip({
+                        content: "This version is set to be published in the future."
+                    });
+                } else {
+                    publishButton.attr("class", "btn btn-sm btn-success");
+                    publishButton.html("Version Published");
+                    $(publishButton).kendoTooltip({
+                        content: "This version is now published and available on the web."
+                    });
+                }
+            } else {
+                publishButton.attr("class", "btn btn-sm btn-warning");
+                publishButton.html("Not Scheduled");
+                $(publishButton).kendoTooltip({
+                    content: "This version is not yet published."
+                });
+            }
         }
 
         function openSchedulerDialog() {
             $("#schedulingDialog").data("kendoDialog").open();
-        }
-
-        function openPermissionsDialog() {
-            $("#permissionsDialog").data("kendoDialog").open();
         }
 
         function cancelPublish() {
@@ -670,18 +694,6 @@
             });
         }
 
-        function editorSave(id, type, value) {
-            // Find the editor
-            var editor = $("#" + id).data(type);
-            if (editor !== null && typeof (editor) !== "undefined") {
-                // ReSharper disable once QualifiedExpressionMaybeNull
-                editor.value(value);
-            } else {
-                editor = $("#" + id);
-                editor.html(value);
-            }
-        }
-
         function openVersionsDialog() {
             $("#versionsDialog").data("kendoDialog").open();
         }
@@ -710,9 +722,6 @@
             dialog.open();
         }
 
-        function closeEditor() {
-           window.location.href = "@Url.Action("Versions", "Editor", new {Id = Model.ArticleNumber})";
-        }
     </script>
 }
 else
