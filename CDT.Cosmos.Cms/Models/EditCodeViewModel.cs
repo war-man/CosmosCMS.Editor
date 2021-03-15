@@ -4,7 +4,7 @@ using CDT.Cosmos.Cms.Models.Interfaces;
 
 namespace CDT.Cosmos.Cms.Models
 {
-    public class EditCodePostModel : ICodeEditorViewModel
+    public class EditCodePostModel
     {
         public int ArticleNumber { get; set; }
 

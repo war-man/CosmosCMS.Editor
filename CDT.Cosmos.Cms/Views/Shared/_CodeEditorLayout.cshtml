@@ -48,11 +48,11 @@
     <script src="https://kendo.cdn.telerik.com/2021.1.224/js/kendo.aspnetmvc.min.js"></script>
 </head>
 <body>
-<header style="background-color: black; border-color: black;">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                @(Html.Kendo().ToolBar().Name("tbar")
+    <header style="background-color: black; border-color: black;">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    @(Html.Kendo().ToolBar().Name("tbar")
                     .HtmlAttributes(new {style = "background-color: black; border: 0px"})
                     .Items(item =>
                     {
@@ -84,7 +84,7 @@
                         item.Add().Template(@"<div><strong>Version:</strong> " + ViewData["Version"] + "</div>");
                         item.Add().Template("<span title=\"Edit sessions\" id=\"pubLbl\">Session info: </span><span id=\"articleChat\"></span>");
                     }))
-                @(Html.Kendo().TabStrip().Name("tabs")
+                    @(Html.Kendo().TabStrip().Name("tabs")
                     .Items(tab =>
                     {
                         foreach (var field in fields)
@@ -92,118 +92,128 @@
                             tab.Add().Text(field.FieldName).Selected(field.FieldId == Model.EditingField).ImageUrl(field.IconUrl).ImageHtmlAttributes(new {style = "height:28px"});
                         }
                     }).Events(a => a.Select("tabOnSelect")))
+                </div>
             </div>
         </div>
+    </header>
+    <div>
+        <div id="editspace" class="editor"></div>
     </div>
-</header>
-<div>
-    <div id="editspace" class="editor"></div>
-</div>
-@RenderBody()
+    @RenderBody()
 
-<kendo-dialog name="closeEditorDialog" title="Edit Code" modal="true" visible="false" min-width="500">
-    <content>
-        <p>You are about to leave this page.</p>
-        <h5> Any unsaved changes will be lost!</h5>
-        <p>To save, click cancel and then the save button.</p>
-    </content>
-    <actions>
-        <action text="Cancel">
-        </action>
-        <action action="closeEditor" primary="true" text="Yes" title="Confirm">
-        </action>
-    </actions>
-    <popup-animation>
-        <open duration="500" effects="fade:in"/>
-        <close duration="500" effects="fade:out"/>
-    </popup-animation>
-</kendo-dialog>
-<kendo-dialog name="modelStateMsg" title="Save Error" modal="true" visible="@ViewData.ModelState.IsValid == false" min-width="600">
-    <content>
-        <div class="bg-secondary text-light">
-            <h4>
-                <span class="badge badge-warning">WARNING!</span>
-            </h4>
-            <p>Could not save because of the following error(s):</p>
-            <ul>
-                @{
-                    var keys = ViewData.ModelState.Keys.ToList();
-                    var values = ViewData.ModelState.Values.ToList();
-                    for (var i = 0; i < ViewData.ModelState.Keys.Count(); i++)
-                    {
-                        var errors = values[i].Errors.ToList();
-                        if (errors.Count > 0)
+    <kendo-dialog name="closeEditorDialog" title="Edit Code" modal="true" visible="false" min-width="500">
+        <content>
+            <p>You are about to leave this page.</p>
+            <h5> Any unsaved changes will be lost!</h5>
+            <p>To save, click cancel and then the save button.</p>
+        </content>
+        <actions>
+            <action text="Cancel">
+            </action>
+            <action action="closeEditor" primary="true" text="Yes" title="Confirm">
+            </action>
+        </actions>
+        <popup-animation>
+            <open duration="500" effects="fade:in" />
+            <close duration="500" effects="fade:out" />
+        </popup-animation>
+    </kendo-dialog>
+    <kendo-dialog name="modelStateMsg" title="Save Error" modal="true" visible="@ViewData.ModelState.IsValid == false" min-width="600">
+        <content>
+            <div class="bg-secondary text-light">
+                <h4>
+                    <span class="badge badge-warning">WARNING!</span>
+                </h4>
+                <p>Could not save because of the following error(s):</p>
+                <ul>
+                    @{
+                        var keys = ViewData.ModelState.Keys.ToList();
+                        var values = ViewData.ModelState.Values.ToList();
+                        for (var i = 0; i < ViewData.ModelState.Keys.Count(); i++)
                         {
-                            <li>
-                                @keys[i] :
-                                <ul>
-                                    @{
-                                        for (var c = 0; c < errors.Count; c++)
-                                        {
-                                            <li>
-                                                @errors[c].ErrorMessage
-                                                @if (errors[c].Exception != null)
-                                                {
-                                                    <br/>
-                                                    <br/>
-                                                    <button class="btn btn-sm btn-dark" onclick="onClickShowError('@("#exception" + i + c)')">View Details</button>
-                                                    <div @("id=\"exception" + i + c + "\"") style="display: none">
-                                                        <div style="display: block; font-family: Courier New;">
-                                                            @errors[c].Exception.Message
+                            var errors = values[i].Errors.ToList();
+                            if (errors.Count > 0)
+                            {
+                                <li>
+                                    @keys[i] :
+                                    <ul>
+                                        @{
+                                            for (var c = 0; c < errors.Count; c++)
+                                            {
+                                                <li>
+                                                    @errors[c].ErrorMessage
+                                                    @if (errors[c].Exception != null)
+                                                    {
+                                                        <br />
+                                                        <br />
+                                                        <button class="btn btn-sm btn-dark" onclick="onClickShowError('@("#exception" + i + c)')">View Details</button>
+                                                        <div @("id=\"exception" + i + c + "\"") style="display: none">
+                                                            <div style="display: block; font-family: Courier New;">
+                                                                @errors[c].Exception.Message
+                                                            </div>
+                                                            <code>
+                                                                @errors[c].Exception.InnerException
+                                                            </code>
                                                         </div>
-                                                        <code>
-                                                            @errors[c].Exception.InnerException
-                                                        </code>
-                                                    </div>
-                                                }
-                                            </li>
+                                                    }
+                                                </li>
+                                            }
                                         }
-                                    }
-                                </ul>
-                            </li>
+                                    </ul>
+                                </li>
+                            }
                         }
                     }
-                }
-            </ul>
-        </div>
-    </content>
-    <actions>
-        <action text="Ok">
-        </action>
-    </actions>
-    <popup-animation>
-        <open duration="500" effects="fade:in"/>
-        <close duration="500" effects="fade:out"/>
-    </popup-animation>
-</kendo-dialog>
-<kendo-dialog name="codeErrorDialog" title="Edit Code" modal="true" visible="false" min-width="800" min-height="800">
-    <content>
-        <div class="bg-dark text-light" id="exceptionDetails">
+                </ul>
+            </div>
+        </content>
+        <actions>
+            <action text="Ok">
+            </action>
+        </actions>
+        <popup-animation>
+            <open duration="500" effects="fade:in" />
+            <close duration="500" effects="fade:out" />
+        </popup-animation>
+    </kendo-dialog>
+    <kendo-dialog name="saveErrorsDialog" title="Errors Log" modal="true" visible="false" min-width="800" min-height="800">
+        <content>
+            <div class="bg-dark text-light" id="divErrorLog">
 
-        </div>
-    </content>
-    <actions>
-        <action text="Close">
-        </action>
-    </actions>
-    <popup-animation>
-        <open duration="500" effects="fade:in"/>
-        <close duration="500" effects="fade:out"/>
-    </popup-animation>
-</kendo-dialog>
-<kendo-dialog name="saveChangesDialog" title="Please Wait" modal="true" visible="false" min-width="500">
-    <content>
-        <div>
-            <p>Saving changes...</p>
-        </div>
-    </content>
-    <popup-animation>
-        <open duration="500" effects="fade:in"/>
-        <close duration="500" effects="fade:out"/>
-    </popup-animation>
-</kendo-dialog>
-
-<script>
+            </div>
+        </content>
+        <actions>
+            <action text="Close">
+            </action>
+        </actions>
+        <popup-animation>
+            <open duration="500" effects="fade:in" />
+            <close duration="500" effects="fade:out" />
+        </popup-animation>
+    </kendo-dialog>
+    <kendo-dialog name="saveChangesDialog" title="Please Wait" modal="true" visible="false" min-width="500">
+        <content>
+            <div>
+                <p>Saving changes...</p>
+            </div>
+        </content>
+        <popup-animation>
+            <open duration="500" effects="fade:in" />
+            <close duration="500" effects="fade:out" />
+        </popup-animation>
+    </kendo-dialog>
+    <kendo-dialog name="changesSavedDialog" title="Changes Saved" modal="true" visible="false" min-width="700">
+        <content>
+            <div>
+                <p>Your changes have been successfully saved.</p>
+            </div>
+        </content>
+        <popup-animation>
+            <open duration="500" effects="fade:in" />
+            <close duration="500" effects="fade:out" />
+        </popup-animation>
+    </kendo-dialog>
+    <script>
     var editor;
     var fieldId;
     // Example: var editFields = '[{"FieldId":"HeaderJavaScript","FieldName":"Header JavaScript","EditorMode":0},{"FieldId":"Content","FieldName":"Html Content","EditorMode":1},{"FieldId":"FooterJavaScript","FieldName":"Footer JavaScript","EditorMode":0}]';
@@ -253,7 +263,8 @@
             });
     }
 
-    $("#codeForm").submit(function(event) {
+    $("#codeForm").submit(function (e) {
+        e.preventDefault(); // Prevent the form from doing a post back.
         $("#saveChangesDialog").data("kendoDialog").open();
         if (editor) {
             $("#" + fieldId).val(editor.getValue());
@@ -263,7 +274,36 @@
             editor.dispose();
             editor = null;
         }
-        return true;
+        //return true;
+        var form = $('#codeForm');
+        var action = form.attr('action');
+
+        $.post(action,
+            form.serialize(),
+            function (response) {
+                $("#saveChangesDialog").data("kendoDialog").close();
+                if (response.IsValid) {
+                    $("#changesSavedDialog").data("kendoDialog").open();
+                    setTimeout(function () {
+                        $("#changesSavedDialog").data("kendoDialog").close();
+                    }, 1000);
+                } else {
+                    var errorMsg = "<h5>Error(s) detected while saving:</h5>";
+                    // Invalid response.
+                    $.each(response.Errors,
+                        function (index, error) {
+                            errorMsg = "<p>" + error.Key + "</p><ul>";
+                            $.each(error.Errors,
+                                function (index, innerError) {
+                                    errorMsg = errorMsg + "<li>" + innerError.ErrorMessage + "</li>";
+                                });
+                            errorMsg = errorMsg + "</ul>";
+                        });
+                    $("#divErrorLog").html(errorMsg);
+                    $("#saveErrorsDialog").data("kendoDialog").open();
+                }
+            }
+        );
     });
 
     function btnSelectField(e) {
@@ -333,9 +373,9 @@
                 }
             }
         });
-</script>
-<script src="~/js/signalr/dist/browser/signalr.js"></script>
-<script src="~/js/ArticleHub.js"></script>
-<script src="/lib/monaco-editor/min/vs/loader.js"></script>
+    </script>
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
+    <script src="~/js/ArticleHub.js"></script>
+    <script src="/lib/monaco-editor/min/vs/loader.js"></script>
 </body>
 </html>

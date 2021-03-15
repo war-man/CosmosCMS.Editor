@@ -93,7 +93,7 @@
         <kendo-dialog name="changesSavedDialog" title="Changes Saved" modal="true" visible="false" min-width="700">
             <content>
                 <div>
-                    <p>Your changes have been successfully save, and reloaded into this page.</p>
+                    <p>Your changes have been successfully saved.</p>
                     <div class="form-group">
                         <span>Version saved:</span>
                         <span id="savedVersionNo"></span>
@@ -140,6 +140,10 @@
                 <div id="divErrorLog">
                 </div>
             </content>
+            <actions>
+                <action text="Close">
+                </action>
+            </actions>
             <popup-animation>
                 <open duration="500" effects="fade:in" />
                 <close duration="500" effects="fade:out" />

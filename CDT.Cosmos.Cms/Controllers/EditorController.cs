@@ -731,6 +731,7 @@ namespace CDT.Cosmos.Cms.Controllers
                     else
                         article.FooterJavaScript = model.FooterJavaScript.Trim();
 
+                    
                     // Check for validation errors...
                     if (ModelState.IsValid)
                         // If no HTML errors were thrown, save here.
@@ -753,39 +754,17 @@ namespace CDT.Cosmos.Cms.Controllers
                     // ReSharper disable once PossibleNullReferenceException
                     ViewData["Version"] = article.VersionNumber;
 
-                    return View(new EditCodePostModel
-                    {
-                        Id = article.Id,
-                        ArticleNumber = article.ArticleNumber,
-                        EditorTitle = article.Title,
-                        EditorFields = new[]
-                        {
-                            new EditorField
-                            {
-                                FieldId = "HeaderJavaScript",
-                                FieldName = "Header JavaScript",
-                                EditorMode = EditorMode.JavaScript
-                            },
-                            new EditorField
-                            {
-                                FieldId = "Content",
-                                FieldName = "Html Content",
-                                EditorMode = EditorMode.Html
-                            },
-                            new EditorField
-                            {
-                                FieldId = "FooterJavaScript",
-                                FieldName = "Footer JavaScript",
-                                EditorMode = EditorMode.JavaScript
-                            }
-                        },
-                        EditorMode = EditorMode.JavaScript,
-                        HeaderJavaScript = article.HeaderJavaScript,
-                        FooterJavaScript = article.FooterJavaScript,
-                        Content = article.Content,
-                        EditingField = model.EditingField,
-                        CustomButtons = new[] { "Preview", "Html" }
-                    });
+                    var jsonModel = new SaveCodeResultJsonModel();
+
+                    jsonModel.ErrorCount = ModelState.ErrorCount;
+                    jsonModel.IsValid = ModelState.IsValid;
+                    jsonModel.Errors.AddRange(ModelState.Values
+                    .Where(w => w.ValidationState == ModelValidationState.Invalid)
+                    .ToList());
+                    jsonModel.ValidationState = ModelState.ValidationState;
+
+                    return Json(jsonModel);
+
                 }
 
                 return Unauthorized();
