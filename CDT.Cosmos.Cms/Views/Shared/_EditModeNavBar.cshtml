@@ -762,8 +762,8 @@ else
                         menuButtons.Add().Text("Reset Site").SpriteCssClass("fa fa-power-off");
                     }
                 }
-                menuButtons.Add().Text("User Account");
-                menuButtons.Add().Text("Log Out");
+                menuButtons.Add().Text("User Account").SpriteCssClass("fa fa-user");
+                menuButtons.Add().Text("Log Out").SpriteCssClass("fa fa-sign-out");;
             }).Click("bgCmsClick");
             items.Add().Template("<a id='timeZone' title='Dates and times are in this time zone.' class='btn btn-sm btn-secondary'></a>");
         }))

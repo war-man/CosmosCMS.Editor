@@ -754,10 +754,11 @@ namespace CDT.Cosmos.Cms.Controllers
                     // ReSharper disable once PossibleNullReferenceException
                     ViewData["Version"] = article.VersionNumber;
 
-                    var jsonModel = new SaveCodeResultJsonModel();
-
-                    jsonModel.ErrorCount = ModelState.ErrorCount;
-                    jsonModel.IsValid = ModelState.IsValid;
+                    var jsonModel = new SaveCodeResultJsonModel
+                    {
+                        ErrorCount = ModelState.ErrorCount,
+                        IsValid = ModelState.IsValid
+                    };
                     jsonModel.Errors.AddRange(ModelState.Values
                     .Where(w => w.ValidationState == ModelValidationState.Invalid)
                     .ToList());

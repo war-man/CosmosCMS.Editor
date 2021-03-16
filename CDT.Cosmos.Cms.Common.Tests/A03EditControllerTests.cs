@@ -361,25 +361,10 @@ namespace CDT.Cosmos.Cms.Common.Tests
 
             var codeModel = (EditCodePostModel) editPage.Model;
 
-            var result1 = (ViewResult) await controller.EditCode(codeModel);
-            var editResult1 = (EditCodePostModel) result1.Model;
+            var result1 = (JsonResult) await controller.EditCode(codeModel);
+            var editResult1 = (SaveCodeResultJsonModel) result1.Value;
 
-            var result2 = (ViewResult) await controller.EditCode(editResult1);
-            var editResult2 = (EditCodePostModel) result2.Model;
-
-            var result3 = (ViewResult) await controller.EditCode(editResult2);
-            var editResult3 = (EditCodePostModel) result3.Model;
-
-            var result4 = (ViewResult) await controller.EditCode(editResult3);
-            var editResult4 = (EditCodePostModel) result4.Model;
-
-            var result5 = (ViewResult) await controller.EditCode(editResult4);
-            var editResult5 = (EditCodePostModel) result5.Model;
-
-            Assert.AreEqual(string.IsNullOrEmpty(pageModel.HeaderJavaScript),
-                string.IsNullOrEmpty(editResult5.HeaderJavaScript));
-            Assert.AreEqual(string.IsNullOrEmpty(pageModel.FooterJavaScript),
-                string.IsNullOrEmpty(editResult5.FooterJavaScript));
+            Assert.IsTrue(editResult1.IsValid);
         }
 
         //
@@ -410,20 +395,11 @@ namespace CDT.Cosmos.Cms.Common.Tests
 
             var codeModel = (EditCodePostModel) editPage.Model;
             codeModel.Content = "<div><div><span><h1>Wow this is messed up!";
-            var result1 = (ViewResult) await controller.EditCode(codeModel);
-            var editResult1 = (EditCodePostModel) result1.Model;
+            var result1 = (JsonResult) await controller.EditCode(codeModel);
+            var editResult1 = (SaveCodeResultJsonModel) result1.Value;
 
-            Assert.IsFalse(result1.ViewData.ModelState.IsValid);
-            Assert.AreEqual(1, result1.ViewData.ModelState.Keys.Count());
-            Assert.AreEqual(1, result1.ViewData.ModelState.Values.Count());
-            var errorList = result1.ViewData.ModelState.Values.ToList();
-            Assert.AreEqual(1, errorList.Count);
-            Assert.AreEqual(4, errorList[0].Errors.Count);
-
-            // Make sure this didn't save, reload edit page, and compare.
-            editPage = (ViewResult) await controller.EditCode(pageModel.Id);
-            codeModel = (EditCodePostModel) editPage.Model;
-            Assert.AreNotEqual("<div><div><span><h1>Wow this is messed up!", codeModel.Content);
+            Assert.IsFalse(editResult1.IsValid);
+            Assert.AreEqual(1, editResult1.Errors.Count);
         }
     }
 }
