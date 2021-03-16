@@ -145,7 +145,7 @@ namespace CDT.Cosmos.Cms.Controllers
                     },
                     IsValid = true
                 };
-                return View(model);
+                return Json(model);
             }
 
             return Unauthorized();

@@ -10,7 +10,6 @@ using CDT.Cosmos.Cms.Common.Services;
 using Google.Cloud.Translate.V3;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Z.EntityFramework.Plus;
@@ -29,7 +28,6 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
         //private readonly IOptions<GoogleCloudAuthConfig> _googleCloudAuthConfig;
 
         //private readonly IOptions<AzureBlobServiceConfig> _blobConfig;
-        private readonly ILogger _logger;
         private readonly IOptions<RedisContextConfig> _redisOptions;
         private readonly TranslationServices _translationServices;
 
@@ -39,12 +37,10 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
         /// <param name="dbContext"></param>
         /// <param name="distributedCache"></param>
         /// <param name="config"></param>
-        /// <param name="logger"></param>
         /// <param name="redisOptions"></param>
         /// <param name="translationServices"></param>
         public ArticleLogic(ApplicationDbContext dbContext,
             IDistributedCache distributedCache,
-            ILogger<ArticleLogic> logger,
             IOptions<SiteCustomizationsConfig> config,
             IOptions<RedisContextConfig> redisOptions,
             TranslationServices translationServices)
@@ -52,7 +48,6 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
             _dbContext = dbContext;
             _distributedCache = distributedCache;
             _config = config.Value;
-            _logger = logger;
             _redisOptions = redisOptions;
             _translationServices = translationServices;
         }
@@ -89,8 +84,8 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
             {
                 var template = await _dbContext.Templates.FindAsync(templateId.Value);
 
-                 defaultTemplate = template?.Content;
-                
+                defaultTemplate = template?.Content;
+
             }
 
             if (string.IsNullOrEmpty(defaultTemplate))
@@ -139,7 +134,7 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
             if (title.ToLower() == "pub") return false;
             var article = await _dbContext.Articles.FirstOrDefaultAsync(a =>
                     a.Title.ToLower() == title.Trim().ToLower() && // Is the title used already
-                    a.StatusCode != (int) StatusCodeEnum.Deleted // and the page is active (active or is inactive)
+                    a.StatusCode != (int)StatusCodeEnum.Deleted // and the page is active (active or is inactive)
             );
 
             if (article == null) return true;
@@ -285,43 +280,35 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
             if (string.IsNullOrEmpty(urlPath) || urlPath.Trim() == "/")
                 urlPath = "root";
 
-            try
+            if (_config.ReadWriteMode) return await GetArticle(urlPath, publishedOnly, onlyActive, lang);
+
+            if (_distributedCache != null && _config.ReadWriteMode != true)
             {
-                if (_config.ReadWriteMode) return await GetArticle(urlPath, publishedOnly, onlyActive, lang);
+                var cacheKey = RedisCacheService.GetPageCacheKey(_redisOptions.Value.CacheId, lang,
+                    RedisCacheService.CacheOptions.Database, urlPath);
 
-                if (_distributedCache != null && _config.ReadWriteMode != true)
+                var bytes = await _distributedCache.GetAsync(cacheKey);
+                if (bytes == null)
                 {
-                    var cacheKey = RedisCacheService.GetPageCacheKey(_redisOptions.Value.CacheId, lang,
-                        RedisCacheService.CacheOptions.Database, urlPath);
-
-                    var bytes = await _distributedCache.GetAsync(cacheKey);
-                    if (bytes == null)
+                    var model = await GetArticle(urlPath, publishedOnly, onlyActive, lang);
+                    if (model != null)
                     {
-                        var model = await GetArticle(urlPath, publishedOnly, onlyActive, lang);
-                        if (model != null)
+                        var cacheBytes = Serialize(model);
+                        var cacheOptions = new DistributedCacheEntryOptions
                         {
-                            var cacheBytes = Serialize(model);
-                            var cacheOptions = new DistributedCacheEntryOptions
-                            {
-                                AbsoluteExpirationRelativeToNow =
-                                    TimeSpan.FromSeconds(_redisOptions.Value.CacheDuration)
-                            };
-                            await _distributedCache.SetAsync(cacheKey, cacheBytes, cacheOptions);
-                        }
-
-                        return model;
+                            AbsoluteExpirationRelativeToNow =
+                                TimeSpan.FromSeconds(_redisOptions.Value.CacheDuration)
+                        };
+                        await _distributedCache.SetAsync(cacheKey, cacheBytes, cacheOptions);
                     }
 
-                    return Deserialize<ArticleViewModel>(bytes);
+                    return model;
                 }
 
-                return await GetArticle(urlPath, publishedOnly, onlyActive, lang);
+                return Deserialize<ArticleViewModel>(bytes);
             }
-            catch (Exception e)
-            {
-                _logger?.LogError(e.Message, e);
-                throw;
-            }
+
+            return await GetArticle(urlPath, publishedOnly, onlyActive, lang);
         }
 
         /// <summary>
@@ -344,7 +331,7 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
             //var pst = TimeZoneUtility.ConvertUtcDateTimeToPst(DateTime.UtcNow);
 
             var activeStatusCodes =
-                onlyActive ? new[] {0, 3} : new[] {0, 1, 3}; // i.e. StatusCode.Active (DEFAULT) and StatusCode.Redirect
+                onlyActive ? new[] { 0, 3 } : new[] { 0, 1, 3 }; // i.e. StatusCode.Active (DEFAULT) and StatusCode.Redirect
 
             if (publishedOnly)
                 article = await _dbContext.Articles.Include(a => a.Layout)
@@ -385,7 +372,7 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
             if (doomed.Any(a => a.UrlPath.ToLower() == "root"))
                 throw new NotSupportedException(
                     "Cannot trash the home page.  Replace home page with another, then send to trash.");
-            foreach (var article in doomed) article.StatusCode = (int) StatusCodeEnum.Deleted;
+            foreach (var article in doomed) article.StatusCode = (int)StatusCodeEnum.Deleted;
 
             await _dbContext.SaveChangesAsync();
         }
@@ -420,7 +407,7 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
             // Avoid restoring an article that has a title that collides with a live article.
             if (await _dbContext.Articles.AnyAsync(a =>
                 a.Title.ToLower() == title && a.ArticleNumber != articleNumber &&
-                a.StatusCode == (int) StatusCodeEnum.Deleted))
+                a.StatusCode == (int)StatusCodeEnum.Deleted))
             {
                 var newTitle = title + " (" + await _dbContext.Articles.CountAsync() + ")";
                 var url = HandleUrlEncodeTitle(newTitle);
@@ -428,7 +415,7 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
                 {
                     article.Title = newTitle;
                     article.UrlPath = url;
-                    article.StatusCode = (int) StatusCodeEnum.Active;
+                    article.StatusCode = (int)StatusCodeEnum.Active;
                     article.Published = null;
                 }
             }
@@ -436,14 +423,14 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
             {
                 foreach (var article in redeemed)
                 {
-                    article.StatusCode = (int) StatusCodeEnum.Active;
+                    article.StatusCode = (int)StatusCodeEnum.Active;
                     article.Published = null;
                 }
             }
 
             await _dbContext.SaveChangesAsync();
         }
-        
+
         #endregion
 
         #region SAVE ARTICLE METHODS
@@ -519,8 +506,9 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
                 // Force publishing of a NEW home page.
                 model.Published = isRoot ? DateTime.UtcNow : model.Published;
 
-                await _dbContext.Articles.AddAsync(article); // Set in an "add" state.
                 var articleCount = await _dbContext.Articles.CountAsync();
+
+                _dbContext.Articles.Add(article); // Set in an "add" state.
                 HandleLogEntry(article, $"New article {articleCount}", userId);
                 HandleLogEntry(article, "New version 1", userId);
 
@@ -542,7 +530,7 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
                 var oldRedirects = _dbContext
                     .Articles
                     .Where(w =>
-                        w.StatusCode == (int) StatusCodeEnum.Redirect &&
+                        w.StatusCode == (int)StatusCodeEnum.Redirect &&
                         w.UrlPath == article.UrlPath
                     );
 
@@ -618,7 +606,7 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
                             Id = 0,
                             LayoutId = null,
                             ArticleNumber = 0,
-                            StatusCode = (int) StatusCodeEnum.Redirect,
+                            StatusCode = (int)StatusCodeEnum.Redirect,
                             UrlPath = model.UrlPath, // Old URL
                             VersionNumber = 0,
                             Published =
@@ -755,7 +743,7 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
 
             foreach (var version in versions)
             {
-                version.StatusCode = (int) code;
+                version.StatusCode = (int)code;
                 version.ArticleLogs ??= new List<ArticleLog>();
 
                 var statusText = code switch
@@ -836,16 +824,16 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
         {
             var data = await
                 (from x in _dbContext.Articles
-                    where x.StatusCode == (int) StatusCodeEnum.Deleted
-                    group x by x.ArticleNumber
+                 where x.StatusCode == (int)StatusCodeEnum.Deleted
+                 group x by x.ArticleNumber
                     into g
-                    select new
-                    {
-                        ArticleNumber = g.Key,
-                        VersionNumber = g.Max(i => i.VersionNumber),
-                        LastPublished = g.Max(m => m.Published),
-                        Status = g.Max(f => f.StatusCode)
-                    }).ToListAsync();
+                 select new
+                 {
+                     ArticleNumber = g.Key,
+                     VersionNumber = g.Max(i => i.VersionNumber),
+                     LastPublished = g.Max(m => m.Published),
+                     Status = g.Max(f => f.StatusCode)
+                 }).ToListAsync();
 
             var model = new List<ArticleListItem>();
 
@@ -878,16 +866,16 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
         {
             var data = await
                 (from x in articles
-                    where x.StatusCode != (int) StatusCodeEnum.Deleted
-                    group x by x.ArticleNumber
+                 where x.StatusCode != (int)StatusCodeEnum.Deleted
+                 group x by x.ArticleNumber
                     into g
-                    select new
-                    {
-                        ArticleNumber = g.Key,
-                        VersionNumber = g.Max(i => i.VersionNumber),
-                        LastPublished = g.Max(m => m.Published),
-                        Status = g.Max(f => f.StatusCode)
-                    }).ToListAsync();
+                 select new
+                 {
+                     ArticleNumber = g.Key,
+                     VersionNumber = g.Max(i => i.VersionNumber),
+                     LastPublished = g.Max(m => m.Published),
+                     Status = g.Max(f => f.StatusCode)
+                 }).ToListAsync();
 
             var model = new List<ArticleListItem>();
 
@@ -901,7 +889,7 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
                     ArticleNumber = art.ArticleNumber,
                     Id = art.Id,
                     IsDefault = art.UrlPath == "root",
-                    LastPublished = item.LastPublished.HasValue ? DateTime.SpecifyKind(item.LastPublished.Value, DateTimeKind.Utc) : (DateTime?) null,
+                    LastPublished = item.LastPublished.HasValue ? DateTime.SpecifyKind(item.LastPublished.Value, DateTimeKind.Utc) : (DateTime?)null,
                     Title = art.Title,
                     Updated = DateTime.SpecifyKind(art.Updated, DateTimeKind.Utc),
                     VersionNumber = art.VersionNumber,
@@ -944,7 +932,7 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
             if (_translationServices != null && !lang.Equals("en", StringComparison.CurrentCultureIgnoreCase) &&
                 !lang.Equals("en-us", StringComparison.CurrentCultureIgnoreCase))
             {
-                var result = await _translationServices.GetTranslation(lang, "en-us", new[] {article.Title, article.Content});
+                var result = await _translationServices.GetTranslation(lang, "en-us", new[] { article.Title, article.Content });
 
                 languageName =
                     (await GetSupportedLanguages(lang))?.Languages.FirstOrDefault(f => f.LanguageCode == lang)
@@ -968,9 +956,9 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
                 CacheKey = cacheKey,
                 CacheDuration = _redisOptions?.Value.CacheDuration ?? 60,
                 Content = article.Content,
-                StatusCode = (StatusCodeEnum) article.StatusCode,
+                StatusCode = (StatusCodeEnum)article.StatusCode,
                 Id = article.Id,
-                Published = article.Published.HasValue ? DateTime.SpecifyKind(article.Published.Value, DateTimeKind.Utc) :(DateTime?)null,
+                Published = article.Published.HasValue ? DateTime.SpecifyKind(article.Published.Value, DateTimeKind.Utc) : (DateTime?)null,
                 Title = article.Title,
                 UrlPath = article.UrlPath,
                 Updated = DateTime.SpecifyKind(article.Updated, DateTimeKind.Utc),
@@ -1050,27 +1038,20 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
         {
             if (_distributedCache == null || _config.ReadWriteMode) return await InternalBuildMenu();
 
-            try
+            var key = RedisCacheService.GetPageCacheKey(_redisOptions.Value.CacheId, lang,
+                RedisCacheService.CacheOptions.Menu, "menu");
+            var menu = await _distributedCache.GetStringAsync(key);
+
+            if (menu != null) return menu;
+
+            menu = await InternalBuildMenu();
+            await _distributedCache.SetStringAsync(key, menu, new DistributedCacheEntryOptions
             {
-                var key = RedisCacheService.GetPageCacheKey(_redisOptions.Value.CacheId, lang,
-                    RedisCacheService.CacheOptions.Menu, "menu");
-                var menu = await _distributedCache.GetStringAsync(key);
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(150)
+            });
 
-                if (menu != null) return menu;
+            return menu;
 
-                menu = await InternalBuildMenu();
-                await _distributedCache.SetStringAsync(key, menu, new DistributedCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(150)
-                });
-
-                return menu;
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e.Message, e);
-                return await InternalBuildMenu();
-            }
         }
 
         private async Task<int> GetNextVersionNumber(int articleNumber)
@@ -1184,7 +1165,7 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
             // Can't make a deleted file the new home page.
             //
             var newHome = await _dbContext.Articles
-                .Where(w => w.Id == id && w.StatusCode != (int) StatusCodeEnum.Deleted).ToListAsync();
+                .Where(w => w.Id == id && w.StatusCode != (int)StatusCodeEnum.Deleted).ToListAsync();
             if (newHome == null) throw new Exception($"Article Id {id} not found.");
 
             if (newHome.All(a => a.Published == null)) throw new Exception("Article has not been published yet.");
@@ -1223,41 +1204,34 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
         /// </remarks>
         public async Task<LayoutViewModel> GetDefaultLayout(string lang, bool includeMenu = true)
         {
-            try
-            {
-                if (_distributedCache == null || _config.ReadWriteMode)
-                    return await BuildDefaultLayout(lang, includeMenu);
-
-                var cacheKey = RedisCacheService.GetPageCacheKey(_redisOptions.Value.CacheId, lang,
-                    RedisCacheService.CacheOptions.Database, "defMenu");
-
-                var bytes = await _distributedCache.GetAsync(cacheKey);
-
-                if (bytes != null)
-                    return Deserialize<LayoutViewModel>(bytes);
-
-                var model = await BuildDefaultLayout(lang, includeMenu);
-
-                if (model != null)
-                {
-                    var cacheBytes = Serialize(model);
-                    var cacheOptions = new DistributedCacheEntryOptions
-                    {
-                        AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(_redisOptions.Value.CacheDuration)
-                    };
-                    await _distributedCache.SetAsync(
-                        cacheKey,
-                        cacheBytes
-                        , cacheOptions);
-                }
-
-                return model;
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e.Message, e);
+            if (_distributedCache == null || _config.ReadWriteMode)
                 return await BuildDefaultLayout(lang, includeMenu);
+
+            var cacheKey = RedisCacheService.GetPageCacheKey(_redisOptions.Value.CacheId, lang,
+                RedisCacheService.CacheOptions.Database, "defMenu");
+
+            var bytes = await _distributedCache.GetAsync(cacheKey);
+
+            if (bytes != null)
+                return Deserialize<LayoutViewModel>(bytes);
+
+            var model = await BuildDefaultLayout(lang, includeMenu);
+
+            if (model != null)
+            {
+                var cacheBytes = Serialize(model);
+                var cacheOptions = new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(_redisOptions.Value.CacheDuration)
+                };
+                await _distributedCache.SetAsync(
+                    cacheKey,
+                    cacheBytes
+                    , cacheOptions);
             }
+
+            return model;
+
         }
 
         /// <summary>

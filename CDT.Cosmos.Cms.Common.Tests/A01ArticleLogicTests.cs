@@ -1,13 +1,13 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using CDT.Cosmos.Cms.Common.Data.Logic;
+﻿using CDT.Cosmos.Cms.Common.Data.Logic;
 using CDT.Cosmos.Cms.Common.Models;
 using CDT.Cosmos.Cms.Common.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace CDT.Cosmos.Cms.Common.Tests
 {
@@ -25,14 +25,15 @@ namespace CDT.Cosmos.Cms.Common.Tests
             //
             // Setup context.
             //
+            using (var dbContext = StaticUtilities.GetApplicationDbContext())
+            {
+                _testUser = StaticUtilities.GetIdentityUser(TestUsers.Foo).Result;
 
-            using var dbContext = StaticUtilities.GetApplicationDbContext();
-            _testUser = StaticUtilities.GetIdentityUser(TestUsers.Foo).Result;
+                dbContext.ArticleLogs.RemoveRange(dbContext.ArticleLogs.ToList());
+                dbContext.Articles.RemoveRange(dbContext.Articles.ToList());
 
-            dbContext.ArticleLogs.RemoveRange(dbContext.ArticleLogs.ToList());
-            dbContext.Articles.RemoveRange(dbContext.Articles.ToList());
-
-            dbContext.SaveChanges();
+                dbContext.SaveChanges();
+            }
         }
 
 
@@ -42,62 +43,78 @@ namespace CDT.Cosmos.Cms.Common.Tests
         [TestMethod]
         public async Task A_Create_And_Save_Root()
         {
-            var logic = StaticUtilities.GetArticleLogic();
+            using (var dbContext = StaticUtilities.GetApplicationDbContext())
+            {
 
-            var rootModel = await logic.Create($"New Title {Guid.NewGuid().ToString()}");
+                var logic = StaticUtilities.GetArticleLogic(dbContext);
 
-            Assert.AreEqual(0, rootModel.Id);
-            Assert.AreEqual(0, rootModel.VersionNumber);
+                var rootModel = await logic.Create($"New Title {Guid.NewGuid().ToString()}");
 
-            //rootModel.Title = Guid.NewGuid().ToString();
-            rootModel.Content = Guid.NewGuid().ToString();
-            rootModel.Published = DateTime.Now;
+                Assert.AreEqual(0, rootModel.Id);
+                Assert.AreEqual(0, rootModel.VersionNumber);
 
-            //
-            // CREATE THE HOME (ROOT) PAGE.
-            //
-            var homePage = await logic.UpdateOrInsert(rootModel, _testUser.Id);
+                //rootModel.Title = Guid.NewGuid().ToString();
+                rootModel.Content = Guid.NewGuid().ToString();
+                rootModel.Published = DateTime.Now;
 
-            //var articles = await _dbContext.Articles.ToListAsync();
+                //
+                // CREATE THE HOME (ROOT) PAGE.
+                //
+                var homePage = await logic.UpdateOrInsert(rootModel, _testUser.Id);
 
-            Assert.IsNotNull(homePage);
-            Assert.IsInstanceOfType(homePage, typeof(ArticleViewModel));
-            Assert.IsTrue(0 < homePage.Id);
-            Assert.AreEqual(1, homePage.VersionNumber);
-            //Assert.AreEqual("root", homePage.UrlPath);
-            Assert.IsTrue(homePage.Published.HasValue);
+                //var articles = await _dbContext.Articles.ToListAsync();
 
-            //
-            // Check other properties
-            //
-            Assert.AreEqual(rootModel.Title, homePage.Title);
-            Assert.AreEqual(rootModel.Content, homePage.Content);
+                Assert.IsNotNull(homePage);
+                Assert.IsInstanceOfType(homePage, typeof(ArticleViewModel));
+                Assert.IsTrue(0 < homePage.Id);
+                Assert.AreEqual(1, homePage.VersionNumber);
+                //Assert.AreEqual("root", homePage.UrlPath);
+                Assert.IsTrue(homePage.Published.HasValue);
 
-            //
-            // Check Logs
-            //
-            await using var dbContext = StaticUtilities.GetApplicationDbContext();
-            var logs = await dbContext.ArticleLogs.Where(l => l.ArticleId == homePage.Id).ToListAsync();
+                //
+                // Check other properties
+                //
+                Assert.AreEqual(rootModel.Title, homePage.Title);
+                Assert.AreEqual(rootModel.Content, homePage.Content);
 
-            Assert.AreEqual(4, logs.Count);
+                //
+                // Check Logs
+                //
+                var logs = await dbContext.ArticleLogs.Where(l => l.ArticleId == homePage.Id).ToListAsync();
+
+                Assert.AreEqual(4, logs.Count);
+            }
         }
 
         [TestMethod]
         public async Task B_Get_Home_Page()
         {
-            var logic = StaticUtilities.GetArticleLogic();
+            // ARRANGE
+            // New db context
+            using var dbContext = StaticUtilities.GetApplicationDbContext();
+            // Ensure root exists
+            Assert.AreEqual(1, await dbContext.Articles.CountAsync());
+
+            var root = await dbContext.Articles.FirstOrDefaultAsync();
+
+            Assert.AreEqual("root", root.UrlPath);
+
+            // Now build the logic
+            var logic = StaticUtilities.GetArticleLogic(dbContext);
 
             //
             // All four should find the home page.
             //
             var test1 = await logic.GetByUrl(null);
-            var test2 = await logic.GetByUrl("");
-            var test3 = await logic.GetByUrl("/");
-            var test4 = await logic.GetByUrl("   ");
-
             Assert.IsNotNull(test1);
+
+            var test2 = await logic.GetByUrl("");
             Assert.IsNotNull(test2);
+
+            var test3 = await logic.GetByUrl("/");
             Assert.IsNotNull(test3);
+
+            var test4 = await logic.GetByUrl("   ");
             Assert.IsNotNull(test4);
 
             Assert.AreEqual(test1.Id, test2.Id);
@@ -108,7 +125,9 @@ namespace CDT.Cosmos.Cms.Common.Tests
         [TestMethod]
         public async Task C_Add_Versions_Some_Published()
         {
-            var logic = StaticUtilities.GetArticleLogic();
+            using var dbContext = StaticUtilities.GetApplicationDbContext();
+
+            var logic = StaticUtilities.GetArticleLogic(dbContext);
 
             //var article = await _dbContext.Articles.FirstOrDefaultAsync(w => w.UrlPath == "ROOT");
 
@@ -148,7 +167,6 @@ namespace CDT.Cosmos.Cms.Common.Tests
             Assert.AreEqual(5, version5.VersionNumber);
             Assert.IsFalse(version5.Published.HasValue);
 
-            await using var dbContext = StaticUtilities.GetApplicationDbContext();
             var versions = await dbContext.Articles
                 .Where(a => a.ArticleNumber == version5.ArticleNumber).ToListAsync();
             Assert.AreEqual(5, versions.Count);
@@ -159,7 +177,8 @@ namespace CDT.Cosmos.Cms.Common.Tests
         {
 
             await using var dbContext = StaticUtilities.GetApplicationDbContext();
-            var logic = StaticUtilities.GetArticleLogic();
+            var logic = StaticUtilities.GetArticleLogic(dbContext);
+
             var article = await logic.GetByUrl("");
             var article1 = article;
 
@@ -185,8 +204,8 @@ namespace CDT.Cosmos.Cms.Common.Tests
         [TestMethod]
         public async Task D_Create_New_Article_Versions_TestRedirect_Publish()
         {
-            var logic = StaticUtilities.GetArticleLogic();
             await using var dbContext = StaticUtilities.GetApplicationDbContext();
+            var logic = StaticUtilities.GetArticleLogic(dbContext);
 
             // Create and save version 1
             var version1 = await logic.UpdateOrInsert(await logic.Create("This is a second page" + Guid.NewGuid()),
@@ -325,8 +344,8 @@ namespace CDT.Cosmos.Cms.Common.Tests
         [TestMethod]
         public async Task E_SetStatus()
         {
-            var logic = StaticUtilities.GetArticleLogic();
             await using var dbContext = StaticUtilities.GetApplicationDbContext();
+            var logic = StaticUtilities.GetArticleLogic(dbContext);
 
             //
             // Get the expected entity
@@ -363,7 +382,7 @@ namespace CDT.Cosmos.Cms.Common.Tests
 
             // The article is deleted, can't even retrieve it here
             Assert.IsNull(await logic.GetByUrl(entity.UrlPath, "en-US", false,
-                false)); 
+                false));
 
             //
             // Now "un-delete" this article.
@@ -383,7 +402,8 @@ namespace CDT.Cosmos.Cms.Common.Tests
         public async Task F_CheckTitle()
         {
             await using var dbContext = StaticUtilities.GetApplicationDbContext();
-            var logic = StaticUtilities.GetArticleLogic();
+            var logic = StaticUtilities.GetArticleLogic(dbContext);
+
             var entity = await dbContext.Articles.FirstOrDefaultAsync(f => f.ArticleNumber == 1);
             var article = await logic.GetByUrl(entity.UrlPath, "en-US", false, false);
             Assert.IsFalse(await logic.ValidateTitle(entity.Title, 0));
@@ -393,7 +413,9 @@ namespace CDT.Cosmos.Cms.Common.Tests
         [TestMethod]
         public async Task G_FindByUrlTest()
         {
-            var logic = StaticUtilities.GetArticleLogic();
+            await using var dbContext = StaticUtilities.GetApplicationDbContext();
+            var logic = StaticUtilities.GetArticleLogic(dbContext);
+
             var article = await logic.Create("Public Safety Power Shutoff (PSPS)" + Guid.NewGuid());
             article.ArticleNumber = 0;
             article.Published = DateTime.Now.ToUniversalTime().AddDays(-1);
@@ -407,8 +429,8 @@ namespace CDT.Cosmos.Cms.Common.Tests
         [TestMethod]
         public async Task H_Test_ScheduledPublishing()
         {
-            var logic = StaticUtilities.GetArticleLogic();
             await using var dbContext = StaticUtilities.GetApplicationDbContext();
+            var logic = StaticUtilities.GetArticleLogic(dbContext);
 
             //
             // Get the home page that the public now sees
@@ -422,7 +444,7 @@ namespace CDT.Cosmos.Cms.Common.Tests
             var mostRecentPublishedArticle = await dbContext.Articles
                 .Where(p => p.Published != null && p.ArticleNumber == articleNumber)
                 .OrderByDescending(o => o.VersionNumber).FirstOrDefaultAsync();
-            
+
             //
             // The logic should have returned the current "live" article
             //
@@ -431,12 +453,12 @@ namespace CDT.Cosmos.Cms.Common.Tests
                 originalArticle.VersionNumber); // VERSION 4 is NOT PUBLISHED!! .
 
             var versionNumber = originalArticle.VersionNumber;
-            
+
             //
             // Now get the very last version
             //
             var lastArticleVersion = await logic.GetByUrl("", "en-US", false);
-            
+
             //
             // It should not yet be published
             //
@@ -480,7 +502,8 @@ namespace CDT.Cosmos.Cms.Common.Tests
         [TestMethod]
         public async Task I_Get_Translations_Home_Page()
         {
-            var logic = StaticUtilities.GetArticleLogic();
+            await using var dbContext = StaticUtilities.GetApplicationDbContext();
+            var logic = StaticUtilities.GetArticleLogic(dbContext);
 
             //var article = await _dbContext.Articles.FirstOrDefaultAsync(w => w.UrlPath == "ROOT");
 
@@ -522,7 +545,8 @@ namespace CDT.Cosmos.Cms.Common.Tests
             //
             // Get the logic
             //
-            var logic = StaticUtilities.GetArticleLogic(false, false);
+            await using var dbContext = StaticUtilities.GetApplicationDbContext();
+            var logic = StaticUtilities.GetArticleLogic(dbContext, false, false);
 
             //
             // Call a page, this should create a Redis cached item.
@@ -541,8 +565,8 @@ namespace CDT.Cosmos.Cms.Common.Tests
         [TestMethod]
         public async Task K_TestRedisCachePurge()
         {
-            var logic = StaticUtilities.GetArticleLogic();
             await using var dbContext = StaticUtilities.GetApplicationDbContext();
+            var logic = StaticUtilities.GetArticleLogic(dbContext);
 
             // Get list of articles...
             var articles = await logic.GetArticleList(dbContext.Articles.AsQueryable());
