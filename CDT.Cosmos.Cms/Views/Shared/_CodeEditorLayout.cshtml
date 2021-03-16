@@ -268,11 +268,11 @@
         $("#saveChangesDialog").data("kendoDialog").open();
         if (editor) {
             $("#" + fieldId).val(editor.getValue());
-            if (editor.getModel()) {
-                editor.getModel().dispose();
-            }
-            editor.dispose();
-            editor = null;
+            //if (editor.getModel()) {
+            //    editor.getModel().dispose();
+            //}
+            //editor.dispose();
+            //editor = null;
         }
         //return true;
         var form = $('#codeForm');

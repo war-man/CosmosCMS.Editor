@@ -4,9 +4,11 @@ using CDT.Cosmos.Cms.Models.Interfaces;
 
 namespace CDT.Cosmos.Cms.Models
 {
-    public class EditCodePostModel
+    public class EditCodePostModel : ICodeEditorViewModel
     {
         public int ArticleNumber { get; set; }
+
+        public bool IsValid { get; set; }
 
         [DataType(DataType.Html)] public string Content { get; set; }
 
