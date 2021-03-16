@@ -425,7 +425,15 @@
                     element.removeClass(css);
                 });
 
+                if (element.attr("class").trim() === "") {
+                    element.removeAttr("class")
+                }
+
+                if (element.attr("data-role") === "editor") {
+                    element.removeAttr("data-role")
+                }
             });
+
             editors = [];
         }
 
@@ -659,6 +667,7 @@
         function saveContent() {
             var editor = $("#eContent").data("kendoEditor"); // Div editor
             var hiddenField = $("#Content"); // Corresponding hidden field.
+
             if (typeof editor !== 'undefined' && editor !== null) {
                 // Object is a Kendo Editor
                 hiddenField.val(editor.value());
@@ -666,6 +675,8 @@
                 editor = $("#eContent");
                 hiddenField.val(editor.html());
             }
+            hiddenField.val(hiddenField.val().replace(" contenteditable=", " crx="));
+            
         }
 
         function processKendoCtrls(roleName, dataName) {
