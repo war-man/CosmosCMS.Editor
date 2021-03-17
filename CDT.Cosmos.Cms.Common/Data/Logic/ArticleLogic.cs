@@ -1167,8 +1167,8 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
             var newHome = await _dbContext.Articles
                 .Where(w => w.Id == id && w.StatusCode != (int)StatusCodeEnum.Deleted).ToListAsync();
             if (newHome == null) throw new Exception($"Article Id {id} not found.");
-
-            if (newHome.All(a => a.Published == null)) throw new Exception("Article has not been published yet.");
+            var utcDateTimeNow = DateTime.UtcNow;
+            if (newHome.All(a => a.Published != null && a.Published.Value <= utcDateTimeNow)) throw new Exception("Article has not been published yet.");
 
             var newUrl = HandleUrlEncodeTitle(currentHome.FirstOrDefault()?.Title);
 

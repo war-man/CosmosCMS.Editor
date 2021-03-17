@@ -12,7 +12,7 @@
     var isAuthor = false;
     var isEditor = false;
     var isAdministrator = false;
-    var accountBtnTemplate = "<div id='userAcct' class='btn btn-sm btn-secondary'><span class='fa fa-user'></span> " + User.Identity.Name + "</div>";
+    var accountBtnTemplate = "<div id='userAcctMenu'><span class='fa fa-user'></span> " + User.Identity.Name + "</div>";
     if (User.IsInRole("Authors"))
     {
         isAuthor = true;
@@ -63,7 +63,7 @@
             .Name("ToolBar")
             .Items(items =>
             {
-                items.Add().Type(CommandType.SplitButton).Text("Menu").MenuButtons(menuButtons =>
+                items.Add().Type(CommandType.SplitButton).Text("Menu").Id("menuBtn").MenuButtons(menuButtons =>
                 {
                     menuButtons.Add().Text("Save").SpriteCssClass("fa fa-cloud-upload");
                     menuButtons.Add().Text("Code").SpriteCssClass("fa fa-codepen");
@@ -80,6 +80,11 @@
                 items.Add().Type(CommandType.Button).Template($"<div onclick='openSchedulerDialog()' id='btnPublish'></div>").Enable(User.IsInRole("Editors") || User.IsInRole("Administrators"));
                 items.Add().Type(CommandType.Button).Template("<div class='badge badge-secondary' onclick='openPermissionsDialog()' id='btnPermissions'><span class='fa fa-shield'></span></div>").Enable(User.IsInRole("Editors") || User.IsInRole("Administrators"));
                 items.Add().Template($"<div id='pendingChangesBadge' class='badge badge-warning' style='display:none'>Changes Pending Save</div>");
+                items.Add().Type(CommandType.SplitButton).Template(accountBtnTemplate).MenuButtons(menuButtons =>
+                {
+                    menuButtons.Add().Text("User Account").SpriteCssClass("fa fa-user");
+                    menuButtons.Add().Text("Log Out").SpriteCssClass("fa fa-sign-out");
+                }).Click("bgCmsClick");
             }))
     </form>
     <div style="display: none">
@@ -762,7 +767,7 @@ else
         .Name("ToolBar")
         .Items(items =>
         {
-            items.Add().Type(CommandType.SplitButton).Text("Menu").ImageUrl("/images/CosmosBearIcon.png").MenuButtons(menuButtons =>
+            items.Add().Type(CommandType.SplitButton).Text("Menu").Id("menuBtn").ImageUrl("/images/CosmosBearIcon.png").MenuButtons(menuButtons =>
             {
                 menuButtons.Add().Text("Home Page").SpriteCssClass("fa fa-home");
                 menuButtons.Add().Text("Help").SpriteCssClass("fa fa-info-circle");
@@ -790,10 +795,14 @@ else
                     }
                 }
                 menuButtons.Add().Text("User Account").SpriteCssClass("fa fa-user");
-                menuButtons.Add().Text("Log Out").SpriteCssClass("fa fa-sign-out");;
+                menuButtons.Add().Text("Log Out").SpriteCssClass("fa fa-sign-out");
             }).Click("bgCmsClick");
             items.Add().Template("<a id='timeZone' title='Dates and times are in this time zone.' class='btn btn-sm btn-secondary'></a>");
-            items.Add().Template(accountBtnTemplate);
+            items.Add().Type(CommandType.SplitButton).Text(accountBtnTemplate).MenuButtons(menuButtons =>
+            {
+                menuButtons.Add().Text("User Account").SpriteCssClass("fa fa-user");
+                menuButtons.Add().Text("Log Out").SpriteCssClass("fa fa-sign-out");
+            }).Click("bgCmsClick");
         }))
     <div style="display: none">
         @* This is the hidden log out form executed by the log out drop down menu pick above*@
@@ -858,6 +867,18 @@ else
     $(document).ready(function () {
         var timeZoneElement = $("#timeZone");
         timeZoneElement.html(getLocalTimeZone());
+
+        $(timeZoneElement).kendoTooltip({
+            content: "This is the time zone for dates and times shown here."
+        });
+
+        $("#userAcctMenu").kendoTooltip({
+            content: "You are using this account. Click down arrow for profile or log out."
+        });
+
+        $("#menuBtn").kendoTooltip({
+            content: "This is the main menu. Click down arrow for options."
+        });
     });
 
     function getLocalTimeZone() {

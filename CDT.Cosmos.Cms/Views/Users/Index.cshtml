@@ -31,7 +31,7 @@
                 toolbar.Save();
                 toolbar.Search();
             })
-            .Search(t => t.Field("Email"))
+            .Search(t => t.Field("EmailAddress"))
             .Editable(editable => editable.Mode(GridEditMode.InCell))
             .Pageable()
             .Navigatable()
