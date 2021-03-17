@@ -74,19 +74,19 @@
                     {
                         ds.Read(operation => operation
                             .Type(HttpVerbs.Post)
-                            .Action("Read", "FileManager", new {teamId = Model.TeamId})
+                            .Action("Read", "FileManager").Data("getTeamId")
                             );
                         ds.Destroy(operation => operation
                             .Type(HttpVerbs.Post)
-                            .Action("Destroy", "FileManager", new {teamId = Model.TeamId})
+                            .Action("Destroy", "FileManager").Data("getTeamId")
                             );
                         ds.Create(operation => operation
                             .Type(HttpVerbs.Post)
-                            .Action("Create", "FileManager", new {teamId = Model.TeamId})
+                            .Action("Create", "FileManager").Data("getTeamId")
                             );
                         ds.Update(operation => operation
                             .Type(HttpVerbs.Post)
-                            .Action("Update", "FileManager", new {teamId = Model.TeamId})
+                            .Action("Update", "FileManager").Data("getTeamId")
                             );
                     })
                     .Toolbar(tb => tb.Items(items =>
@@ -205,7 +205,14 @@
         //} else {
         //    kendoConsole.log("event :: select");
         //}
-        $("#frmTeam").submit();
+        var filemanager = $("#filemanager").getKendoFileManager();
+        filemanager.refresh();
+    }
+
+    function getTeamId() {
+        return {
+            teamId: $("#TeamId").data("kendoDropDownList").value()
+        }
     }
 
     $(document).ready(function() {

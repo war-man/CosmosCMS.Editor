@@ -12,6 +12,7 @@
     var isAuthor = false;
     var isEditor = false;
     var isAdministrator = false;
+    var accountBtnTemplate = "<div id='userAcct' class='btn btn-sm btn-secondary'><span class='fa fa-user'></span> " + User.Identity.Name + "</div>";
     if (User.IsInRole("Authors"))
     {
         isAuthor = true;
@@ -792,6 +793,7 @@ else
                 menuButtons.Add().Text("Log Out").SpriteCssClass("fa fa-sign-out");;
             }).Click("bgCmsClick");
             items.Add().Template("<a id='timeZone' title='Dates and times are in this time zone.' class='btn btn-sm btn-secondary'></a>");
+            items.Add().Template(accountBtnTemplate);
         }))
     <div style="display: none">
         @* This is the hidden log out form executed by the log out drop down menu pick above*@
