@@ -72,7 +72,7 @@ namespace CDT.Cosmos.Cms.Controllers
                             // User does not belong to any teams yet.
                             return Unauthorized();
 
-                    ViewData["BlobEndpointUrl"] = GetBlobRootUrl(teamId);
+                    ViewData["BlobEndpointUrl"] = GetBlobRootUrl();
 
                     return View(new FileManagerViewModel
                     {
@@ -98,7 +98,7 @@ namespace CDT.Cosmos.Cms.Controllers
                 {
                     var teams = await GetTeamsForUser();
 
-                    ViewData["BlobEndpointUrl"] = GetBlobRootUrl(model.TeamId);
+                    ViewData["BlobEndpointUrl"] = GetBlobRootUrl();
 
                     return View(new FileManagerViewModel
                     {
@@ -188,7 +188,7 @@ namespace CDT.Cosmos.Cms.Controllers
             var teamIds = await DbContext.Teams.Select(a => a.Id).ToListAsync();
             if (teamIds.Any())
                 foreach (var teamId in teamIds)
-                    await _blobService.CreateFolder(GetAbsolutePath(teamId));
+                    await _blobService.CreateFolder(GetAbsolutePath("/teams/", teamId.ToString()));
         }
 
         /// <summary>
@@ -239,7 +239,7 @@ namespace CDT.Cosmos.Cms.Controllers
                     entry.Extension = entry.Extension?.ToLower();
                     target = target?.ToLower();
 
-                    var fullPath = GetAbsolutePath(teamId, entry.Path, entry.Name);
+                    var fullPath = GetAbsolutePath(entry.Path, entry.Name);
                     fullPath = UrlEncode(fullPath);
 
                     var byteArray = Encoding.ASCII.GetBytes($"This is a folder stub file for {target}.");
@@ -257,7 +257,7 @@ namespace CDT.Cosmos.Cms.Controllers
                     //
                     // RELATIVE PATH
                     //
-                    fileManagerEntry.Path = GetRelativePath(teamId, fileManagerEntry.Path);
+                    fileManagerEntry.Path = GetRelativePath(fileManagerEntry.Path);
 
                     //{"Name":"test","Size":0,"EntryType":1}
                     return Json(fileManagerEntry);
@@ -300,7 +300,7 @@ namespace CDT.Cosmos.Cms.Controllers
                     //
                     // CONVERT TO FULL PATH
                     //
-                    var path = GetAbsolutePath(teamId, entry.Path).ToLower();
+                    var path = GetAbsolutePath(entry.Path).ToLower();
 
                     if (entry.IsDirectory)
                         await DeleteDirectory(path);
@@ -331,6 +331,9 @@ namespace CDT.Cosmos.Cms.Controllers
             if (_options.Value.ReadWriteMode)
             {
 
+                //
+                // GET FULL OR ABSOLUTE PATH
+                //
                 var model = await GetFiles(target, teamId);
 
                 return Json(model);
@@ -460,7 +463,7 @@ namespace CDT.Cosmos.Cms.Controllers
                     entry.Name = entry.Name?.ToLower();
                     entry.Extension = entry.Extension?.ToLower();
 
-                    var source = GetAbsolutePath(teamId, entry.Path);
+                    var source = GetAbsolutePath(entry.Path);
                     string destination;
                     if (!string.IsNullOrEmpty(source) && source.Contains("/"))
                     {
@@ -489,7 +492,7 @@ namespace CDT.Cosmos.Cms.Controllers
 
                     // File manager is expecting the file name to come back without an extension.
                     entry.Name = Path.GetFileNameWithoutExtension(destination);
-                    entry.Path = GetRelativePath(teamId, destination);
+                    entry.Path = GetRelativePath(destination);
                     entry.Extension = entry.IsDirectory || string.IsNullOrEmpty(entry.Extension) ? "" : entry.Extension;
 
                     // Example: {"Name":"Wow","Size":0,"Path":"Wow","Extension":"","IsDirectory":true,"HasDirectories":false,"Created":"2020-10-30T18:14:16.0772789+00:00","CreatedUtc":"2020-10-30T18:14:16.0772789Z","Modified":"2020-10-30T18:14:16.0772789+00:00","ModifiedUtc":"2020-10-30T18:14:16.0772789Z"}
@@ -506,13 +509,11 @@ namespace CDT.Cosmos.Cms.Controllers
 
         private async Task<List<FileManagerEntry>> GetFiles(string target, int? teamId)
         {
-            //
-            // GET FULL OR ABSOLUTE PATH
-            //
-            var searchPath = GetAbsolutePath(teamId, target);
+            var rootPath = GetAbsolutePath("");
+            target = GetAbsolutePath(target);
 
             //var results = await InternalRead(fullPath, teamId);
-            var blobObjects = await _blobService.Search(searchPath, null);
+            var blobObjects = await _blobService.Search(target, null);
 
             if (!blobObjects.Any()) return new List<FileManagerEntry>();
 
@@ -520,6 +521,21 @@ namespace CDT.Cosmos.Cms.Controllers
             var files = blobObjects.Where(w =>
                 w.IsPrefix == false &&
                 w.Blob.Name.EndsWith("folder.stubxx") == false && w.Blob.Properties.BlobType == BlobType.Append);
+
+            // Filter by team ID
+            if (teamId.HasValue)
+            {
+                if (target == rootPath)
+                {
+                    folders = folders.Where(f => f.Prefix.StartsWith($"{rootPath}/teams")).ToList();
+                    files = new List<BlobHierarchyItem>();  // Team user should not see any files here.
+                }
+                else
+                {
+                    folders = folders.Where(f => f.Prefix.StartsWith($"{rootPath}/teams/{teamId.Value.ToString()}")).ToList();
+                    files = files.Where(b => b.Blob.Name.StartsWith($"{rootPath}/teams/{teamId.Value.ToString()}")).ToList();
+                }
+            }
 
             //var outputPath = target.TrimStart('/');
 
@@ -538,7 +554,7 @@ namespace CDT.Cosmos.Cms.Controllers
                     Modified = DateTime.Now,
                     ModifiedUtc = DateTime.UtcNow,
                     Name = folderName, // Get the name of the last folder
-                    Path = GetRelativePath(teamId, folder.Prefix),
+                    Path = GetRelativePath(null, folder.Prefix),
                     Size = 0,
                     HasDirectories = false
                 };
@@ -547,10 +563,9 @@ namespace CDT.Cosmos.Cms.Controllers
 
             foreach (var file in files)
             {
-                var entry = GetFileManagerEntry(file, false, teamId).Result;
+                var entry = GetFileManagerEntry(file, false, null).Result;
                 fileSystemList.Add(entry);
             }
-
 
             return fileSystemList;
         }
@@ -689,7 +704,7 @@ namespace CDT.Cosmos.Cms.Controllers
 
             if (isDirectory) path = path?.Replace("/folder.stubxx", "");
             var fileName = Path.GetFileNameWithoutExtension(path);
-            path = GetRelativePath(teamId, path);
+            path = GetRelativePath(path);
 
             // CONVERT TO PREFERRED TIME ZONE
             // TODO: Make a site-wide preferred timezone setting.
@@ -720,19 +735,13 @@ namespace CDT.Cosmos.Cms.Controllers
         /// <param name="teamId"></param>
         /// <param name="pathParts">Relative path parts</param>
         /// <returns></returns>
-        public string GetAbsolutePath(int? teamId, params string[] pathParts)
+        public string GetAbsolutePath(params string[] pathParts)
         {
             var root = TrimPathPart("pub").ToLower();
 
             var paths = new List<string>();
 
             if (!string.IsNullOrEmpty(root)) paths.Add(root);
-
-            if (teamId.HasValue)
-            {
-                paths.Add("teams");
-                paths.Add(teamId.Value.ToString());
-            }
 
             paths.AddRange(ParsePath(pathParts));
 
@@ -745,9 +754,9 @@ namespace CDT.Cosmos.Cms.Controllers
         /// <param name="fullPath"></param>
         /// <param name="teamId"></param>
         /// <returns></returns>
-        public  string GetRelativePath(int? teamId, params string[] fullPath)
+        public  string GetRelativePath(params string[] fullPath)
         {
-            var rootPath = GetAbsolutePath(teamId, "");
+            var rootPath = GetAbsolutePath("");
 
             var absolutePath = string.Join('/', ParsePath(fullPath));
 
@@ -766,9 +775,9 @@ namespace CDT.Cosmos.Cms.Controllers
         /// </summary>
         /// <param name="teamId"></param>
         /// <returns></returns>
-        public  string GetBlobRootUrl(int? teamId)
+        public  string GetBlobRootUrl()
         {
-            return $"{_blobConfig.Value.BlobServicePublicUrl}{GetAbsolutePath(teamId, "")}/";
+            return $"{_blobConfig.Value.BlobServicePublicUrl}{GetAbsolutePath("")}/";
         }
 
         /// <summary>
@@ -1071,7 +1080,7 @@ namespace CDT.Cosmos.Cms.Controllers
                 // NOTE: If there is no "metaData," it means the file(s) are NOT being "chunked."
                 // The files are being uploaded in whole
                 //
-                var fullPath = GetAbsolutePath(teamId, path);
+                var fullPath = GetAbsolutePath(path);
 
                 if (metaData == null) return await SaveAsync(files, fullPath);
                 return await AppendBlobAsync(files, metaData, fullPath);
