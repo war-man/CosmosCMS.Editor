@@ -64,7 +64,7 @@ namespace CDT.Cosmos.Cms.Common.Tests
             return context;
         }
 
-        public static ArticleLogic GetArticleLogic(bool readWriteModeOn = true, bool allSetupOn = true)
+        public static ArticleLogic GetArticleLogic(ApplicationDbContext dbContext, bool readWriteModeOn = true, bool allSetupOn = true)
         {
             var siteOptions = Options.Create(new SiteCustomizationsConfig
             {
@@ -73,9 +73,8 @@ namespace CDT.Cosmos.Cms.Common.Tests
             });
             var distributedCache = StaticUtilities.GetRedisDistributedCache();
             return new ArticleLogic(
-                GetApplicationDbContext(),
+                dbContext,
                 distributedCache,
-                GetLogger<ArticleLogic>(),
                 siteOptions,
                 Options.Create(GetRedisContextConfig()),
                 new TranslationServices(GetGoogleOptions()));
@@ -112,8 +111,8 @@ namespace CDT.Cosmos.Cms.Common.Tests
             var config = builder.Build();
 
             // From either local secrets or app config, get connection info for Azure Vault.
-            var tenantId = config["TenantId"];
-            if (string.IsNullOrEmpty(tenantId)) tenantId = Environment.GetEnvironmentVariable("AzureVaultTenantId");
+            //var tenantId = config["TenantId"];
+            //if (string.IsNullOrEmpty(tenantId)) tenantId = Environment.GetEnvironmentVariable("AzureVaultTenantId");
             var clientId = config["ClientId"];
             if (string.IsNullOrEmpty(clientId)) clientId = Environment.GetEnvironmentVariable("AzureVaultClientId");
             var key = config["Key"];
@@ -180,15 +179,17 @@ namespace CDT.Cosmos.Cms.Common.Tests
             });
             var logger = new Logger<EditorController>(new NullLoggerFactory());
 
+            var dbContext = GetApplicationDbContext();
+
             var controller = new EditorController(
                 logger,
-                GetApplicationDbContext(),
+                dbContext,
                 GetUserManager(),
                 siteOptions,
                 GetRedisDistributedCache(),
                 null,
                 null,
-                GetArticleLogic(),
+                GetArticleLogic(dbContext),
                 Options.Create(GetRedisContextConfig()),
                 GetAzureBlobServiceOptions())
             {
@@ -204,13 +205,16 @@ namespace CDT.Cosmos.Cms.Common.Tests
                 ReadWriteMode = true,
                 AllowSetup = true
             });
+
+            var dbContext = GetApplicationDbContext();
+
             var logger = new Logger<HomeController>(new NullLoggerFactory());
             //var blobOptions = Options.Create(new AzureBlobServiceConfig());
             var controller = new HomeController(logger,
                 GetApplicationDbContext(),
                 siteOptions,
                 Options.Create(GetRedisContextConfig()),
-                GetArticleLogic(), Options.Create(new GoogleCloudAuthConfig())
+                GetArticleLogic(dbContext), Options.Create(new GoogleCloudAuthConfig())
             )
             {
                 ControllerContext = { HttpContext = GetMockContext(user) }
@@ -229,14 +233,15 @@ namespace CDT.Cosmos.Cms.Common.Tests
             //var blobOptions = Options.Create(new AzureBlobServiceConfig());
             var claimsPrincipal = GetPrincipal(TestUsers.Foo).Result;
             var redisConfig = Options.Create(GetRedisContextConfig());
+            var dbContext = GetApplicationDbContext();
 
             var controller = new SetupController(logger,
-                GetApplicationDbContext(),
+                dbContext,
                 GetRoleManager(),
                 GetUserManager(),
                 siteOptions,
                 null,
-                GetArticleLogic(),
+                GetArticleLogic(dbContext),
                 redisConfig,
                 GetAzureBlobService())
             {
@@ -256,7 +261,10 @@ namespace CDT.Cosmos.Cms.Common.Tests
             //var blobOptions = Options.Create(new AzureBlobServiceConfig());
             var claimsPrincipal = GetPrincipal(TestUsers.Foo).Result;
 
-            var controller = new TeamsController(siteOptions, GetApplicationDbContext(), logger, GetUserManager(), GetArticleLogic())
+            var dbContext = GetApplicationDbContext();
+
+            var controller = new TeamsController(siteOptions, dbContext, logger, GetUserManager(),
+                GetArticleLogic(dbContext))
             {
                 ControllerContext = { HttpContext = GetMockContext(claimsPrincipal) }
             };
@@ -269,7 +277,7 @@ namespace CDT.Cosmos.Cms.Common.Tests
 
         public static IOptions<AzureBlobServiceConfig> GetAzureBlobServiceOptions()
         {
-            var connectionString = GetConfig().GetConnectionString("DefaultBlobConnection");
+            //var connectionString = GetConfig().GetConnectionString("DefaultBlobConnection");
             var config = GetConfig().GetSection("AzureBlobServiceConfig");
 
             var options = config.Get<AzureBlobServiceConfig>();

@@ -234,7 +234,7 @@ namespace CDT.Cosmos.Cms.Controllers
                     //
                     // FULL OR ABSOLUTE BLOB PATH
                     //
-                    entry.Path = entry.Path?.ToLower();
+                    entry.Path = target.ToLower();
                     entry.Name = entry.Name.ToLower();
                     entry.Extension = entry.Extension?.ToLower();
                     target = target?.ToLower();
@@ -527,6 +527,8 @@ namespace CDT.Cosmos.Cms.Controllers
 
             foreach (var folder in folders)
             {
+                var folderName = folder.Prefix.TrimEnd('/').Split("/").LastOrDefault();
+                
                 var entry = new FileManagerEntry
                 {
                     Created = DateTime.Now,
@@ -535,7 +537,7 @@ namespace CDT.Cosmos.Cms.Controllers
                     IsDirectory = true,
                     Modified = DateTime.Now,
                     ModifiedUtc = DateTime.UtcNow,
-                    Name = folder.Prefix.TrimEnd('/').Split("/").LastOrDefault(), // Get the name of the last folder
+                    Name = folderName, // Get the name of the last folder
                     Path = GetRelativePath(teamId, folder.Prefix),
                     Size = 0,
                     HasDirectories = false
