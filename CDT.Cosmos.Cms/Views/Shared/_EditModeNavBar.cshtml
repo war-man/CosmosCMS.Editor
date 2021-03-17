@@ -38,6 +38,9 @@
         font-size: 16px;
         line-height: 16px;
     }
+    .editorToolbarWindow.k-window-content{
+        position: fixed !important;
+    }
 </style>
 @if (controllerName == "Editor" && actionName == "Edit" && Model != null)
 {
@@ -386,6 +389,8 @@
             // div and after the editor is built, reapply.
             var color = $(element).closest("div").css("color");
             var bgcolor = $(element).closest("div").css("background-color");
+            var toolBar = $("#ToolBar");
+            var offSet = toolBar.offset();
 
             $(element).kendoEditor({
                 tools: toolList,
@@ -404,6 +409,16 @@
                         fileUrl: blobUrl + "{0}"
                     }
                 }
+            });
+
+            $(element).data("kendoEditor").toolbar.window.bind("open", function (e) {
+                e.sender.setOptions({
+                    position: {
+                        top: offSet.top + 49,
+                        left: 1,
+                        right: 1
+                    }
+                });
             });
 
             //
