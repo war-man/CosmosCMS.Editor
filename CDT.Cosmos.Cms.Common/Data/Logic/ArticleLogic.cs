@@ -1158,9 +1158,6 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
         /// </remarks>
         public async Task NewHomePage(int id, string userId)
         {
-            var currentHome = await _dbContext.Articles.Where(w => w.UrlPath.ToLower() == "root").ToListAsync();
-            if (currentHome == null) throw new Exception("Fatal error, could not find home page!");
-
             //
             // Can't make a deleted file the new home page.
             //
@@ -1170,9 +1167,13 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
             var utcDateTimeNow = DateTime.UtcNow;
             if (newHome.All(a => a.Published != null && a.Published.Value <= utcDateTimeNow)) throw new Exception("Article has not been published yet.");
 
+            var currentHome = await _dbContext.Articles.Where(w => w.UrlPath.ToLower() == "root").ToListAsync();
+
             var newUrl = HandleUrlEncodeTitle(currentHome.FirstOrDefault()?.Title);
 
             foreach (var article in currentHome) article.UrlPath = newUrl;
+
+            await _dbContext.SaveChangesAsync();
 
             foreach (var article in newHome) article.UrlPath = "root";
 

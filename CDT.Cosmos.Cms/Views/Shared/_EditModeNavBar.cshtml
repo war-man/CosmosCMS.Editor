@@ -809,8 +809,52 @@ else
         <form id="frmLogout" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new {area = ""})">
         </form>
     </div>
-    <script>
-        // Handles button bar click - menu button.
+}
+<script>
+    $(document).ready(function () {
+        var timeZoneElement = $("#timeZone");
+        timeZoneElement.html(getLocalTimeZone());
+
+        $(timeZoneElement).kendoTooltip({
+            content: "This is the time zone for dates and times shown here."
+        });
+
+        $("#userAcctMenu").kendoTooltip({
+            content: "You are using this account. Click down arrow for profile or log out."
+        });
+
+        $("#menuBtn").kendoTooltip({
+            content: "This is the main menu. Click down arrow for options."
+        });
+    });
+
+    function getLocalTimeZone() {
+        var datetime = new Date();
+        var dateTimeString = datetime.toString();
+        var timezone = dateTimeString.substring(dateTimeString.indexOf("(") - 1);
+        return timezone;
+    }
+
+    function convertUtcToLocalDateTime(utcDateTime) {
+
+        if (utcDateTime === null || typeof (utcDateTime) === "undefined" || utcDateTime === "") {
+            return "";
+        }
+
+        // ReSharper disable once QualifiedExpressionMaybeNull
+        if (utcDateTime instanceof Date || utcDateTime.endsWith("Z")) {
+            var localStateTime = new Date(utcDateTime);
+            return localStateTime;
+        }
+
+        // This will turn UTC to local time
+        // ReSharper disable once UseOfImplicitGlobalInFunctionScope
+        var datTimeString = kendo.toString(new Date(utcDateTime), "G");
+        var formattedLocalDateTime = datTimeString + " UTC";
+        return new Date(formattedLocalDateTime);
+    }
+
+            // Handles button bar click - menu button.
         function bgCmsClick(e) {
             var command = e.target.text();
             switch (command) {
@@ -861,49 +905,4 @@ else
                 break;
             }
         }
-    </script>
-}
-<script>
-    $(document).ready(function () {
-        var timeZoneElement = $("#timeZone");
-        timeZoneElement.html(getLocalTimeZone());
-
-        $(timeZoneElement).kendoTooltip({
-            content: "This is the time zone for dates and times shown here."
-        });
-
-        $("#userAcctMenu").kendoTooltip({
-            content: "You are using this account. Click down arrow for profile or log out."
-        });
-
-        $("#menuBtn").kendoTooltip({
-            content: "This is the main menu. Click down arrow for options."
-        });
-    });
-
-    function getLocalTimeZone() {
-        var datetime = new Date();
-        var dateTimeString = datetime.toString();
-        var timezone = dateTimeString.substring(dateTimeString.indexOf("(") - 1);
-        return timezone;
-    }
-
-    function convertUtcToLocalDateTime(utcDateTime) {
-
-        if (utcDateTime === null || typeof (utcDateTime) === "undefined" || utcDateTime === "") {
-            return "";
-        }
-
-        // ReSharper disable once QualifiedExpressionMaybeNull
-        if (utcDateTime instanceof Date || utcDateTime.endsWith("Z")) {
-            var localStateTime = new Date(utcDateTime);
-            return localStateTime;
-        }
-
-        // This will turn UTC to local time
-        // ReSharper disable once UseOfImplicitGlobalInFunctionScope
-        var datTimeString = kendo.toString(new Date(utcDateTime), "G");
-        var formattedLocalDateTime = datTimeString + " UTC";
-        return new Date(formattedLocalDateTime);
-    }
 </script>
