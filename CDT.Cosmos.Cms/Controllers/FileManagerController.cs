@@ -537,8 +537,6 @@ namespace CDT.Cosmos.Cms.Controllers
                 }
             }
 
-            //var outputPath = target.TrimStart('/');
-
             var fileSystemList = new List<FileManagerEntry>();
 
             foreach (var folder in folders)
