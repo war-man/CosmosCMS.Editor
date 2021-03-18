@@ -111,7 +111,7 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
                 Title = title,
                 Content = defaultTemplate,
                 Updated = DateTime.Now,
-                UrlPath = "/" + HttpUtility.UrlEncode(title.Replace(" ", "_")),
+                UrlPath = HttpUtility.UrlEncode(title.Replace(" ", "_")),
                 ArticleLogs = new List<ArticleLog>(),
                 LayoutId = layout?.Id
             };
@@ -631,11 +631,11 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
                     article.UrlPath = HandleUrlEncodeTitle(model.Title);
 
                     // We have to change the title and paths for all versions now.
-                    foreach (var oldArticle in oldArticles) oldArticle.UrlPath = article.UrlPath;
-
-                    // We have to change the title and paths for all versions now.
                     foreach (var oldArticle in oldArticles)
                     {
+                        // We have to change the title and paths for all versions now.
+                        oldArticle.UrlPath = article.UrlPath;
+
                         oldArticle.Title = model.Title;
                         oldArticle.Updated = DateTime.UtcNow;
                     }
@@ -687,8 +687,6 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
             article.FooterJavaScript = model.FooterJavaScript;
 
             article.RoleList = model.RoleList;
-
-            article.UrlPath = isRoot ? "root" : model.UrlPath;
 
             // Save changes to database.
             await _dbContext.SaveChangesAsync();
