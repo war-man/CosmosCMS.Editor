@@ -482,6 +482,8 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
             if (!await ValidateTitle(model.Title, model.ArticleNumber))
                 throw new Exception($"Title '{model.Title}' already taken");
 
+            bool isRoot = await _dbContext.Articles.AnyAsync(a => a.ArticleNumber == model.ArticleNumber && a.UrlPath == "root");
+
             //
             // Is this a new article?
             //
@@ -491,7 +493,9 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
                 // If the article number is 0, then this is a new article.
                 // The save action will give this a new unique article number.
                 //
-                var isRoot = !await _dbContext.Articles.AnyAsync();
+
+                // If no other articles exist, then make this the new root or home page.
+                isRoot = (await _dbContext.Articles.CountAsync()) == 0;
 
                 article = new Article
                 {
@@ -562,13 +566,12 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
                     {
                         ArticleNumber = model.ArticleNumber, // This stays the same
                         VersionNumber = await GetNextVersionNumber(model.ArticleNumber),
-                        UrlPath = article.UrlPath,
+                        UrlPath = model.UrlPath,
                         HeaderJavaScript = article.HeaderJavaScript,
                         FooterJavaScript = article.FooterJavaScript,
                         ArticleLogs = new List<ArticleLog>(),
                         LayoutId = article.LayoutId,
                         Title = article.Title, // Keep this from previous version, will handle title change below.
-
                         Updated = DateTime.UtcNow
                     };
 
@@ -585,56 +588,50 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
                 }
 
                 //
-                // Is the title changing? If so handle redirect.
+                // Is the title changing? If so handle redirect if this is NOT the root.
                 //
-                if (!string.Equals(article.Title, model.Title, StringComparison.CurrentCultureIgnoreCase))
+                if (!isRoot && !string.Equals(article.Title, model.Title, StringComparison.CurrentCultureIgnoreCase))
                 {
                     // make all those articles with the old path inactive, so they don't conflict with URLs
                     var oldArticles = _dbContext.Articles.Where(w => w.ArticleNumber == article.ArticleNumber)
                         .ToListAsync().Result;
 
-                    //
-                    // We can update URL if the article is *NOT* the home page.
-                    //
-                    if (article.UrlPath != "root")
+                    article.UrlPath = HandleUrlEncodeTitle(model.Title);
+
+                    // Add redirect here
+                    await _dbContext.Articles.AddAsync(new Article
                     {
-                        article.UrlPath = HandleUrlEncodeTitle(model.Title);
-
-                        // Add redirect here
-                        await _dbContext.Articles.AddAsync(new Article
-                        {
-                            Id = 0,
-                            LayoutId = null,
-                            ArticleNumber = 0,
-                            StatusCode = (int)StatusCodeEnum.Redirect,
-                            UrlPath = model.UrlPath, // Old URL
-                            VersionNumber = 0,
-                            Published =
-                                TimeZoneUtility.ConvertUtcDateTimeToPst(
-                                    DateTime.UtcNow.AddDays(-1)), // Make sure this sticks!
-                            Title = "Redirect",
-                            Content = article.UrlPath, // New URL
-                            Updated = DateTime.UtcNow,
-                            HeaderJavaScript = null,
-                            FooterJavaScript = null,
-                            Layout = null,
-                            ArticleLogs = null,
-                            MenuItems = null,
-                            FontIconId = null,
-                            FontIcon = null
-                        });
+                        Id = 0,
+                        LayoutId = null,
+                        ArticleNumber = 0,
+                        StatusCode = (int)StatusCodeEnum.Redirect,
+                        UrlPath = model.UrlPath, // Old URL
+                        VersionNumber = 0,
+                        Published =
+                            TimeZoneUtility.ConvertUtcDateTimeToPst(
+                                DateTime.UtcNow.AddDays(-1)), // Make sure this sticks!
+                        Title = "Redirect",
+                        Content = article.UrlPath, // New URL
+                        Updated = DateTime.UtcNow,
+                        HeaderJavaScript = null,
+                        FooterJavaScript = null,
+                        Layout = null,
+                        ArticleLogs = null,
+                        MenuItems = null,
+                        FontIconId = null,
+                        FontIcon = null
+                    });
 
 
-                        HandleLogEntry(article, $"Redirect {model.UrlPath} to {article.UrlPath}", userId);
+                    HandleLogEntry(article, $"Redirect {model.UrlPath} to {article.UrlPath}", userId);
 
-                        //
-                        // Update the path 
-                        //
-                        article.UrlPath = HandleUrlEncodeTitle(model.Title);
+                    //
+                    // Update the path 
+                    //
+                    article.UrlPath = HandleUrlEncodeTitle(model.Title);
 
-                        // We have to change the title and paths for all versions now.
-                        foreach (var oldArticle in oldArticles) oldArticle.UrlPath = article.UrlPath;
-                    }
+                    // We have to change the title and paths for all versions now.
+                    foreach (var oldArticle in oldArticles) oldArticle.UrlPath = article.UrlPath;
 
                     // We have to change the title and paths for all versions now.
                     foreach (var oldArticle in oldArticles)
@@ -690,6 +687,8 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
             article.FooterJavaScript = model.FooterJavaScript;
 
             article.RoleList = model.RoleList;
+
+            article.UrlPath = isRoot ? "root" : model.UrlPath;
 
             // Save changes to database.
             await _dbContext.SaveChangesAsync();
