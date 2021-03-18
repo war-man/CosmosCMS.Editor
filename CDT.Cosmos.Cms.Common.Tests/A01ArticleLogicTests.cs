@@ -207,12 +207,14 @@ namespace CDT.Cosmos.Cms.Common.Tests
             await using var dbContext = StaticUtilities.GetApplicationDbContext();
             var logic = StaticUtilities.GetArticleLogic(dbContext);
 
+            //
             // Create and save version 1
             var version1 = await logic.UpdateOrInsert(await logic.Create("This is a second page" + Guid.NewGuid()),
                 _testUser.Id);
             Assert.AreEqual(1, version1.VersionNumber);
             Assert.AreEqual(2, version1.ArticleNumber);
 
+            //
             // Make a change to version 1, and save as an update (don't create a new version)
             version1.Content = Guid.NewGuid() + "WOW";
             var ver1OriginalContent = version1.Content;
@@ -221,6 +223,7 @@ namespace CDT.Cosmos.Cms.Common.Tests
             Assert.AreEqual(version1.Content, version1UpdateA.Content);
             Assert.AreEqual(1, version1UpdateA.VersionNumber);
 
+            //
             // Make a change to version 1, and save as an update (don't create a new version)
             version1UpdateA.Content = Guid.NewGuid() + "NOW";
             var version1UpdateB = await logic.UpdateOrInsert(version1UpdateA, _testUser.Id);
@@ -228,6 +231,7 @@ namespace CDT.Cosmos.Cms.Common.Tests
             Assert.AreNotEqual(version1.Content, version1UpdateB.Content);
             Assert.AreEqual(1, version1UpdateB.VersionNumber);
 
+            //
             // Make a new version (version 2)
             version1UpdateB.Published = null;
             version1UpdateB.VersionNumber = 0;
@@ -235,11 +239,17 @@ namespace CDT.Cosmos.Cms.Common.Tests
             Assert.AreEqual(2, version2.VersionNumber);
             Assert.AreEqual(version1UpdateB.Content, version2.Content);
 
+            //
+            // Create a new version, and change the title.
+            // This should trigger a redirect record being created.
+            //
             version2.Title = "New Version " + Guid.NewGuid(); // Change the title 
             version2.VersionNumber = 0; // Make a version 3
             version2.Published = DateTime.Now; // New version published.
 
-
+            //
+            // This should change the title, create a redirect record as well.
+            //
             var titleChangeVersion3 = await logic.UpdateOrInsert(version2, _testUser.Id);
             Assert.AreEqual(3, titleChangeVersion3.VersionNumber);
             // Even though version 2 is published, new versions should NEVER be published.

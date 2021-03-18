@@ -211,20 +211,34 @@ namespace CDT.Cosmos.Cms.Controllers
             if (SiteOptions.Value.ReadWriteMode)
                 try
                 {
+
                     IQueryable<Article> query;
+
+                    //
+                    // Are we basing this on an existing entity?
+                    //
                     if (entityId == null)
                     {
                         //
-                        // Create a new version based on the latest version
+                        // If here, we are not. Clone the new version from the last version.
                         //
+                        // Find the last version here
                         var maxVersion = await DbContext.Articles.Where(a => a.ArticleNumber == id)
                             .MaxAsync(m => m.VersionNumber);
+
+                        //
+                        // Now find that version.
+                        //
                         query = DbContext.Articles.Where(f =>
                             f.ArticleNumber == id &&
                             f.VersionNumber == maxVersion);
                     }
                     else
                     {
+                        //
+                        // We are here because the new versison is being based on a
+                        // specific older version, not the latest version.
+                        //
                         //
                         // Create a new version based on a specific version
                         //
@@ -233,7 +247,8 @@ namespace CDT.Cosmos.Cms.Controllers
                     }
 
                     var article = await query.FirstOrDefaultAsync();
-                    var defaultLayout = await ArticleLogic.GetDefaultLayout("en-US");
+
+                    // var defaultLayout = await ArticleLogic.GetDefaultLayout("en-US");
                     var model = new ArticleViewModel
                     {
                         Id = article.Id, // This is the article we are going to clone as a new version.
@@ -247,7 +262,6 @@ namespace CDT.Cosmos.Cms.Controllers
                         Updated = DateTime.UtcNow,
                         HeaderJavaScript = article.HeaderJavaScript,
                         FooterJavaScript = article.FooterJavaScript,
-                        Layout = defaultLayout,
                         ReadWriteMode = false,
                         PreviewMode = false,
                         EditModeOn = false,
@@ -256,6 +270,7 @@ namespace CDT.Cosmos.Cms.Controllers
                     };
 
                     var userId = UserManager.GetUserId(User);
+
                     var result = await ArticleLogic.UpdateOrInsert(model, userId);
 
                     return RedirectToAction("Edit", "Editor", new { result.Id });
