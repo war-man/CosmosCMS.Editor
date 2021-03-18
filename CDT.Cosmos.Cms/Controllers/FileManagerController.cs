@@ -234,10 +234,11 @@ namespace CDT.Cosmos.Cms.Controllers
                     //
                     // FULL OR ABSOLUTE BLOB PATH
                     //
-                    entry.Path = target.ToLower();
+                    target = target == null ? "" : target.ToLower();
+                    entry.Path = target;
                     entry.Name = entry.Name.ToLower();
                     entry.Extension = entry.Extension?.ToLower();
-                    target = target?.ToLower();
+                    
 
                     var fullPath = GetAbsolutePath(entry.Path, entry.Name);
                     fullPath = UrlEncode(fullPath);
