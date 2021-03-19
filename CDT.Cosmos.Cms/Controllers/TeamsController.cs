@@ -189,13 +189,25 @@ namespace CDT.Cosmos.Cms.Controllers
                 try
                 {
                     if (teams.Any())
+                    {
                         foreach (var team in teams)
                         {
                             var entity = await DbContext.Teams.FirstOrDefaultAsync(f => f.Id == team.Id);
+                            var orphanedArticles = await DbContext.Articles.Where(a => a.TeamId == team.Id).ToListAsync();
+                            foreach (var article in orphanedArticles)
+                            {
+                                article.TeamId = null; // Detach the page from the team.
+                            }
+
+                            var users = await DbContext.TeamMembers.Where(t => t.TeamId == team.Id).ToListAsync();
+                            DbContext.TeamMembers.RemoveRange(users);
+                            await DbContext.SaveChangesAsync();
+                            // Now remove the team
                             DbContext.Teams.Remove(entity);
                         }
 
-                    await DbContext.SaveChangesAsync();
+                        await DbContext.SaveChangesAsync();
+                    }
 
                     return Json(teams.ToDataSourceResult(request, ModelState));
                 }
@@ -235,7 +247,7 @@ namespace CDT.Cosmos.Cms.Controllers
                             TeamDescription = s.Team.TeamDescription,
                             TeamName = s.Team.TeamName
                         },
-                        Member = null
+                        Member = new TeamMemberLookupItem(s.User)
                     }).ToList();
                     return Json(model.ToDataSourceResult(request));
                 }

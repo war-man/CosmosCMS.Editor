@@ -1,16 +1,22 @@
 ﻿@using Kendo.Mvc.UI
 @model TeamViewModel
 @{
-    ViewData["Title"] = "Membership";
+    ViewData["Title"] = "Team Membership";
 }
 
 <div class="row">
     <div class="col-md-12">
-        <h4>Membership for:</h4>
-        <h2>@Model.TeamName</h2>
+        <h4>Team: @Model.TeamName</h4>
         <hr/>
-        <p>Team description:</p>
-        <div class="alert alert-secondary">@Model.TeamDescription</div>
+        <ul>
+            <li>Use this page to add and remove members, and assign roles.</li>
+            <li>Change a role, click on it, then use the drop down to select the new role.</li>
+            <li><span class="badge badge-warning">Important!</span> Don't forget to click &quot;Save Changes&quot; when done.</li>
+        </ul>
+       
+        <p>
+            <a asp-action="Index" class="btn btn-sm btn-secondary">Back to Teams</a>
+        </p>
     </div>
 </div>
 <div class="row">
@@ -26,7 +32,7 @@
         })
         .ToolBar(toolBar =>
         {
-            toolBar.Create();
+            toolBar.Create().Text("Add member");
             toolBar.Save();
         })
         .Editable(editable => editable.Mode(GridEditMode.InCell))
