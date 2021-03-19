@@ -655,11 +655,6 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
                     HandleLogEntry(article, $"Changing role access from '{article.RoleList}' to '{model.RoleList}'.", userId);
 
                     //
-                    // Update the path 
-                    //
-                    article.UrlPath = HandleUrlEncodeTitle(model.Title);
-
-                    //
                     // We have to change the title and paths for all versions now.
                     //
                     foreach (var oldArticle in oldArticles) oldArticle.RoleList = model.RoleList;
