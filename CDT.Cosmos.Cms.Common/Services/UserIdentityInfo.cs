@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
 
 namespace CDT.Cosmos.Cms.Common.Services
 {
@@ -7,6 +10,23 @@ namespace CDT.Cosmos.Cms.Common.Services
     /// </summary>
     public class UserIdentityInfo
     {
+        public UserIdentityInfo(ClaimsPrincipal user)
+        {
+            if (user.Identity != null && user.Identity.IsAuthenticated)
+            {
+                IsAuthenticated = user.Identity.IsAuthenticated;
+                RoleMembership = ((ClaimsIdentity)user.Identity).Claims
+                    .Where(c => c.Type == ClaimTypes.Role)
+                    .Select(c => c.Value).ToList();
+                UserName = user.Identity.Name;
+            }
+            else
+            {
+                IsAuthenticated = false;
+                RoleMembership = new List<string>();
+                UserName = string.Empty;
+            }
+        }
         /// <summary>
         /// User is authenticated
         /// </summary>
@@ -19,6 +39,16 @@ namespace CDT.Cosmos.Cms.Common.Services
         /// <summary>
         /// Role membership
         /// </summary>
-        public IEnumerable<string> RoleMembership { get; set; }
+        public List<string> RoleMembership { get; set; }
+
+        /// <summary>
+        /// Checks to see if a user is in a role.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public bool IsInRole(string name)
+        {
+            return RoleMembership.Contains(name, StringComparer.CurrentCultureIgnoreCase);
+        }
     }
 }

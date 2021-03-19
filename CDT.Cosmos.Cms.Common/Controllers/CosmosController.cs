@@ -22,6 +22,7 @@ namespace CDT.Cosmos.Cms.Common.Controllers
         private readonly ILogger _logger;
         private readonly IOptions<RedisContextConfig> _redisOptions;
         private readonly IOptions<GoogleCloudAuthConfig> _gglConfig;
+        private readonly IOptions<SimpleProxyConfigs> _proxyConfigs;
 
         /// <summary>
         ///     Base constructor
@@ -33,11 +34,13 @@ namespace CDT.Cosmos.Cms.Common.Controllers
         protected CosmosController(ILogger logger,
             ArticleLogic articleLogic,
             IOptions<RedisContextConfig> redisOptions,
-            IOptions<GoogleCloudAuthConfig> gglConfig)
+            IOptions<GoogleCloudAuthConfig> gglConfig,
+            IOptions<SimpleProxyConfigs> proxyConfigs)
         {
             _logger = logger;
             _redisOptions = redisOptions;
             _gglConfig = gglConfig;
+            _proxyConfigs = proxyConfigs;
             _articleLogic = articleLogic;
         }
 
@@ -119,31 +122,33 @@ namespace CDT.Cosmos.Cms.Common.Controllers
             }
         }
 
+        /// <summary>
+        /// Returns a proxy result as a <see cref="JsonResult"/>.
+        /// </summary>
+        /// <param name="endpointName"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> SimpleProxyJson(string endpointName)
+        {
+            if (_proxyConfigs.Value == null) return Json(string.Empty);
+            var proxy = new SimpleProxyService(_proxyConfigs);
+            return Json(await proxy.CallEndpoint(endpointName, new UserIdentityInfo(User)));
+        }
+
+        /// <summary>
+        /// Returns a proxy as a simple string.
+        /// </summary>
+        /// <param name="endpointName"></param>
+        /// <returns></returns>
+        public async Task<string> SimpleProxy(string endpointName)
+        {
+            if (_proxyConfigs.Value == null) return string.Empty;
+            var proxy = new SimpleProxyService(_proxyConfigs);
+            return await proxy.CallEndpoint(endpointName, new UserIdentityInfo(User));
+        }
+
         private string GetUserIdentityInfo()
         {
-            UserIdentityInfo identity;
-            if (User.Identity != null && User.Identity.IsAuthenticated)
-            {
-                identity = new UserIdentityInfo
-                {
-                    IsAuthenticated = User.Identity.IsAuthenticated,
-                    RoleMembership = ((ClaimsIdentity)User.Identity).Claims
-                        .Where(c => c.Type == ClaimTypes.Role)
-                        .Select(c => c.Value),
-                    UserName = User.Identity.Name
-                };
-            }
-            else
-            {
-                identity = new UserIdentityInfo
-                {
-                    IsAuthenticated = false,
-                    RoleMembership = new string[] { },
-                    UserName = string.Empty
-                };
-            }
-
-            return JsonConvert.SerializeObject(identity);
+            return JsonConvert.SerializeObject(new UserIdentityInfo(User));
         }
 
         /// <summary>

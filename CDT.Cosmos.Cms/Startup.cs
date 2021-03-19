@@ -54,6 +54,7 @@ namespace CDT.Cosmos.Cms
             services.Configure<GoogleCloudAuthConfig>(Configuration.GetSection("GoogleCloudAuthConfig"));
             services.Configure<AzureCdnConfig>(Configuration.GetSection("AzureCdnConfig"));
             services.Configure<AkamaiContextConfig>(Configuration.GetSection("AkamaiContextConfig"));
+            services.Configure<SimpleProxyConfigs>(Configuration.GetSection("SimpleProxyConfigs"));
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));

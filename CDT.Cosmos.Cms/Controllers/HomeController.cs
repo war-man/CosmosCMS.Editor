@@ -25,12 +25,14 @@ namespace CDT.Cosmos.Cms.Controllers
         private readonly IOptions<RedisContextConfig> _redisOptions;
         private readonly IOptions<SiteCustomizationsConfig> _siteOptions;
         private readonly IOptions<GoogleCloudAuthConfig> _gglConfig;
+        private readonly IOptions<SimpleProxyConfigs> _proxyConfigs;
 
         public HomeController(ILogger<HomeController> logger, ApplicationDbContext dbContext,
             IOptions<SiteCustomizationsConfig> options,
             IOptions<RedisContextConfig> redisOptions,
             ArticleLogic articleLogic,
-            IOptions<GoogleCloudAuthConfig> gglConfig)
+            IOptions<GoogleCloudAuthConfig> gglConfig,
+            IOptions<SimpleProxyConfigs> proxyConfigs)
         {
             _redisOptions = redisOptions;
             _logger = logger;
@@ -38,6 +40,7 @@ namespace CDT.Cosmos.Cms.Controllers
             _siteOptions = options;
             _articleLogic = articleLogic;
             _gglConfig = gglConfig;
+            _proxyConfigs = proxyConfigs;
         }
 
         public async Task<IActionResult> Index(string id, string lang)
@@ -60,7 +63,7 @@ namespace CDT.Cosmos.Cms.Controllers
                 {
                     lang = "en";
                 }
-
+                
                 //
                 // Check if we are in read/write mode
                 //
@@ -162,7 +165,6 @@ namespace CDT.Cosmos.Cms.Controllers
             }
         }
 
-
         /// <summary>
         ///     Gets an article by its ID (or row key).
         /// </summary>
@@ -246,5 +248,34 @@ namespace CDT.Cosmos.Cms.Controllers
         }
 
         #endregion
+
+        #region SIMPLE PROXIES
+
+        /// <summary>
+        /// Returns a proxy result as a <see cref="JsonResult"/>.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> SimpleProxyJson(string id)
+        {
+            if (_proxyConfigs.Value == null) return Json(string.Empty);
+            var proxy = new SimpleProxyService(_proxyConfigs);
+            return Json(await proxy.CallEndpoint(id, new UserIdentityInfo(User)));
+        }
+
+        /// <summary>
+        /// Returns a proxy as a simple string.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<string> SimpleProxy(string id)
+        {
+            if (_proxyConfigs.Value == null) return string.Empty;
+            var proxy = new SimpleProxyService(_proxyConfigs);
+            return await proxy.CallEndpoint(id, new UserIdentityInfo(User));
+        }
+
+        #endregion
+
     }
 }
