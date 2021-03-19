@@ -142,6 +142,56 @@ namespace CDT.Cosmos.Cms.Common.Tests
             };
         }
 
+        public static SimpleProxyConfigs GetSimpleProxyConfigs()
+        {
+            return new SimpleProxyConfigs()
+            {
+                Configs = new ProxyConfig[]
+                 {
+                     new ProxyConfig()
+                        {
+                            ContentType = "text/html; charset=UTF-8",
+                            Method = "GET",
+                            Name = "GoogleAnonymous",
+                            Password = "",
+                            UriEndpoint = "https://www.google.com",
+                            UserName = "",
+                            Roles = new string[] { "Anonymous" }
+                        },
+                     new ProxyConfig()
+                        {
+                            ContentType = "application/x-www-form-urlencoded",
+                            Method = "GET",
+                            Name = "TableauAnonymous",
+                            Password = "",
+                            UriEndpoint = "https://worldtimeapi.org/api/timezone",
+                            UserName = "",
+                            Roles = new string[] { "Anonymous" }
+                        },
+                     new ProxyConfig()
+                        {
+                            ContentType = "application/x-www-form-urlencoded",
+                            Method = "GET",
+                            Name = "TableauAuthenticated",
+                            Password = "",
+                            UriEndpoint = "https://worldtimeapi.org/api/timezone",
+                            UserName = "",
+                            Roles = new string[] { "Authenticated" }
+                        },
+                     new ProxyConfig()
+                        {
+                            ContentType = "application/x-www-form-urlencoded",
+                            Method = "GET",
+                            Name = "TableauAdministrators",
+                            Password = "",
+                            UriEndpoint = "https://worldtimeapi.org/api/timezone",
+                            UserName = "",
+                            Roles = new string[] { "Administrators" }
+                        }
+                 }
+            };
+        }
+
         #endregion
 
         #region CONTROLLER MOCK UPS
@@ -214,7 +264,7 @@ namespace CDT.Cosmos.Cms.Common.Tests
                 GetApplicationDbContext(),
                 siteOptions,
                 Options.Create(GetRedisContextConfig()),
-                GetArticleLogic(dbContext), Options.Create(new GoogleCloudAuthConfig())
+                GetArticleLogic(dbContext), Options.Create(new GoogleCloudAuthConfig()), Options.Create(GetSimpleProxyConfigs())
             )
             {
                 ControllerContext = { HttpContext = GetMockContext(user) }

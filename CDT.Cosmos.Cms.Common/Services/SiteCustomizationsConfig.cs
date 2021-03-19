@@ -34,5 +34,11 @@
         ///     (Future functionality) Turns on page autoversion
         /// </summary>
         public bool AutoVersion { get; set; } = false;
+
+        /// <summary>
+        /// URI/URLURL
+        /// of the publisher website.
+        /// </summary>
+        public string PublisherUrl { get; set; } = "";
     }
 }
