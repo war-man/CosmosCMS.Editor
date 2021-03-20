@@ -22,6 +22,7 @@
         public bool AllowReset { get; set; } = false;
 
         /// <summary>
+        /// Allowed file type extensions
         /// </summary>
         public string AllowedFileTypes { get; set; } = ".js,.css,.htm,.html,.mov,.webm,.avi,.mp4,.mpeg,.ts,.svg,.json";
 

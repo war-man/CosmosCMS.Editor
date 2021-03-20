@@ -14,6 +14,9 @@ namespace CDT.Cosmos.Cms.Common.Services
     /// </summary>
     public class SimpleProxyService
     {
+        /// <summary>
+        /// Optsions field
+        /// </summary>
         private readonly IOptions<SimpleProxyConfigs> config;
 
         public SimpleProxyService(IOptions<SimpleProxyConfigs> config)

@@ -18,10 +18,25 @@ namespace CDT.Cosmos.Cms.Common.Controllers
     /// </summary>
     public abstract class CosmosController : Controller
     {
+        /// <summary>
+        /// Article logic field.
+        /// </summary>
         private readonly ArticleLogic _articleLogic;
+        /// <summary>
+        /// Logger field
+        /// </summary>
         private readonly ILogger _logger;
+        /// <summary>
+        /// Redis cache configuration field
+        /// </summary>
         private readonly IOptions<RedisContextConfig> _redisOptions;
+        /// <summary>
+        /// Google cloud configuration 
+        /// </summary>
         private readonly IOptions<GoogleCloudAuthConfig> _gglConfig;
+        /// <summary>
+        /// Simple proxy settings
+        /// </summary>
         private readonly IOptions<SimpleProxyConfigs> _proxyConfigs;
 
         /// <summary>
@@ -146,6 +161,10 @@ namespace CDT.Cosmos.Cms.Common.Controllers
             return await proxy.CallEndpoint(endpointName, new UserIdentityInfo(User));
         }
 
+        /// <summary>
+        /// Gets the current user's identity information.
+        /// </summary>
+        /// <returns></returns>
         private string GetUserIdentityInfo()
         {
             return JsonConvert.SerializeObject(new UserIdentityInfo(User));
