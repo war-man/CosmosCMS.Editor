@@ -42,6 +42,28 @@ namespace CDT.Cosmos.Cms.Common.Tests
                             UriEndpoint = "https://api.zippopotam.us/us/",
                             UserName = "",
                             Roles = new string[] { "Anonymous" }
+                        },
+                     new ProxyConfig()
+                        {
+                            ContentType = "text/html; charset=UTF-8",
+                            Data = "",
+                            Method = "GET",
+                            Name = "ZippopotamAddData",
+                            Password = "",
+                            UriEndpoint = "https://api.zippopotam.us/us/",
+                            UserName = "",
+                            Roles = new string[] { "Anonymous" }
+                        },
+                     new ProxyConfig()
+                        {
+                            ContentType = "text/html; charset=UTF-8",
+                            Data = "",
+                            Method = "GET",
+                            Name = "ZippopotamAdminRoleAddData",
+                            Password = "",
+                            UriEndpoint = "https://api.zippopotam.us/us/",
+                            UserName = "",
+                            Roles = new string[] { "Administrators" }
                         }
                  }
             };
@@ -63,17 +85,17 @@ namespace CDT.Cosmos.Cms.Common.Tests
         }
 
         [TestMethod]
-        public async Task A02_Post_Anonymous_Tableau()
+        public async Task A02_Get_Zippopotam_AddData()
         {
             // Arrange
             var proxy = new SimpleProxyService(Options.Create(configs));
 
             // Act
-            var result = await proxy.CallEndpoint("TableauAnonymous", null);
+            var result = await proxy.CallEndpoint("ZippopotamAddData", null, "/93950");
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreNotEqual("Permission denied.", result);
+            Assert.IsTrue(result.Length > 9);
         }
 
         [TestMethod]
@@ -88,50 +110,37 @@ namespace CDT.Cosmos.Cms.Common.Tests
             // Assert
             Assert.IsNotNull(result);
             Assert.AreNotEqual("Permission denied.", result);
+            Assert.IsTrue(result.Length > 9);
         }
+
         [TestMethod]
-        public async Task A03_Post_Authenticated_Tableau_FailAuthentication()
+        public async Task A03_Post_Authenticated_ZippopotamAdminRole_FailAuthentication()
         {
             // Arrange
             var proxy = new SimpleProxyService(Options.Create(configs));
 
             // Act
-            var result = await proxy.CallEndpoint("TableauAuthenticated", null);
+            var result = await proxy.CallEndpoint("ZippopotamAdminRoleAddData", null, "/95842");
 
             // Assert
             Assert.AreEqual("Permission denied.", result);
         }
 
         [TestMethod]
-        public async Task A04_Post_Authenticated_Tableau_SucceedAuthentication()
+        public async Task A04_Post_Authenticated_ZippopotamAdminRole_SucceedAuthentication()
         {
             // Arrange
             var proxy = new SimpleProxyService(Options.Create(configs));
             var user = await StaticUtilities.GetPrincipal(TestUsers.Foo);
 
             // Act
-            var result = await proxy.CallEndpoint("TableauAuthenticated", new UserIdentityInfo(user));
+            var result = await proxy.CallEndpoint("ZippopotamAdminRoleAddData", new UserIdentityInfo(user), "/95842");
 
             // Assert
             Assert.AreNotEqual("Permission denied.", result);
             Assert.IsNotNull(result);
-            Assert.IsTrue(result.Length > 20);
+            Assert.IsTrue(result.Length > 9);
         }
 
-        [TestMethod]
-        public async Task A05_Post_Authenticated_Tableau_SucceedRole()
-        {
-            // Arrange
-            var proxy = new SimpleProxyService(Options.Create(configs));
-            var user = await StaticUtilities.GetPrincipal(TestUsers.Foo);
-
-            // Act
-            var result = await proxy.CallEndpoint("TableauAdministrators", new UserIdentityInfo(user));
-
-            // Assert
-            Assert.AreNotEqual("Permission denied.", result);
-            Assert.IsNotNull(result);
-            Assert.IsTrue(result.Length > 20);
-        }
     }
 }

@@ -65,7 +65,15 @@ namespace CDT.Cosmos.Cms.Common.Services
         /// <returns></returns>
         private async Task<string> CallEndpoint(Uri endPoint, string method, string proxyData, string userName, string password, string contentType = "application/x-www-form-urlencoded")
         {
-            WebRequest request = WebRequest.Create(endPoint);
+            WebRequest request;
+            if (method.Equals("get", StringComparison.CurrentCultureIgnoreCase))
+            {
+                request = WebRequest.Create(endPoint + proxyData);
+            }
+            else
+            {
+                request = WebRequest.Create(endPoint);
+            }
             request.Method = method;
             request.ContentType = contentType;
 
