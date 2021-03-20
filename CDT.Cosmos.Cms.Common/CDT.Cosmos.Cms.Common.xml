@@ -9,7 +9,7 @@
                 Base class for the Cosmos CMS controller.
             </summary>
         </member>
-        <member name="M:CDT.Cosmos.Cms.Common.Controllers.CosmosController.#ctor(Microsoft.Extensions.Logging.ILogger,CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic,Microsoft.Extensions.Options.IOptions{CDT.Cosmos.Cms.Common.Services.RedisContextConfig},Microsoft.Extensions.Options.IOptions{CDT.Cosmos.Cms.Common.Services.GoogleCloudAuthConfig})">
+        <member name="M:CDT.Cosmos.Cms.Common.Controllers.CosmosController.#ctor(Microsoft.Extensions.Logging.ILogger,CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic,Microsoft.Extensions.Options.IOptions{CDT.Cosmos.Cms.Common.Services.RedisContextConfig},Microsoft.Extensions.Options.IOptions{CDT.Cosmos.Cms.Common.Services.GoogleCloudAuthConfig},Microsoft.Extensions.Options.IOptions{CDT.Cosmos.Cms.Common.Services.SimpleProxyConfigs})">
             <summary>
                 Base constructor
             </summary>
@@ -24,6 +24,20 @@
             </summary>
             <param name="id">URL of page</param>
             <param name="lang">iso language code</param>
+            <returns></returns>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Controllers.CosmosController.SimpleProxyJson(System.String)">
+            <summary>
+            Returns a proxy result as a <see cref="T:Microsoft.AspNetCore.Mvc.JsonResult"/>.
+            </summary>
+            <param name="endpointName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Controllers.CosmosController.SimpleProxy(System.String)">
+            <summary>
+            Returns a proxy as a simple string.
+            </summary>
+            <param name="endpointName"></param>
             <returns></returns>
         </member>
         <member name="M:CDT.Cosmos.Cms.Common.Controllers.CosmosController.GetSupportedLanguages(System.String)">
@@ -351,14 +365,13 @@
             </summary>
             <remarks>An article is the "content" behind a web page.</remarks>
         </member>
-        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.#ctor(CDT.Cosmos.Cms.Common.Data.ApplicationDbContext,Microsoft.Extensions.Caching.Distributed.IDistributedCache,Microsoft.Extensions.Logging.ILogger{CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic},Microsoft.Extensions.Options.IOptions{CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig},Microsoft.Extensions.Options.IOptions{CDT.Cosmos.Cms.Common.Services.RedisContextConfig},CDT.Cosmos.Cms.Common.Services.TranslationServices)">
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.#ctor(CDT.Cosmos.Cms.Common.Data.ApplicationDbContext,Microsoft.Extensions.Caching.Distributed.IDistributedCache,Microsoft.Extensions.Options.IOptions{CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig},Microsoft.Extensions.Options.IOptions{CDT.Cosmos.Cms.Common.Services.RedisContextConfig},CDT.Cosmos.Cms.Common.Services.TranslationServices)">
             <summary>
                 Constructor
             </summary>
             <param name="dbContext"></param>
             <param name="distributedCache"></param>
             <param name="config"></param>
-            <param name="logger"></param>
             <param name="redisOptions"></param>
             <param name="translationServices"></param>
         </member>
@@ -1603,6 +1616,26 @@
                 Number of seconds to cache data in memory (1 minute default).
             </summary>
         </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Services.SimpleProxyService">
+            <summary>
+            This is a generic class that makes server to server calls
+            </summary>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Services.SimpleProxyService.CallEndpoint(System.String,CDT.Cosmos.Cms.Common.Services.UserIdentityInfo,System.String)">
+            <summary>
+            Calls and endpoint and returns the results as a string.
+            </summary>
+            <param name="name"></param>
+            <param name="user"></param>
+            <param name="proxyData"></param>
+            <returns></returns>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Services.SimpleProxyService.CallEndpoint(System.Uri,System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            Use this private method to call and end point
+            </summary>
+            <returns></returns>
+        </member>
         <member name="T:CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig">
             <summary>
                 Startup.ConfigureServices method captures the site customization options found in "secrets" in this
@@ -1636,6 +1669,12 @@
         <member name="P:CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig.AutoVersion">
             <summary>
                 (Future functionality) Turns on page autoversion
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig.PublisherUrl">
+            <summary>
+            URI/URLURL
+            of the publisher website.
             </summary>
         </member>
         <member name="T:CDT.Cosmos.Cms.Common.Services.TimeZoneUtility">
@@ -1703,6 +1742,13 @@
             <summary>
             Role membership
             </summary>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Services.UserIdentityInfo.IsInRole(System.String)">
+            <summary>
+            Checks to see if a user is in a role.
+            </summary>
+            <param name="name"></param>
+            <returns></returns>
         </member>
     </members>
 </doc>

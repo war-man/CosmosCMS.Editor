@@ -59,7 +59,12 @@ namespace CDT.Cosmos.Cms.Controllers
 
         public IActionResult Index()
         {
-            if (SiteOptions.Value.ReadWriteMode) return View();
+            if (SiteOptions.Value.ReadWriteMode)
+            {
+                ViewData["PublisherUrl"] = SiteOptions.Value?.PublisherUrl;
+
+                return View();
+            };
 
             return Unauthorized();
         }
@@ -746,7 +751,7 @@ namespace CDT.Cosmos.Cms.Controllers
                     else
                         article.FooterJavaScript = model.FooterJavaScript.Trim();
 
-                    
+
                     // Check for validation errors...
                     if (ModelState.IsValid)
                         // If no HTML errors were thrown, save here.
@@ -913,7 +918,7 @@ namespace CDT.Cosmos.Cms.Controllers
                 try
                 {
                     var data = await DbContext.Articles.OrderByDescending(o => o.VersionNumber)
-                        .Where(a => a.ArticleNumber == id).Select(s => new 
+                        .Where(a => a.ArticleNumber == id).Select(s => new
                         {
                             s.Id,
                             s.Published,

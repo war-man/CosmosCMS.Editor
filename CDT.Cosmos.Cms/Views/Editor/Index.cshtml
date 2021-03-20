@@ -3,10 +3,12 @@
     Layout = "_Layout";
     ViewData["Title"] = "Page List";
 
-    var versions = $"<a class=\"btn btn-sm btn-secondary\" href=\"{Url.Action("Versions", "Editor")}/#: ArticleNumber #\" title=\"Edit Article\"><span class='fa fa-font'></span></a>";
-    var copyUrl = "<button class=\"clipboard btn btn-sm btn-secondary\" data-clipboard-text=\"/#: UrlPath #\"  title='Click to copy url'><span class='fa fa-external-link'></span></button>";
+    var publisherUrl = ViewData["PublisherUrl"];
+
+    var versions = $"<a class=\"btn btn-sm btn-secondary\" href=\"{Url.Action("Versions", "Editor")}/#: ArticleNumber #\" title=\"See a list of versions for this page\"><span class='fa fa-files-o'></span></a>";
+    var copyUrl = "<button class=\"clipboard btn btn-sm btn-secondary\" data-clipboard-text=\"/#: UrlPath #\"  title='Click to copy url'><span class='fa fa-clipboard'></span></button>";
     var btnGroup = "<div class=\"btn-group btn-group-sm\" role=\"group\" aria-label=\"Basic example\">#= getNewHomeButton(IsDefault, LastPublished, Id) #" +
-                   versions + copyUrl + "#= getStatusBadge(LastPublished, ArticleNumber) #</div>";
+                   versions + copyUrl + "#= getStatusBadge(LastPublished, UrlPath) #</div>";
 }
 <script src="~/js/clipboard.min.js"></script>
 <div id="main-content" class="main-content">
@@ -24,7 +26,7 @@
                     {
                         col.Bound(b => b.Id).Hidden(true);
 
-                        col.Template(btnGroup).Title("Menu");
+                        col.Template(btnGroup).Title("Menu").Width(300);
                         col.Template("#= kendo.toString(Updated, 'G') #").Title("Last Updated");
                         col.Bound(b => b.Title).Width(260);
                         col.Bound(b => b.TeamName);
@@ -60,12 +62,12 @@
                             e.clearSelection();
                         });
 
-                    function getStatusBadge(published, articleNumber) {
+                    function getStatusBadge(published, UrlPath) {
                         if (published === null) {
                             return "<div class='btn btn-sm btn-secondary' style='width:120px'><span class='badge badge-light'>Not Published</span></div>";
                         }
-                        var url = "@Url.Action("Versions", "Editor")/" + articleNumber;
-                        return "<a title=\"Open versions of this page.\" class='btn btn-sm btn-primary' href=\"" + url + "\" style=\"width:120px\"><span class=\"badge badge-light\">" + kendo.toString(published, "G") + "</span></a>";
+                        var url = "@publisherUrl/" + UrlPath.replace("root", "");
+                        return "<a target=\"_blank\" title=\"Open published version of this page.\" class='btn btn-sm btn-primary' href=\"" + url + "\" style=\"width:120px\"><span class=\"badge badge-light\">" + kendo.toString(published, "G") + "<span class=\"fa fa-external-link\"></span></span></a>";
                     }
 
                     function getNewHomeButton(isDefault, published, id) {

@@ -16,8 +16,8 @@
 		<AnalysisLevel>5.0</AnalysisLevel>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		<RepositoryUrl>https://github.com/StateOfCalifornia/CosmosCMS</RepositoryUrl>
-		<AssemblyVersion>2021.3.19.12</AssemblyVersion>
-		<FileVersion>2021.3.19.12</FileVersion>
+		<AssemblyVersion>2021.3.20.0</AssemblyVersion>
+		<FileVersion>2021.3.20.0</FileVersion>
 		<UserSecretsId>498e495c-d772-4d44-870d-92009f01de57</UserSecretsId>
 		<PackageProjectUrl>https://cosmos.azureedge.net</PackageProjectUrl>
 		<NeutralLanguage></NeutralLanguage>
