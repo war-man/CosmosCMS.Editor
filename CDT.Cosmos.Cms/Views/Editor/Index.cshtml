@@ -64,20 +64,20 @@
 
                     function getStatusBadge(published, UrlPath) {
                         if (published === null) {
-                            return "<div class='btn btn-sm btn-secondary' style='width:120px'><span class='badge badge-light'>Not Published</span></div>";
+                            return "<a title=\"This page not not published.\" class='btn btn-sm btn-secondary'><span class='fa fa-circle-o-notch'></span></a>";
                         }
                         var url = "@publisherUrl/" + UrlPath.replace("root", "");
-                        return "<a target=\"_blank\" title=\"Open published version of this page.\" class='btn btn-sm btn-primary' href=\"" + url + "\" style=\"width:120px\"><span class=\"badge badge-light\">" + kendo.toString(published, "G") + "<span class=\"fa fa-external-link\"></span></span></a>";
+                        return "<a target=\"_blank\" title=\"This page was published as of " + kendo.toString(published, "G") + ". Click to view.\" class='btn btn-sm btn-primary' href=\"" + url + "\"><span class=\"fa fa-external-link\"></span></a>";
                     }
 
                     function getNewHomeButton(isDefault, published, id) {
                         if (isDefault === null || isDefault === false) {
                             if (published === null) {
-                                return "<div onclick=\"clickAlert('This page cannot be made the home page until it is published.')\" class='btn btn-sm btn-warning' title='This page cannot be made the home page until it is published.'><span class='fa fa-check-circle'></span></div>";
+                                return "<div onclick=\"clickAlert('This page cannot be made the home page until it is published.')\" class='btn btn-sm btn-warning' title='This page cannot be made the home page until it is published.'><span class='fa fa-power-off'></span></div>";
                             }
-                            return "<a href='@Url.Action("NewHome")/" + id + "' title='Set this page as the new home page.' class='btn btn-sm btn-secondary'><span class='fa fa-check-circle-o'></span></a>";
+                            return "<a href='@Url.Action("NewHome")/" + id + "' title='Set this page as the new home page.' class='btn btn-sm btn-secondary'><span class='fa fa-home'></span></a>";
                         }
-                        return "<div class='btn btn-sm btn-primary' title='Is now the home page for this website.'><span class='fa fa-check-circle'></span></div>";
+                        return "<div class='btn btn-sm btn-primary' title='Is now the home page for this website.'><span class='fa fa-home'></span></div>";
                     }
 
                     function clickAlert(msg) {
