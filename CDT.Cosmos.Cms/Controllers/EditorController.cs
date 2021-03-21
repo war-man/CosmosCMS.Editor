@@ -837,6 +837,8 @@ namespace CDT.Cosmos.Cms.Controllers
                 try
                 {
                     List<ArticleListItem> list;
+                    var defaultSort = request.Sorts.Any() == false && request.Filters.Any() == false;
+
                     if (User.IsInRole("Team Members"))
                     {
                         var identityUser = await UserManager.GetUserAsync(User);
@@ -856,11 +858,11 @@ namespace CDT.Cosmos.Cms.Controllers
                             .Include(i => i.Team)
                             .Where(w => w.Team.Members.Any(a => a.UserId == userId));
 
-                        list = await ArticleLogic.GetArticleList(query);
+                        list = await ArticleLogic.GetArticleList(query, defaultSort);
                     }
                     else
                     {
-                        list = await ArticleLogic.GetArticleList();
+                        list = await ArticleLogic.GetArticleList(query: null, defaultSort);
 
                         ViewData["TeamsLookup"] = null;
                     }

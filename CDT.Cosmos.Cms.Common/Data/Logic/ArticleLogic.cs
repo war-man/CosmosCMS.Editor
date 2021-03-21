@@ -701,7 +701,7 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
         /// <remarks>This action is used only for "publishing" entire websites.</remarks>
         public async Task<int> UpdateDateTimeStamps()
         {
-            var articleIds = (await PrivateGetArticleList(_dbContext.Articles.AsQueryable()))?.Select(s => s.Id)
+            var articleIds = (await PrivateGetArticleList(_dbContext.Articles.AsQueryable(), false))?.Select(s => s.Id)
                 .ToList();
             if (articleIds == null || articleIds.Any() == false) return 0;
 
@@ -768,7 +768,7 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
         /// <remarks>
         ///     <para>Note: Cannot list articles that are trashed.</para>
         /// </remarks>
-        public async Task<List<ArticleListItem>> GetArticleList(string userId)
+        public async Task<List<ArticleListItem>> GetArticleList(string userId, bool showDefaultSort = true)
         {
             var articles = _dbContext.Articles.Include(i => i.Team)
                 .Where(t => t.Team.Members.Any(m => m.UserId == userId));
@@ -776,7 +776,7 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
             //= __dbContext.Teams.Include(i => i.Articles)
             //.Where(t => t.Members.Any(a => a.UserId == userId)).SelectMany(s => s.Articles);
 
-            return await PrivateGetArticleList(articles);
+            return await PrivateGetArticleList(articles, showDefaultSort);
         }
 
         /// <summary>
@@ -786,9 +786,9 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
         /// <remarks>
         ///     <para>Note: Cannot list articles that are trashed.</para>
         /// </remarks>
-        public async Task<List<ArticleListItem>> GetArticleList(IQueryable<Article> query = null)
+        public async Task<List<ArticleListItem>> GetArticleList(IQueryable<Article> query = null, bool showDefaultSort = true)
         {
-            return await PrivateGetArticleList(query ?? _dbContext.Articles.AsQueryable());
+            return await PrivateGetArticleList(query ?? _dbContext.Articles.AsQueryable(), showDefaultSort);
         }
 
         /// <summary>
@@ -854,7 +854,7 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
 
         #region PRIVATE METHODS
 
-        private async Task<List<ArticleListItem>> PrivateGetArticleList(IQueryable<Article> articles)
+        private async Task<List<ArticleListItem>> PrivateGetArticleList(IQueryable<Article> articles, bool showDefaultSort = true)
         {
             var data = await
                 (from x in articles
@@ -891,7 +891,12 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
                 });
             }
 
-            return model.OrderByDescending(o => o.IsDefault).ThenBy(t => t.Title).ToList();
+            if (showDefaultSort)
+            {
+                return model.OrderByDescending(o => o.IsDefault).ThenBy(t => t.Title).ToList();
+            }
+
+            return model.ToList();
         }
 
         /// <summary>
