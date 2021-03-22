@@ -19,6 +19,10 @@ namespace CDT.Cosmos.Cms.Common.Services
         /// </summary>
         private readonly IOptions<SimpleProxyConfigs> config;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="config"></param>
         public SimpleProxyService(IOptions<SimpleProxyConfigs> config)
         {
             this.config = config;

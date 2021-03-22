@@ -46,6 +46,7 @@ namespace CDT.Cosmos.Cms.Common.Controllers
         /// <param name="articleLogic"></param>
         /// <param name="redisOptions"></param>
         /// <param name="gglConfig"></param>
+        /// <param name="proxyConfigs"></param>
         protected CosmosController(ILogger logger,
             ArticleLogic articleLogic,
             IOptions<RedisContextConfig> redisOptions,

@@ -10,6 +10,10 @@ namespace CDT.Cosmos.Cms.Common.Services
     /// </summary>
     public class UserIdentityInfo
     {
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="user"></param>
         public UserIdentityInfo(ClaimsPrincipal user)
         {
             if (user.Identity != null && user.Identity.IsAuthenticated)
