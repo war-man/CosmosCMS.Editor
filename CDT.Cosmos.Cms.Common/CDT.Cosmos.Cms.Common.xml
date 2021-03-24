@@ -9,6 +9,31 @@
                 Base class for the Cosmos CMS controller.
             </summary>
         </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Controllers.CosmosController._articleLogic">
+            <summary>
+            Article logic field.
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Controllers.CosmosController._logger">
+            <summary>
+            Logger field
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Controllers.CosmosController._redisOptions">
+            <summary>
+            Redis cache configuration field
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Controllers.CosmosController._gglConfig">
+            <summary>
+            Google cloud configuration 
+            </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Controllers.CosmosController._proxyConfigs">
+            <summary>
+            Simple proxy settings
+            </summary>
+        </member>
         <member name="M:CDT.Cosmos.Cms.Common.Controllers.CosmosController.#ctor(Microsoft.Extensions.Logging.ILogger,CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic,Microsoft.Extensions.Options.IOptions{CDT.Cosmos.Cms.Common.Services.RedisContextConfig},Microsoft.Extensions.Options.IOptions{CDT.Cosmos.Cms.Common.Services.GoogleCloudAuthConfig},Microsoft.Extensions.Options.IOptions{CDT.Cosmos.Cms.Common.Services.SimpleProxyConfigs})">
             <summary>
                 Base constructor
@@ -17,6 +42,7 @@
             <param name="articleLogic"></param>
             <param name="redisOptions"></param>
             <param name="gglConfig"></param>
+            <param name="proxyConfigs"></param>
         </member>
         <member name="M:CDT.Cosmos.Cms.Common.Controllers.CosmosController.Index(System.String,System.String)">
             <summary>
@@ -38,6 +64,12 @@
             Returns a proxy as a simple string.
             </summary>
             <param name="endpointName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Controllers.CosmosController.GetUserIdentityInfo">
+            <summary>
+            Gets the current user's identity information.
+            </summary>
             <returns></returns>
         </member>
         <member name="M:CDT.Cosmos.Cms.Common.Controllers.CosmosController.GetSupportedLanguages(System.String)">
@@ -573,7 +605,7 @@
             <exception cref="T:System.Exception">User ID or article number not found.</exception>
             <returns>Returns the number of versions for the given article where status was set</returns>
         </member>
-        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetArticleList(System.String)">
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetArticleList(System.String,System.Boolean)">
             <summary>
                 Gets the latest versions of articles (published or not).
             </summary>
@@ -582,7 +614,7 @@
                 <para>Note: Cannot list articles that are trashed.</para>
             </remarks>
         </member>
-        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetArticleList(System.Linq.IQueryable{CDT.Cosmos.Cms.Common.Data.Article})">
+        <member name="M:CDT.Cosmos.Cms.Common.Data.Logic.ArticleLogic.GetArticleList(System.Linq.IQueryable{CDT.Cosmos.Cms.Common.Data.Article},System.Boolean)">
             <summary>
                 Gets the latest versions of articles (published or not).
             </summary>
@@ -925,6 +957,50 @@
             <summary>
                 Initial create site
             </summary>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Migrations.InitialCreate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <summary>
+            Migration up
+            </summary>
+            <param name="migrationBuilder"></param>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Migrations.InitialCreate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <summary>
+            Migration rollback
+            </summary>
+            <param name="migrationBuilder"></param>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <summary>
+            Initial migration build
+            </summary>
+            <param name="modelBuilder"></param>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Migrations.RBAC">
+            <summary>
+            Migration RBAC
+            </summary>
+            <summary>
+            Migration partial for RBAC
+            </summary>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Migrations.RBAC.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <summary>
+            Migration up
+            </summary>
+            <param name="migrationBuilder"></param>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Migrations.RBAC.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <summary>
+            Migration roll back
+            </summary>
+            <param name="migrationBuilder"></param>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Migrations.RBAC.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <summary>
+            Build target
+            </summary>
+            <param name="modelBuilder"></param>
         </member>
         <member name="T:CDT.Cosmos.Cms.Common.Models.ArticleListItem">
             <summary>
@@ -1382,6 +1458,76 @@
                 No role
             </summary>
         </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Services.AuthenticationConfig">
+            <summary>
+            Authentication provider configurations
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.AuthenticationConfig.Microsoft">
+            <summary>
+            Microsoft authentication configuration
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.AuthenticationConfig.Google">
+            <summary>
+            Google authentication configuration
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.AuthenticationConfig.Facebook">
+            <summary>
+            Facebook authentication configuration
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.AuthenticationConfig.AllowLocalRegistration">
+            <summary>
+            Allow registration locally on the editor site?
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Services.Microsoft">
+            <summary>
+            Microsoft configuration
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.Microsoft.ClientId">
+            <summary>
+            Client ID
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.Microsoft.ClientSecret">
+            <summary>
+            Client Secret
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Services.Google">
+            <summary>
+            Google configuration
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.Google.ClientId">
+            <summary>
+            Client ID
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.Google.ClientSecret">
+            <summary>
+            Client Secret
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Services.Facebook">
+            <summary>
+            Facebook configuration
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.Facebook.AppId">
+            <summary>
+            Application ID
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.Facebook.AppSecret">
+            <summary>
+            Application Secret
+            </summary>
+        </member>
         <member name="T:CDT.Cosmos.Cms.Common.Services.AuthMessageSenderOptions">
             <summary>
             SendGrid Authentication Options
@@ -1616,10 +1762,79 @@
                 Number of seconds to cache data in memory (1 minute default).
             </summary>
         </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Services.SimpleProxyConfigs">
+            <summary>
+            Simple proxy service config
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.SimpleProxyConfigs.Configs">
+            <summary>
+            Array of configurations
+            </summary>
+        </member>
+        <member name="T:CDT.Cosmos.Cms.Common.Services.ProxyConfig">
+            <summary>
+            Proxy configuration
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.ProxyConfig.Name">
+            <summary>
+            Name of the connection
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.ProxyConfig.Method">
+            <summary>
+            Method (i.e. GET or POST)
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.ProxyConfig.UriEndpoint">
+            <summary>
+            URL End Point
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.ProxyConfig.Data">
+            <summary>
+            GET string or POST data
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.ProxyConfig.UserName">
+            <summary>
+            User name to use when accessing end point.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.ProxyConfig.Password">
+            <summary>
+            Password to use when accessing end point.
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.ProxyConfig.ContentType">
+            <summary>
+            Content type
+            </summary>
+        </member>
+        <member name="P:CDT.Cosmos.Cms.Common.Services.ProxyConfig.Roles">
+            <summary>
+            RBAC roles allowed to use end point
+            </summary>
+            <remarks>
+            <para>Anonymous role enables anyone to use end point. Authenticated role allows any authenticated user access. Otherwise the specifc roles who have access are listed here.</para>
+            </remarks>
+        </member>
         <member name="T:CDT.Cosmos.Cms.Common.Services.SimpleProxyService">
             <summary>
             This is a generic class that makes server to server calls
             </summary>
+        </member>
+        <member name="F:CDT.Cosmos.Cms.Common.Services.SimpleProxyService.config">
+            <summary>
+            Optsions field
+            </summary>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Services.SimpleProxyService.#ctor(Microsoft.Extensions.Options.IOptions{CDT.Cosmos.Cms.Common.Services.SimpleProxyConfigs})">
+            <summary>
+            Constructor
+            </summary>
+            <param name="config"></param>
         </member>
         <member name="M:CDT.Cosmos.Cms.Common.Services.SimpleProxyService.CallEndpoint(System.String,CDT.Cosmos.Cms.Common.Services.UserIdentityInfo,System.String)">
             <summary>
@@ -1659,6 +1874,7 @@
         </member>
         <member name="P:CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig.AllowedFileTypes">
             <summary>
+            Allowed file type extensions
             </summary>
         </member>
         <member name="P:CDT.Cosmos.Cms.Common.Services.SiteCustomizationsConfig.UseAzureSignalR">
@@ -1727,6 +1943,12 @@
             <summary>
             User identity information
             </summary>
+        </member>
+        <member name="M:CDT.Cosmos.Cms.Common.Services.UserIdentityInfo.#ctor(System.Security.Claims.ClaimsPrincipal)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="user"></param>
         </member>
         <member name="P:CDT.Cosmos.Cms.Common.Services.UserIdentityInfo.IsAuthenticated">
             <summary>
