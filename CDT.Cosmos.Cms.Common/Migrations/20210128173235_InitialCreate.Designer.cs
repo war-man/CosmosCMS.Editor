@@ -13,6 +13,10 @@ namespace CDT.Cosmos.Cms.Common.Migrations
     [Migration("20210128173235_InitialCreate")]
     partial class InitialCreate
     {
+        /// <summary>
+        /// Initial migration build
+        /// </summary>
+        /// <param name="modelBuilder"></param>
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618

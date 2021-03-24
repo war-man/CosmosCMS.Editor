@@ -9,10 +9,17 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CDT.Cosmos.Cms.Common.Migrations
 {
+    /// <summary>
+    /// Migration partial for RBAC
+    /// </summary>
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20210303152729_RBAC")]
     partial class RBAC
     {
+        /// <summary>
+        /// Build target
+        /// </summary>
+        /// <param name="modelBuilder"></param>
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618

@@ -2,8 +2,15 @@
 
 namespace CDT.Cosmos.Cms.Common.Migrations
 {
+    /// <summary>
+    /// Migration RBAC
+    /// </summary>
     public partial class RBAC : Migration
     {
+        /// <summary>
+        /// Migration up
+        /// </summary>
+        /// <param name="migrationBuilder"></param>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
@@ -13,6 +20,10 @@ namespace CDT.Cosmos.Cms.Common.Migrations
                 maxLength: 512,
                 nullable: true);
         }
+        /// <summary>
+        /// Migration roll back
+        /// </summary>
+        /// <param name="migrationBuilder"></param>
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
