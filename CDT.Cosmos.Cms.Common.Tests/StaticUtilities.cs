@@ -449,5 +449,27 @@ namespace CDT.Cosmos.Cms.Common.Tests
         }
 
         #endregion
+
+        /// <summary>
+        /// Compares date/times (not kind)
+        /// </summary>
+        /// <param name="expected"></param>
+        /// <param name="actual"></param>
+        /// <returns></returns>
+        public static bool DateTimesAreEqual(DateTime expected, DateTime actual)
+        {
+            //
+            // The date/time should stay exactly the same after the save.
+            //
+            var isValid = ((expected.Year == actual.Year) && 
+                (expected.Month == actual.Month) &&
+                (expected.Day == actual.Day) &&
+                (expected.Hour == actual.Hour) &&
+                (expected.Minute == actual.Minute) &&
+                (expected.Second == actual.Second));
+
+            return isValid;
+        }
+
     }
 }

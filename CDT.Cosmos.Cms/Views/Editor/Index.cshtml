@@ -32,7 +32,7 @@
                     {
                         col.Bound(b => b.Id).Hidden(true);
                         col.Template(btnGroup).Title("Menu").Width(300);
-                        col.Bound(p => p.Updated).Format("{0:dd/MM/yyyy h:mm tt}").Title("Last Updated");
+                        col.Template("#= formatPublishedDate(LastPublished) #").Title("Published");
                         col.Bound(b => b.Title).Width(260);
                         col.Bound(b => b.TeamName);
                         col.Command(com => com.Destroy().IconClass("fa fa-trash")).Visible(canEdit).Title("Trash Page");
@@ -57,7 +57,7 @@
                     <input id="selected" type="hidden" />
                 </form>
                 <script>
-                    var canEdit = @canEdit;
+                    var canEdit = @canEdit.ToString().ToLower();
                     var clipboard = new ClipboardJS('.clipboard');
                     clipboard.on('success',
                         function(e) {
@@ -96,6 +96,14 @@
                         alert(msg);
                     }
 
+                    function formatPublishedDate(published) {
+                        if (published === null) {
+                            return "Draft";
+                        }
+                        else {
+                            return kendo.toString(published, 'G');
+                        }
+                    }
                 </script>
             </div>
         </div>

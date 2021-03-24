@@ -528,6 +528,11 @@ namespace CDT.Cosmos.Cms.Controllers
 
         #region EDIT ARTICLE FUNCTIONS
 
+        /// <summary>
+        /// Gets an article to edit by ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [Authorize(Roles = "Administrators, Editors, Authors, Team Members")]
         public async Task<IActionResult> Edit(int id)
         {
@@ -836,8 +841,9 @@ namespace CDT.Cosmos.Cms.Controllers
             if (SiteOptions.Value.ReadWriteMode)
                 try
                 {
+
                     List<ArticleListItem> list;
-                    var defaultSort = request.Sorts.Any() == false && request.Filters.Any() == false;
+                    var defaultSort = request.Sorts?.Any() == false && request.Filters?.Any() == false;
 
                     if (User.IsInRole("Team Members"))
                     {

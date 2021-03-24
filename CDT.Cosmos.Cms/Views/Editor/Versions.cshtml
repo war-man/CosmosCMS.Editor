@@ -34,12 +34,12 @@
             .Columns(c =>
             {
                 c.Bound(b => b.Id).Hidden(true);
+                c.Bound(b => b.VersionNumber).Width(86).Title("Version#");
                 c.Template($"<a target=\"_blank\" class=\"btn btn-sm btn-primary\" href=\"{Url.Action("Preview", "Home")}/#: Id #\" title=\"Open preview\"><span class=\"fa fa-external-link\"></span></a>").Width(40);
                 c.Template($"<a class=\"btn btn-sm btn-secondary\" href=\"javascript:showEditDialog('HTML', #: Id #, '#: Published #') \" title=\"Edit online with Kendo WSYWIG editor\" #: visibleStyle('{isReviewer}', '{isAuthor}', Published) #><span class=\"fa fa-pencil-square-o\" aria-hidden=\"true\"></span></a> <a class=\"btn btn-sm btn-secondary\" href=\"javascript:showEditDialog('CODE', #: Id #, '#: Published #')\" title=\"Edit online with VS Code Monaco editor\" #: visibleStyle('{isReviewer}', '{isAuthor}', Published) #><img src=\"{Url.Content("~/images/vscicon-120.png")}\" height=\"18\" width=\"18\" /></a>").Width(120).Title("Edit Tools");
-                c.Bound(b => b.VersionNumber).Width(86).Title("Version#");
-                c.Bound(b => b.Title);
-                c.Template("#= kendo.toString(Updated, 'G') #").Title("Edited");
+
                 c.Template("#= formatPublishedDate(Published) #").Title("Published");
+                c.Template("#= kendo.toString(Updated, 'G') #").Title("Last Edited");
                 c.Template($"<a class=\"btn btn-sm btn-secondary\" title=\"Use this version to create a new one.\" href=\"{Url.Action("CreateVersion")}?id={ViewData["ArticleId"]}&entityId=#: Id #\"><span class=\"fa fa-clone\" aria-hidden=\"true\"></span></a>");
             })
    .Sortable()

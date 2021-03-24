@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CDT.Cosmos.Cms.Common.Data;
 using CDT.Cosmos.Cms.Common.Models;
 using CDT.Cosmos.Cms.Models;
+using Kendo.Mvc.UI;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -400,6 +401,61 @@ namespace CDT.Cosmos.Cms.Common.Tests
 
             Assert.IsFalse(editResult1.IsValid);
             Assert.AreEqual(1, editResult1.Errors.Count);
+        }
+
+        [TestMethod]
+        public async Task A06_SaveDate_Success()
+        {
+
+            using var homeController =
+                StaticUtilities.GetHomeController(await StaticUtilities.GetPrincipal(TestUsers.Foo));
+
+            using var editorController =
+                StaticUtilities.GetEditorController(await StaticUtilities.GetPrincipal(TestUsers.Foo));
+
+            var testDate = DateTime.SpecifyKind(new DateTime(2021, 3, 1, 0, 0, 0), DateTimeKind.Utc);
+
+            Article article;
+
+            await using (var dbContext = StaticUtilities.GetApplicationDbContext())
+            {
+                article = await dbContext.Articles.Where(p => p.Published.HasValue).OrderByDescending(o => o.Id)
+                    .FirstOrDefaultAsync();
+            }
+
+            var savedViewResult = (ViewResult)await editorController.Edit(article.Id);
+            var articleViewModel = ((ArticleViewModel)savedViewResult.Model);
+
+            // Should always be UTC
+            Assert.AreEqual(DateTimeKind.Utc, articleViewModel.Published.Value.Kind);
+
+            articleViewModel.Published = testDate;
+
+            //
+            // Save the published date.
+            //
+            var jsonResult = (JsonResult)await editorController.SaveHtml(articleViewModel);
+            var savedArticle = (SaveResultJsonModel)jsonResult.Value;
+            var savedModel = (ArticleViewModel) savedArticle.Model;
+            // Get time zone kind, ensure it was lost when save happened.
+            Assert.AreEqual(DateTimeKind.Utc, savedModel.Published.Value.Kind);
+
+            //
+            // The date/time should stay exactly the same after the save.
+            //
+            Assert.IsTrue(StaticUtilities.DateTimesAreEqual(testDate, savedModel.Published.Value));
+
+            Assert.AreEqual(DateTimeKind.Utc, savedModel.Published.Value.Kind);
+
+            var articleJsonResult = (JsonResult) await editorController.Get_Articles(new Kendo.Mvc.UI.DataSourceRequest());
+            var dataSourceResult = (DataSourceResult)articleJsonResult.Value;
+            var articleListModel = (List<ArticleListItem>)dataSourceResult.Data;
+
+            var target = articleListModel.FirstOrDefault(f => f.ArticleNumber == article.ArticleNumber);
+
+            Assert.IsTrue(StaticUtilities.DateTimesAreEqual(testDate, target.LastPublished.Value));
+            Assert.AreEqual(DateTimeKind.Utc, target.LastPublished.Value.Kind);
+
         }
     }
 }

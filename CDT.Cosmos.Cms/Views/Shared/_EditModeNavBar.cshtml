@@ -539,7 +539,7 @@
                 $("#Published").val("");
             }
 
-            loadPublishLocalDateTime();
+            //loadPublishLocalDateTime();
         }
 
         function cancelPublishDateTime() {
@@ -585,19 +585,19 @@
             $("#divErrorLog").html("");
 
             // Save date/time
-            var dateTimePicker = $("#dtPublished").data("kendoDateTimePicker");
-            var dateTimeValue = dateTimePicker.value();
+            //var dateTimePicker = $("#dtPublished").data("kendoDateTimePicker");
+            //var dateTimeValue = dateTimePicker.value();
 
             // Note, this saves the date/time using local time (of the user's computer).
             // The server stores this as UTC time.
-            if (dateTimeValue !== null && dateTimeValue !== "null") {
-                var datetime = new Date(dateTimeValue);
+            //if (dateTimeValue !== null && dateTimeValue !== "null") {
+            //    var datetime = new Date(dateTimeValue);
 // ReSharper disable once QualifiedExpressionMaybeNull
-                var utcString = datetime.toUTCString();
-                $("#Published").val(utcString);
-            } else {
-                $("#Published").val("");
-            }
+            //    var utcString = datetime.toUTCString();
+            //    $("#Published").val(utcString);
+            //} else {
+            //    $("#Published").val("");
+            //}
 
             if (validator.validate()) {
 

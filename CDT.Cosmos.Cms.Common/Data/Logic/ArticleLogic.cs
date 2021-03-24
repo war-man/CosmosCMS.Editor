@@ -856,6 +856,7 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
 
         private async Task<List<ArticleListItem>> PrivateGetArticleList(IQueryable<Article> articles, bool showDefaultSort = true)
         {
+
             var data = await
                 (from x in articles
                  where x.StatusCode != (int)StatusCodeEnum.Deleted
@@ -864,31 +865,42 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
                  select new
                  {
                      ArticleNumber = g.Key,
-                     VersionNumber = g.Max(i => i.VersionNumber),
-                     LastPublished = g.Max(m => m.Published),
-                     Status = g.Max(f => f.StatusCode)
+                     IsPublished = g.Max(i => i.Published)
                  }).ToListAsync();
 
             var model = new List<ArticleListItem>();
 
             foreach (var item in data)
             {
-                var art = await _dbContext.Articles.Include(i => i.Team).FirstOrDefaultAsync(
-                    f => f.ArticleNumber == item.ArticleNumber && f.VersionNumber == item.VersionNumber
-                );
-                model.Add(new ArticleListItem
+                Article art;
+
+                if (item.IsPublished.HasValue)
+                {
+                    // If published, get the last published article, search by article number and published date and time.
+                    art = await _dbContext.Articles.Include(i => i.Team).Where(
+                    f => f.ArticleNumber == item.ArticleNumber && f.Published.HasValue).OrderBy(o => o.Id).LastOrDefaultAsync();
+                }
+                else
+                {
+                    // If not published, get the last entity ID for the article.
+                    art = await _dbContext.Articles.Include(i => i.Team).Where(
+                    f => f.ArticleNumber == item.ArticleNumber).OrderBy(o => o.Id).LastOrDefaultAsync();
+                }
+
+                var entity = new ArticleListItem
                 {
                     ArticleNumber = art.ArticleNumber,
                     Id = art.Id,
                     IsDefault = art.UrlPath == "root",
-                    LastPublished = item.LastPublished.HasValue ? DateTime.SpecifyKind(item.LastPublished.Value, DateTimeKind.Utc) : (DateTime?)null,
+                    LastPublished = art.Published.HasValue ? DateTime.SpecifyKind(art.Published.Value, DateTimeKind.Utc) : (DateTime?)null,
                     Title = art.Title,
                     Updated = DateTime.SpecifyKind(art.Updated, DateTimeKind.Utc),
                     VersionNumber = art.VersionNumber,
                     Status = art.StatusCode == 0 ? "Active" : "Inactive",
                     UrlPath = art.UrlPath,
                     TeamName = art.Team == null ? "" : art.Team.TeamName
-                });
+                };
+                model.Add(entity);
             }
 
             if (showDefaultSort)
