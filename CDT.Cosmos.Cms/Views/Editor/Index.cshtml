@@ -11,7 +11,6 @@
                    versions + copyUrl + "#= getStatusBadge(LastPublished, UrlPath) #</div>";
 
     var canEdit = User.IsInRole("Administrators") || User.IsInRole("Editors");
-    var isReviewer = User.IsInRole("Reviewers");
 }
 <script src="~/js/clipboard.min.js"></script>
 <div id="main-content" class="main-content">
@@ -68,11 +67,11 @@
                             e.clearSelection();
                         });
 
-                    function getStatusBadge(published, UrlPath) {
+                    function getStatusBadge(published, urlPath) {
                         if (published === null) {
-                            return "<a title=\"This page not not published.\" class='btn btn-sm btn-secondary'><span class='fa fa-circle-o-notch'></span></a>";
+                            return "<a title=\"This page not published.\" class='btn btn-sm btn-secondary'><span class='fa fa-circle-o-notch'></span></a>";
                         }
-                        var url = "@publisherUrl/" + UrlPath.replace("root", "");
+                        var url = "@publisherUrl/" + urlPath.replace("root", "");
                         return "<a target=\"_blank\" title=\"This page was published as of " + kendo.toString(published, "G") + ". Click to view.\" class='btn btn-sm btn-primary' href=\"" + url + "\"><span class=\"fa fa-external-link\"></span></a>";
                     }
 
