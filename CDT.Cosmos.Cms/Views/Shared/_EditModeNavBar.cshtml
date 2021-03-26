@@ -42,6 +42,12 @@
     .editorToolbarWindow.k-window-content{
         position: fixed !important;
     }
+    div#k-table-properties.k-content.k-state-active {
+        overflow: auto;
+    }
+    div#k-cell-properties.k-content.k-state-active {
+        min-height: 460px !important;
+    }
 </style>
 @if (controllerName == "Editor" && actionName == "Edit" && Model != null)
 {
