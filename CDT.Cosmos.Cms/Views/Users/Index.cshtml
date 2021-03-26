@@ -23,7 +23,7 @@
                 col.Bound(b => b.Role);
                 col.Bound(b => b.LoginProvider);
                 col.Command(command => {
-                    command.Custom("Editor Role").Click("manageRoles");
+                    command.Custom(" &nbsp;Access").Click("manageRoles").IconClass("fa fa-shield");
                 });
             })
             .ToolBar(toolbar =>

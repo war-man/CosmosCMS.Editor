@@ -1112,7 +1112,7 @@ namespace CDT.Cosmos.Cms.Common.Data.Logic
             var cacheBytes = Serialize(model);
             var cacheOptions = new DistributedCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(600) // 10 minutes
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(20)
             };
             await _distributedCache.SetAsync(cachKey, cacheBytes, cacheOptions);
 
